@@ -40,6 +40,6 @@ class SBE:
         :param obj: a data structure in the form returned by :meth:`to_dict`
         :param stream: a file like object
         """
-        et = self.xsd.encode(obj)
+        et = self.xsd.encode(obj, validation='lax')
         ET.register_namespace('sbe',"http://fixprotocol.io/2016/sbe")
-        stream.write(ET.tostring(et, encoding='utf8', method='xml'))
+        stream.write(ET.tostring(et[0], encoding='utf8', method='xml'))
