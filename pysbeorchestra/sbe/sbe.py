@@ -1,8 +1,7 @@
 import xml.etree.ElementTree as ET
-from typing import Iterator
+from typing import Any, Iterator, Union
 
 import xmlschema
-
 
 class SBE:
     """
@@ -24,15 +23,15 @@ class SBE:
         """
         return self.xsd.iter_errors(xml)
 
-    def to_dict(self, xml):
+    def to_dict(self, xml) -> Iterator[Union[Any, ValueError]]:
         """
-        Decodes an XML source to a data structure.
+        Creates an iterator for decoding an XML source to a data structure.
 
         :param source: the source of XML data. Can be an :class:`XMLResource` instance, a \
         path to a file or an URI of a resource or an opened file-like object or an Element \
         instance or an ElementTree instance or a string containing the XML data.
         """
-        return self.xsd.decode(xml)
+        return self.xsd.iter_decode(xml)
 
     def from_dict(self, obj, stream):
         """

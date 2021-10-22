@@ -32,15 +32,26 @@ def test_to_dict():
     xml_path = os.path.join(XML_FILE_DIR, 'OrchestraFIXLatest.xml')
     output_path = os.path.join(output_dir(), 'OrchestraFIXLatest-dict.txt')
     with open(output_path, 'w') as f:
-        pprint(orchestra.to_dict(xml_path), f)
+        for data in orchestra.to_dict(xml_path):
+            pprint(data, f)
         f.close
 
 
-def test_from_dict():
+def test_invalid_to_dict():
+    orchestra = Orchestra()
+    xml_path = os.path.join(XML_FILE_DIR, 'BadOrchestra.xml')
+    output_path = os.path.join(output_dir(), 'BadOrchestra-dict.txt')
+    with open(output_path, 'w') as f:
+        for data in orchestra.to_dict(xml_path):
+            pprint(data, f)
+        f.close
+
+
+def test_to_from_dict():
     orchestra = Orchestra()
     xml_path = os.path.join(XML_FILE_DIR, 'OrchestraFIXLatest.xml')
     output_path = os.path.join(output_dir(), 'OrchestraFIXLatest-copy.xml')
     with open(output_path, 'wb') as f:
-        data = orchestra.to_dict(xml_path)
-        orchestra.from_dict(data, f)
+        for data in orchestra.to_dict(xml_path):
+            orchestra.from_dict(data, f)
         f.close
