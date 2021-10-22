@@ -46,4 +46,4 @@ class Orchestra:
         ET.register_namespace('fixr','http://fixprotocol.io/2020/orchestra/repository')
         ET.register_namespace('dcterms', 'http://purl.org/dc/terms/')
         ET.register_namespace('dc', 'http://purl.org/dc/elements/1.1/')
-        stream.write(ET.tostring(et, encoding='utf8', method='xml'))
+        stream.write(ET.tostring(et[0], encoding='utf8', method='xml'))

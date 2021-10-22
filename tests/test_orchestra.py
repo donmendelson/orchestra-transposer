@@ -25,6 +25,7 @@ def test_to_dict():
 def test_from_dict():
     orchestra = Orchestra()
     with open('tests/OrchestraFIXLatest-copy.xml', 'wb') as f:
-        orchestra.from_dict(orchestra.to_dict(
-            'tests/xml/OrchestraFIXLatest.xml'), f)
+        data = orchestra.to_dict(
+            'tests/xml/OrchestraFIXLatest.xml')
+        orchestra.from_dict(data, f)
         f.close
