@@ -14,13 +14,14 @@ def output_dir():
 def test_valid():
     sbe = SBE()
     xml_path = os.path.join(XML_FILE_DIR, 'Examples.xml')
-    sbe.validate(xml_path)
+    error_iter = sbe.validate(xml_path)
+    assert not next(error_iter, None)
 
 def test_invalid():
     sbe = SBE()
     xml_path = os.path.join(XML_FILE_DIR, 'BadExamples.xml')
-    with pytest.raises(ValueError):
-        sbe.validate(xml_path)
+    error_iter = sbe.validate(xml_path)
+    assert next(error_iter, None)
 
 def test_to_dict():
     sbe = SBE()

@@ -1,31 +1,46 @@
+import os
 from pprint import pprint
 
 import pytest
 from pysbeorchestra import Orchestra
 
+XML_FILE_DIR = os.path.join(os.path.dirname(__file__), 'xml/')
+
+
+def output_dir():
+    path = os.path.join(os.path.dirname(__file__), 'out/')
+    os.makedirs(path, exist_ok=True)
+    return path
+
 
 def test_valid():
     orchestra = Orchestra()
-    orchestra.validate('tests/xml/OrchestraFIXLatest.xml')
+    xml_path = os.path.join(XML_FILE_DIR, 'OrchestraFIXLatest.xml')
+    error_iter = orchestra.validate(xml_path)
+    assert not next(error_iter, None)
 
 
 def test_invalid():
     orchestra = Orchestra()
-    with pytest.raises(ValueError):
-        orchestra.validate('tests/xml/BadOrchestra.xml')
+    xml_path = os.path.join(XML_FILE_DIR, 'BadOrchestra.xml')
+    error_iter = orchestra.validate(xml_path)
+    assert next(error_iter, None)
 
 
 def test_to_dict():
     orchestra = Orchestra()
-    with open('tests/OrchestraFIXLatest-dict.txt', 'w') as f:
-        pprint(orchestra.to_dict('tests/xml/OrchestraFIXLatest.xml'), f)
+    xml_path = os.path.join(XML_FILE_DIR, 'OrchestraFIXLatest.xml')
+    output_path = os.path.join(output_dir(), 'OrchestraFIXLatest-dict.txt')
+    with open(output_path, 'w') as f:
+        pprint(orchestra.to_dict(xml_path), f)
         f.close
 
 
 def test_from_dict():
     orchestra = Orchestra()
-    with open('tests/OrchestraFIXLatest-copy.xml', 'wb') as f:
-        data = orchestra.to_dict(
-            'tests/xml/OrchestraFIXLatest.xml')
+    xml_path = os.path.join(XML_FILE_DIR, 'OrchestraFIXLatest.xml')
+    output_path = os.path.join(output_dir(), 'OrchestraFIXLatest-copy.xml')
+    with open(output_path, 'wb') as f:
+        data = orchestra.to_dict(xml_path)
         orchestra.from_dict(data, f)
         f.close
