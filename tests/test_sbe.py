@@ -1,8 +1,7 @@
 import os
-from pprint import pprint
 
 import pytest
-from pysbeorchestra import SBE
+from pysbeorchestra import SBE, SBEInstance
 
 XML_FILE_DIR = os.path.join(os.path.dirname(__file__), 'xml/')
 
@@ -32,8 +31,10 @@ def test_to_dict():
     xml_path = os.path.join(XML_FILE_DIR, 'Examples.xml')
     output_path = os.path.join(output_dir(), 'Examples-dict.txt')
     with open(output_path, 'w') as f:
-        pprint(next(sbe.to_dict(xml_path)), f)
+        (data, errors) = sbe.to_instance(xml_path)
+        print(data[0], f)
         f.close
+        assert not errors
 
 
 def test_invalid_to_dict():
@@ -41,9 +42,10 @@ def test_invalid_to_dict():
     xml_path = os.path.join(XML_FILE_DIR, 'BadExamples.xml')
     output_path = os.path.join(output_dir(), 'BadExamples-dict.txt')
     with open(output_path, 'w') as f:
-        for data in sbe.to_dict(xml_path):
-            pprint(data, f)
+        (data, errors) = sbe.to_instance(xml_path)
+        print(data[0], f)
         f.close
+        assert errors
 
 
 def test_to_from_dict():
@@ -51,6 +53,7 @@ def test_to_from_dict():
     xml_path = os.path.join(XML_FILE_DIR, 'Examples.xml')
     output_path = os.path.join(output_dir(), 'Examples-copy.xml')
     with open(output_path, 'wb') as f:
-        for data in sbe.to_dict(xml_path):
-            sbe.from_dict(data, f)
+        (data, errors) = sbe.to_instance(xml_path)
+        sbe.write_instance(data[0], f)
         f.close
+        assert not errors

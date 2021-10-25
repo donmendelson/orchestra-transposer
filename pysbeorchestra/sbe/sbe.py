@@ -1,7 +1,10 @@
 import xml.etree.ElementTree as ET
-from typing import Any, Iterator, Union
+from typing import Iterator, List, Tuple, Union
 
 import xmlschema
+
+from .sbeinstance import SBEInstance
+
 
 class SBE:
     """
@@ -23,23 +26,29 @@ class SBE:
         """
         return self.xsd.iter_errors(xml)
 
-    def to_dict(self, xml) -> Iterator[Union[Any, ValueError]]:
+    def to_instance(self, xml) -> Tuple[SBEInstance, List[ValueError]]:
         """
-        Creates an iterator for decoding an XML source to a data structure.
+        Creates an SBEInstance and a possible List of validation errors.
 
         :param source: the source of XML data. Can be an :class:`XMLResource` instance, a \
         path to a file or an URI of a resource or an opened file-like object or an Element \
         instance or an ElementTree instance or a string containing the XML data.
         """
-        return self.xsd.iter_decode(xml)
+        data, errors = [], []
+        for result in self.xsd.iter_decode(xml):
+            if not isinstance(result, ValueError):
+                data.append(SBEInstance(result))
+            else:
+                errors.append(result)
+        return (data, errors)
 
-    def from_dict(self, obj, stream):
+    def write_instance(self, sbe_instance, stream):
         """
-        Encodes a data structure XML data and writes it to a stream.
+        Encodes an SBEInstance and writes it to a stream.
 
-        :param obj: a data structure in the form returned by :meth:`to_dict`
+        :param obj: a data structure in the form returned by :meth:`to_instance`
         :param stream: a file like object
         """
-        et = self.xsd.encode(obj, validation='lax')
+        et = self.xsd.encode(sbe_instance.root(), validation='lax')
         ET.register_namespace('sbe', "http://fixprotocol.io/2016/sbe")
         stream.write(ET.tostring(et[0], encoding='utf8', method='xml'))

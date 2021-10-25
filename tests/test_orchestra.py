@@ -1,5 +1,4 @@
 import os
-from pprint import pprint
 
 import pytest
 from pysbeorchestra import Orchestra
@@ -32,9 +31,10 @@ def test_to_dict():
     xml_path = os.path.join(XML_FILE_DIR, 'OrchestraFIXLatest.xml')
     output_path = os.path.join(output_dir(), 'OrchestraFIXLatest-dict.txt')
     with open(output_path, 'w') as f:
-        for data in orchestra.to_dict(xml_path):
-            pprint(data, f)
+        (data, errors) = orchestra.to_instance(xml_path)
+        print(data[0], f)
         f.close
+        assert not errors
 
 
 def test_invalid_to_dict():
@@ -42,9 +42,10 @@ def test_invalid_to_dict():
     xml_path = os.path.join(XML_FILE_DIR, 'BadOrchestra.xml')
     output_path = os.path.join(output_dir(), 'BadOrchestra-dict.txt')
     with open(output_path, 'w') as f:
-        for data in orchestra.to_dict(xml_path):
-            pprint(data, f)
+        (data, errors) = orchestra.to_instance(xml_path)
+        print(data[0], f)
         f.close
+        assert errors
 
 
 def test_to_from_dict():
@@ -52,6 +53,7 @@ def test_to_from_dict():
     xml_path = os.path.join(XML_FILE_DIR, 'OrchestraFIXLatest.xml')
     output_path = os.path.join(output_dir(), 'OrchestraFIXLatest-copy.xml')
     with open(output_path, 'wb') as f:
-        for data in orchestra.to_dict(xml_path):
-            orchestra.from_dict(data, f)
+        (data, errors) = orchestra.to_instance(xml_path)
+        orchestra.write_instance(data[0], f)
         f.close
+        assert not errors
