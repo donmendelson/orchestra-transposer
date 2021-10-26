@@ -32,7 +32,7 @@ def test_to_dict():
     output_path = os.path.join(output_dir(), 'Examples-dict.txt')
     with open(output_path, 'w') as f:
         (data, errors) = sbe.to_instance(xml_path)
-        print(data[0], f)
+        print(data[0], file=f)
         f.close
         assert not errors
 
@@ -43,7 +43,7 @@ def test_invalid_to_dict():
     output_path = os.path.join(output_dir(), 'BadExamples-dict.txt')
     with open(output_path, 'w') as f:
         (data, errors) = sbe.to_instance(xml_path)
-        print(data[0], f)
+        print(data[0], file=f)
         f.close
         assert errors
 
