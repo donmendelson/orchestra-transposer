@@ -1,3 +1,4 @@
+import os
 import xml.etree.ElementTree as ET
 from typing import Iterator, List, Tuple, Union
 
@@ -6,14 +7,18 @@ import xmlschema
 from .sbeinstance import SBEInstance
 
 
-class SBE:
+class SBE10:
     """
     Represents the XML schema for Simple Binary Encoding version 1.0 and processing of XML instances \
     that conform to that schema.
     """
-
     def __init__(self):
-        self.xsd = xmlschema.XMLSchema('pysbeorchestra/sbe/schema/sbe.xsd')
+        self.xsd = xmlschema.XMLSchema(SBE10.get_xsd_path())
+
+    @classmethod
+    def get_xsd_path(cls):
+        schemas_dir = os.path.join(os.path.dirname(__file__), 'schemas/')
+        return os.path.join(schemas_dir, 'sbe.xsd')
 
     def validate(self, xml) -> Iterator[ValueError]:
         """
@@ -52,3 +57,7 @@ class SBE:
         et = self.xsd.encode(sbe_instance.root(), validation='lax')
         ET.register_namespace('sbe', "http://fixprotocol.io/2016/sbe")
         stream.write(ET.tostring(et[0], encoding='utf8', method='xml'))
+
+
+SBE = SBE10
+""" Default SBE schema implementation """

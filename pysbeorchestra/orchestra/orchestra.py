@@ -2,21 +2,24 @@ import os
 import xml.etree.ElementTree as ET
 from typing import Iterator, List, Tuple, Union
 
-import xmlschema
+from xmlschema import XMLSchema
 
 from .orchestrainstance import OrchestraInstance
+from .. import SBE
 
 
-class Orchestra:
+class Orchestra10:
     """
     Represents the XML schema for FIX Orchestra version 1.0 and processing of XML instances \
     that conform to that schema.
     """
-    SCHEMAS_DIR = os.path.join(os.path.dirname(__file__), 'schemas/')
-
     def __init__(self):
-        xsd_path = os.path.join(self.SCHEMAS_DIR, 'v1-0/repository.xsd')
-        self.xsd = xmlschema.XMLSchema(xsd_path)
+        self.xsd = XMLSchema(Orchestra10.get_xsd_path())
+
+    @classmethod
+    def get_xsd_path(cls):
+        schemas_dir = os.path.join(os.path.dirname(__file__), 'schemas/')
+        return os.path.join(schemas_dir, 'v1-0/repository.xsd')
 
     def validate(self, xml) -> Iterator[ValueError]:
         """
@@ -28,7 +31,6 @@ class Orchestra:
         instance or an ElementTree instance or a string containing the XML data.
         """
         return self.xsd.iter_errors(xml)
-
 
     def to_instance(self, xml) -> Tuple[OrchestraInstance, List[ValueError]]:
         """
@@ -54,7 +56,39 @@ class Orchestra:
         :param stream: a file like object
         """
         et = self.xsd.encode(obj, validation='lax')
-        ET.register_namespace('fixr','http://fixprotocol.io/2020/orchestra/repository')
+        ET.register_namespace(
+            'fixr', 'http://fixprotocol.io/2020/orchestra/repository')
         ET.register_namespace('dcterms', 'http://purl.org/dc/terms/')
         ET.register_namespace('dc', 'http://purl.org/dc/elements/1.1/')
         stream.write(ET.tostring(et[0], encoding='utf8', method='xml'))
+
+
+class Orchestra10WithSBETypes(Orchestra10):
+    """
+    Represents the XML schema for FIX Orchestra version 1.0 and processing of XML instances \
+    that conform to that schema Supports SBE snippets in mappedDatatype.
+    """
+
+    def __init__(self):
+        orch_xsd_path = Orchestra10.get_xsd_path()
+        sbe_xsd_path = SBE.get_xsd_path()
+        self.xsd = XMLSchema([orch_xsd_path, sbe_xsd_path])
+
+    def write_instance(self, obj, stream):
+        """
+        Encodes an OrchestraInstance and writes it to a stream.
+
+        :param obj: a data structure in the form returned by :meth:`to_instance`
+        :param stream: a file like object
+        """
+        et = self.xsd.encode(obj, validation='lax')
+        ET.register_namespace(
+            'fixr', 'http://fixprotocol.io/2020/orchestra/repository')
+        ET.register_namespace('dcterms', 'http://purl.org/dc/terms/')
+        ET.register_namespace('dc', 'http://purl.org/dc/elements/1.1/')
+        ET.register_namespace('sbe', "http://fixprotocol.io/2016/sbe")
+        stream.write(ET.tostring(et[0], encoding='utf8', method='xml'))
+
+
+Orchestra = Orchestra10WithSBETypes
+""" Default Orchestra schema implementation """
