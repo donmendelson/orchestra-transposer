@@ -130,3 +130,5 @@ dmypy.json
 # VS Code
 /.vscode
 /tests/out
+#JetBrains
+.idea

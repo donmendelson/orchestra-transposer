@@ -31,8 +31,8 @@ def test_to_dict():
     xml_path = os.path.join(XML_FILE_DIR, 'Examples.xml')
     output_path = os.path.join(output_dir(), 'Examples-dict.txt')
     with open(output_path, 'w') as f:
-        (data, errors) = sbe.to_instance(xml_path)
-        print(data[0], file=f)
+        (instance, errors) = sbe.to_instance(xml_path)
+        print(instance.root(), file=f)
         f.close
         assert not errors
 
@@ -42,8 +42,8 @@ def test_invalid_to_dict():
     xml_path = os.path.join(XML_FILE_DIR, 'BadExamples.xml')
     output_path = os.path.join(output_dir(), 'BadExamples-dict.txt')
     with open(output_path, 'w') as f:
-        (data, errors) = sbe.to_instance(xml_path)
-        print(data[0], file=f)
+        (instance, errors) = sbe.to_instance(xml_path)
+        print(instance.root(), file=f)
         f.close
         assert errors
 
@@ -53,7 +53,7 @@ def test_to_from_dict():
     xml_path = os.path.join(XML_FILE_DIR, 'Examples.xml')
     output_path = os.path.join(output_dir(), 'Examples-copy.xml')
     with open(output_path, 'wb') as f:
-        (data, errors) = sbe.to_instance(xml_path)
-        sbe.write_instance(data[0], f)
+        (instance, errors) = sbe.to_instance(xml_path)
+        sbe.write_instance(instance, f)
         f.close
         assert not errors

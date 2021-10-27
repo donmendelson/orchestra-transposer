@@ -16,79 +16,82 @@ class SBEOrchestraTranslator:
         self.sbe = SBE()
 
     def orchestra2sbe(self, orchestra_xml, sbe_stream) -> List[ValueError]:
-        (data, errors) = self.orchestra.to_instance(orchestra_xml)
+        """
+        Translate an Orchestra file to an SBE message schema file
+        :param orchestra_xml: an XML file-like object in Orchestra schema
+        :param sbe_stream: an output stream to write an SBE file
+        :return: a list of errors, if any
+        """
+        (orch_instance, errors) = self.orchestra.to_instance(orchestra_xml)
         if errors:
             for error in errors:
                 self.logger.error(error)
             return errors
         else:
             translate_errors = []
-            orchestra_dict = data[0]
-            sbe_instance = self.orchestra_dict2sbe_dict(orchestra_dict)
+            sbe_instance = self.orchestra_dict2sbe_dict(orch_instance)
             self.sbe.write_instance(sbe_instance, sbe_stream)
             return translate_errors
 
     def orchestra_dict2sbe_dict(self, orch: OrchestraInstance) -> SBEInstance:
         sbe = SBEInstance()
-        sbe_ms = sbe.root()
         repository = orch.root()
-        self.orch2sbe_metadata(repository, sbe_ms)
-        sbe_all_types = {}
-        sbe_ms['types'] = sbe_all_types
+        self.orch2sbe_metadata(repository, sbe)
         datatypes = repository['fixr:datatypes']
-        self.orch2sbe_datatypes(datatypes, sbe_all_types)
+        self.orch2sbe_datatypes(datatypes, sbe)
         codesets = repository['fixr:codeSets']
-        self.orch2sbe_codesets(codesets, sbe_all_types)
+        self.orch2sbe_codesets(codesets, sbe)
         return sbe
 
-    def orch2sbe_metadata(self, repository, sbe_ms):
+    def orch2sbe_metadata(self, repository, sbe):
         """
         Set SBE message schema metadata from Orchestra
         """
-        sbe_ms['@package'] = repository['@name']
+        sbe_ms = sbe.root()
+        sbe_ms['@package'] = repository.get('@name', 'Unknown')
         sbe_ms['@id'] = 1
         sbe_ms['@version'] = 0
 
-    def orch2sbe_datatypes(self, datatypes, sbe_all_types):
+    def orch2sbe_datatypes(self, datatypes, sbe):
         """
         Append SBE types from Orchesta datatypes
         """
-        sbe_types = []
-        sbe_all_types['type'] = sbe_types
         dt_lst = datatypes['fixr:datatype']
         for datatype in dt_lst:
-            sbe_type_attr = {}
-            sbe_type_attr['@name'] = datatype['@name']
-            sbe_type_attr['@semanticType'] = datatype['@name']
+            sbe_type_attr = {'@name': datatype['@name'], '@semanticType': datatype['@name']}
             mappings = datatype.get('fixr:mappedDatatype', None)
             if mappings:
                 mapping = next(
                     (mapping for mapping in mappings if mapping['@standard'] == 'SBE'), None)
-                if (mapping):
-                    sbe_type_attr['@primitiveType'] = mapping['@base']
-                    sbe_type_attr['minValue'] = mapping['minInclusive']
-                    sbe_type_attr['maxValue'] = mapping['maxInclusive']
-            sbe_types.append(sbe_type_attr)
+                if mapping:
+                    # sbe_encoding = mapping.get('fixr:extension', None)
+                    # if sbe_encoding:
+                    #    print(sbe_encoding)
+                    # else:
+                    base = mapping.get('@base', None)
+                    if base:
+                        sbe_type_attr['@primitiveType'] = base
+                    minInclusive = mapping.get('@minInclusive', None)
+                    if minInclusive:
+                        sbe_type_attr['minValue'] = minInclusive
+                    maxInclusive = mapping.get('@maxInclusive', None)
+                    if maxInclusive:
+                        sbe_type_attr['maxValue'] = maxInclusive
+            sbe.append_encoding_type(sbe_type_attr)
 
-    def orch2sbe_codesets(self, codesets, sbe_all_types):
+    def orch2sbe_codesets(self, codesets, sbe):
         """
         Append SBE enums from Orchesta codesets
         """
-        sbe_enums = []
-        sbe_all_types['enum'] = sbe_enums
         cs_lst = codesets['fixr:codeSet']
         for codeset in cs_lst:
-            sbe_enum_attr = {}
-            sbe_enum_attr['@name'] = codeset['@name']
-            sbe_enum_attr['@encodingType'] = codeset['@type']
+            sbe_enum_attr = {'@name': codeset['@name'], '@encodingType': codeset['@type']}
             sbe_codes = []
             sbe_enum_attr['validValue'] = sbe_codes
             cd_lst = codeset['fixr:code']
             for code in cd_lst:
-                sbe_code_attr = {}
-                sbe_code_attr['@name'] = code['@name']
+                sbe_code_attr = {'@name': code['@name'], '$': code['@value']}
                 # $ represents element text
-                sbe_code_attr['$'] = code['@value']
                 sbe_codes.append(sbe_code_attr)
 
-            sbe_enums.append(sbe_enum_attr)
+            sbe.append_enum(sbe_enum_attr)

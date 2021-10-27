@@ -31,8 +31,8 @@ def test_to_dict():
     xml_path = os.path.join(XML_FILE_DIR, 'OrchestraFIXLatest.xml')
     output_path = os.path.join(output_dir(), 'OrchestraFIXLatest-dict.txt')
     with open(output_path, 'w') as f:
-        (data, errors) = orchestra.to_instance(xml_path)
-        print(data[0], file=f)
+        (instance, errors) = orchestra.to_instance(xml_path)
+        print(instance.root(), file=f)
         f.close
         assert not errors
 
@@ -42,8 +42,8 @@ def test_invalid_to_dict():
     xml_path = os.path.join(XML_FILE_DIR, 'BadOrchestra.xml')
     output_path = os.path.join(output_dir(), 'BadOrchestra-dict.txt')
     with open(output_path, 'w') as f:
-        (data, errors) = orchestra.to_instance(xml_path)
-        print(data[0], file=f)
+        (instance, errors) = orchestra.to_instance(xml_path)
+        print(instance.root(), file=f)
         f.close
         assert errors
 
@@ -53,7 +53,7 @@ def test_to_from_dict():
     xml_path = os.path.join(XML_FILE_DIR, 'OrchestraFIXLatest.xml')
     output_path = os.path.join(output_dir(), 'OrchestraFIXLatest-copy.xml')
     with open(output_path, 'wb') as f:
-        (data, errors) = orchestra.to_instance(xml_path)
-        orchestra.write_instance(data[0], f)
+        (instance, errors) = orchestra.to_instance(xml_path)
+        orchestra.write_instance(instance, f)
         f.close
         assert not errors
