@@ -15,25 +15,25 @@ class SBEOrchestraTranslator:
         self.orchestra = Orchestra()
         self.sbe = SBE()
 
-    def orchestra2sbe(self, orchestra_xml, sbe_stream) -> List[ValueError]:
+    def orchestra2sbe_xml(self, orchestra_xml, sbe_stream) -> List[ValueError]:
         """
         Translate an Orchestra file to an SBE message schema file
         :param orchestra_xml: an XML file-like object in Orchestra schema
         :param sbe_stream: an output stream to write an SBE file
         :return: a list of errors, if any
         """
-        (orch_instance, errors) = self.orchestra.to_instance(orchestra_xml)
+        (orch_instance, errors) = self.orchestra.read_xml(orchestra_xml)
         if errors:
             for error in errors:
                 self.logger.error(error)
             return errors
         else:
             translate_errors = []
-            sbe_instance = self.orchestra_dict2sbe_dict(orch_instance)
-            self.sbe.write_instance(sbe_instance, sbe_stream)
+            sbe_instance = self.orchestra_2sbe_dict(orch_instance)
+            self.sbe.write_xml(sbe_instance, sbe_stream)
             return translate_errors
 
-    def orchestra_dict2sbe_dict(self, orch: OrchestraInstance) -> SBEInstance:
+    def orchestra_2sbe_dict(self, orch: OrchestraInstance) -> SBEInstance:
         sbe = SBEInstance()
         repository = orch.root()
         self.orch2sbe_metadata(repository, sbe)

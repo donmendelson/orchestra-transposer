@@ -32,7 +32,7 @@ class Orchestra10:
         """
         return self.xsd.iter_errors(xml)
 
-    def to_instance(self, xml) -> Tuple[OrchestraInstance10, List[ValueError]]:
+    def read_xml(self, xml) -> Tuple[OrchestraInstance10, List[ValueError]]:
         """
         Creates an OrchestraInstance and a possible List of validation errors.
 
@@ -48,7 +48,7 @@ class Orchestra10:
                 errors.append(result)
         return OrchestraInstance10(data[0]), errors
 
-    def write_instance(self, instance: OrchestraInstance10, stream):
+    def write_xml(self, instance: OrchestraInstance10, stream):
         """
         Encodes an OrchestraInstance and writes it to a stream.
 
@@ -74,7 +74,7 @@ class Orchestra10WithSBETypes(Orchestra10):
         sbe_xsd_path = SBE.get_xsd_path()
         self.xsd = XMLSchema([orch_xsd_path, sbe_xsd_path])
 
-    def write_instance(self, instance: OrchestraInstance10, stream):
+    def write_xml(self, instance: OrchestraInstance10, stream):
         """
         Encodes an OrchestraInstance and writes it to a stream.
 

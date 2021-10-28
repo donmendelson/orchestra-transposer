@@ -31,7 +31,7 @@ class SBE10:
         """
         return self.xsd.iter_errors(xml)
 
-    def to_instance(self, xml) -> Tuple[SBEInstance10, List[ValueError]]:
+    def read_xml(self, xml) -> Tuple[SBEInstance10, List[ValueError]]:
         """
         Creates an SBEInstance and a possible List of validation errors.
 
@@ -47,7 +47,7 @@ class SBE10:
                 errors.append(result)
         return SBEInstance10(data[0]), errors
 
-    def write_instance(self, sbe_instance: SBEInstance10, stream):
+    def write_xml(self, sbe_instance: SBEInstance10, stream):
         """
         Encodes an SBEInstance and writes it to a stream.
 
