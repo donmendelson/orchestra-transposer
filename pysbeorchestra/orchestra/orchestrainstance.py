@@ -24,6 +24,24 @@ class OrchestraInstance10:
         """
         return self.obj["fixr:metadata"]
 
+    def datatypes(self) -> list:
+        """
+        :return: a list of  datatypes of an Orchestra instance
+        """
+        return self.obj["fixr:datatypes"]["fixr:datatype"]
+
+    def codesets(self) -> list:
+        """
+        :return: a list of  codesets of an Orchestra instance
+        """
+        return self.obj["fixr:codeSets"]['fixr:codeSet']
+
+    def messages(self) -> list:
+        """
+        :return: a list of messages of an Orchestra instance
+        """
+        return self.obj["fixr:messages"]['fixr:message']
+
 
 OrchestraInstance = OrchestraInstance10
 """Default Orchestra instance"""

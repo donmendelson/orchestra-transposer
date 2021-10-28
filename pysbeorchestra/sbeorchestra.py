@@ -35,29 +35,30 @@ class SBEOrchestraTranslator:
 
     def orchestra_2sbe_dict(self, orch: OrchestraInstance) -> SBEInstance:
         sbe = SBEInstance()
-        repository = orch.root()
-        self.orch2sbe_metadata(repository, sbe)
-        datatypes = repository['fixr:datatypes']
+        self.orch2sbe_metadata(orch, sbe)
+        datatypes = orch.datatypes()
         self.orch2sbe_datatypes(datatypes, sbe)
-        codesets = repository['fixr:codeSets']
+        codesets = orch.codesets()
         self.orch2sbe_codesets(codesets, sbe)
+        messages = orch.messages()
+        self.orch2sbe_messages(messages, sbe)
         return sbe
 
-    def orch2sbe_metadata(self, repository, sbe):
+    def orch2sbe_metadata(self, orch: OrchestraInstance, sbe: SBEInstance):
         """
         Set SBE message schema metadata from Orchestra
         """
+        repository = orch.root()
         sbe_ms = sbe.root()
         sbe_ms['@package'] = repository.get('@name', 'Unknown')
         sbe_ms['@id'] = 1
         sbe_ms['@version'] = 0
 
-    def orch2sbe_datatypes(self, datatypes, sbe):
+    def orch2sbe_datatypes(self, datatypes: list, sbe: SBEInstance):
         """
-        Append SBE types from Orchesta datatypes
+        Append SBE types from Orchestra datatypes
         """
-        dt_lst = datatypes['fixr:datatype']
-        for datatype in dt_lst:
+        for datatype in datatypes:
             sbe_type_attr = {'@name': datatype['@name'], '@semanticType': datatype['@name']}
             mappings = datatype.get('fixr:mappedDatatype', None)
             if mappings:
@@ -79,12 +80,11 @@ class SBEOrchestraTranslator:
                         sbe_type_attr['maxValue'] = maxInclusive
             sbe.append_encoding_type(sbe_type_attr)
 
-    def orch2sbe_codesets(self, codesets, sbe):
+    def orch2sbe_codesets(self, codesets: list, sbe: SBEInstance):
         """
-        Append SBE enums from Orchesta codesets
+        Append SBE enums from Orchestra codesets
         """
-        cs_lst = codesets['fixr:codeSet']
-        for codeset in cs_lst:
+        for codeset in codesets:
             sbe_enum_attr = {'@name': codeset['@name'], '@encodingType': codeset['@type']}
             sbe_codes = []
             sbe_enum_attr['validValue'] = sbe_codes
@@ -95,3 +95,11 @@ class SBEOrchestraTranslator:
                 sbe_codes.append(sbe_code_attr)
 
             sbe.append_enum(sbe_enum_attr)
+
+    def orch2sbe_messages(self, messages: list, sbe: SBEInstance):
+        """
+        Append SBE messages from Orchestra
+        """
+        for msg in messages:
+            sbe_msg_attr = {'@name': msg['@name'], '@id': msg['@id'], '@semanticType': msg['@msgType']}
+            sbe.append_message(sbe_msg_attr)

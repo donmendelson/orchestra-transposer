@@ -32,7 +32,7 @@ def test_to_dict():
     output_path = os.path.join(output_dir(), 'OrchestraFIXLatest-dict.txt')
     with open(output_path, 'w') as f:
         (instance, errors) = orchestra.read_xml(xml_path)
-        print(instance.root(), file=f)
+        print(str(instance), file=f)
         f.close
         assert not errors
 
@@ -43,7 +43,7 @@ def test_invalid_to_dict():
     output_path = os.path.join(output_dir(), 'BadOrchestra-dict.txt')
     with open(output_path, 'w') as f:
         (instance, errors) = orchestra.read_xml(xml_path)
-        print(instance.root(), file=f)
+        print(str(instance), file=f)
         f.close
         assert errors
 

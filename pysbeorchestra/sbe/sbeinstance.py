@@ -50,6 +50,16 @@ class SBEInstance10:
         types_l = list(types_d.values())[0]
         types_l.append(enum)
 
+    def messages(self) -> list:
+        messages = self.obj.get('sbe:message', None)
+        if messages is None:
+            messages = []
+            self.obj['sbe:message'] = messages
+        return messages
+
+    def append_message(self, message):
+        self.messages().append(message)
+
 
 SBEInstance = SBEInstance10
 """Default SBE instance"""
