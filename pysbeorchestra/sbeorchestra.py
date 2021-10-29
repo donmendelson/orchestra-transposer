@@ -57,25 +57,28 @@ class SBEOrchestraTranslator:
         Append SBE types from Orchestra datatypes
         """
         for datatype in datatypes:
-            sbe_type_attr = {'@name': datatype['@name'], '@semanticType': datatype['@name'], '@primitiveType': 'int64'}
-            mappings = datatype.get('fixr:mappedDatatype', None)
-            if mappings:
-                mapping = next(
-                    (mapping for mapping in mappings if mapping['@standard'] == 'SBE'), None)
-                if mapping:
-                    # sbe_encoding = mapping.get('fixr:extension', None)
-                    # if sbe_encoding:
-                    #    print(sbe_encoding)
-                    # else:
-                    base = mapping.get('@base', None)
-                    if base:
-                        sbe_type_attr['@primitiveType'] = base
-                    min_inclusive = mapping.get('@minInclusive', None)
-                    if min_inclusive:
-                        sbe_type_attr['minValue'] = min_inclusive
-                    max_inclusive = mapping.get('@maxInclusive', None)
-                    if max_inclusive:
-                        sbe_type_attr['maxValue'] = max_inclusive
+            name = datatype['@name']
+            if not name in ['NumInGroup', 'Length', 'Reserved100Plus', 'Reserved1000Plus', 'Reserved4000Plus', 'XID',
+                            'XIDREF']:
+                sbe_type_attr = {'@name': name, '@semanticType': datatype['@name'], '@primitiveType': 'int64'}
+                mappings = datatype.get('fixr:mappedDatatype', None)
+                if mappings:
+                    mapping = next(
+                        (mapping for mapping in mappings if mapping['@standard'] == 'SBE'), None)
+                    if mapping:
+                        # sbe_encoding = mapping.get('fixr:extension', None)
+                        # if sbe_encoding:
+                        #    print(sbe_encoding)
+                        # else:
+                        base = mapping.get('@base', None)
+                        if base:
+                            sbe_type_attr['@primitiveType'] = base
+                        min_inclusive = mapping.get('@minInclusive', None)
+                        if min_inclusive:
+                            sbe_type_attr['minValue'] = min_inclusive
+                        max_inclusive = mapping.get('@maxInclusive', None)
+                        if max_inclusive:
+                            sbe_type_attr['maxValue'] = max_inclusive
 
     def orch2sbe_codesets(self, codesets: list, sbe: SBEInstance):
         """
@@ -107,21 +110,20 @@ class SBEOrchestraTranslator:
             sbe.append_message(sbe_msg_attr)
 
     def orch2sbe_fields(self, sbe_msg_attr: dict, field_refs: list, orch: OrchestraInstance):
-        sbe_fields = SBEInstance.fields(sbe_msg_attr)
-        for fieldRef in field_refs:
-            self.orch2sbe_field(sbe_fields, fieldRef, orch)
-
-    def orch2sbe_field(self, sbe_fields: list, field_ref: dict, orch: OrchestraInstance) -> dict:
-        field = orch.field(field_ref['@id'])
-        name = field['@name'] if field else 'Unknown'
-        presence = SBEOrchestraTranslator.orch2sbe_presence(field_ref['@presence']) if field else 'required'
-        field_type = field['@type'] if field else 'Unknown'
-        sbe_field_attr = {'@id': field_ref['@id'],
-                          '@name': name,
-                          '@presence': presence,
-                          '@type': field_type}
-        sbe_fields.append(sbe_field_attr)
-        return sbe_field_attr
+        for field_ref in field_refs:
+            field = orch.field(field_ref['@id'])
+            name = field['@name'] if field else 'Unknown'
+            presence = SBEOrchestraTranslator.orch2sbe_presence(field_ref['@presence']) if field else 'required'
+            field_type = field['@type'] if field else 'Unknown'
+            if not field_type in ['Length', 'NumInGroup']:
+                sbe_field_attr = {'@id': field_ref['@id'],
+                                  '@name': name,
+                                  '@presence': presence,
+                                  '@type': field_type}
+                if field_type == 'data':
+                    SBEInstance.append_data_field(sbe_msg_attr, sbe_field_attr)
+                else:
+                    SBEInstance.append_field(sbe_msg_attr, sbe_field_attr)
 
     @staticmethod
     def orch2sbe_presence(orch_presence: str) -> str:

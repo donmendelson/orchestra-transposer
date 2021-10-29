@@ -61,6 +61,16 @@ class SBEInstance10:
         self.messages().append(message)
 
     @staticmethod
+    def append_field(message, field):
+        fields = SBEInstance.fields(message)
+        fields.append(field)
+
+    @staticmethod
+    def append_data_field(message, field):
+        data = SBEInstance.data(message)
+        data.append(field)
+
+    @staticmethod
     def fields(message: dict) -> list:
         fields = message.get('field', None)
         if not fields:
@@ -72,8 +82,8 @@ class SBEInstance10:
     def data(message: dict) -> list:
         data = message.get('data', None)
         if not data:
-            fields = []
-            message['data'] = fields
+            data = []
+            message['data'] = data
         return data
 
     @staticmethod
