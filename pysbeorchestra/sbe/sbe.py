@@ -12,6 +12,7 @@ class SBE10:
     Represents the XML schema for Simple Binary Encoding version 1.0 and processing of XML instances \
     that conform to that schema.
     """
+
     def __init__(self):
         self.xsd = xmlschema.XMLSchema(SBE10.get_xsd_path())
 
@@ -38,6 +39,7 @@ class SBE10:
         :param xml: the source of XML data. Can be an :class:`XMLResource` instance, a \
         path to a file or an URI of a resource or an opened file-like object or an Element \
         instance or an ElementTree instance or a string containing the XML data.
+        :return: a list of errors, if any
         """
         data, errors = [], []
         for result in self.xsd.iter_decode(xml):
@@ -47,16 +49,20 @@ class SBE10:
                 errors.append(result)
         return SBEInstance10(data[0]), errors
 
-    def write_xml(self, sbe_instance: SBEInstance10, stream):
+    def write_xml(self, sbe_instance: SBEInstance10, stream) -> List[ValueError]:
         """
-        Encodes an SBEInstance and writes it to a stream.
+        Encodes an SBEInstance and writes it to a stream, returns a possible List of validation errors.
 
         :param sbe_instance: an SBE instance
         :param stream: a file like object
+
+        :return: a list of errors, if any
         """
-        et = self.xsd.encode(sbe_instance.root(), validation='lax')
+        data, errors = self.xsd.encode(sbe_instance.root(), validation='lax',
+                                       namespaces={'sbe': 'http://fixprotocol.io/2016/sbe'})
         ET.register_namespace('sbe', "http://fixprotocol.io/2016/sbe")
-        stream.write(ET.tostring(et[0], encoding='utf8', method='xml'))
+        stream.write(ET.tostring(data, encoding='utf8', method='xml'))
+        return errors
 
 
 SBE = SBE10

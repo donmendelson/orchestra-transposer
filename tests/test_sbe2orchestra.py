@@ -14,7 +14,7 @@ def output_dir():
 def test_orchestra2sbe_xml():
     sbe = SBE()
     xml_path = os.path.join(XML_FILE_DIR, 'OrchestraFIXLatestWithSBE.xml')
-    output_path = os.path.join(output_dir(), 'OrchestraFIXLatest-sbe-dict.txt')
+    output_path = os.path.join(output_dir(), 'OrchestraFIXLatest-sbe.xml')
     translator = SBEOrchestraTranslator()
     with open(output_path, 'wb') as f:
         errors = translator.orchestra2sbe_xml(xml_path, f)

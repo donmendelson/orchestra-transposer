@@ -60,6 +60,30 @@ class SBEInstance10:
     def append_message(self, message):
         self.messages().append(message)
 
+    @staticmethod
+    def fields(message: dict) -> list:
+        fields = message.get('field', None)
+        if not fields:
+            fields = []
+            message['field'] = fields
+        return fields
+
+    @staticmethod
+    def data(message: dict) -> list:
+        data = message.get('data', None)
+        if not data:
+            fields = []
+            message['data'] = fields
+        return data
+
+    @staticmethod
+    def groups(message: dict) -> list:
+        groups = message.get('group', None)
+        if not groups:
+            groups = []
+            message['group'] = groups
+        return groups
+
 
 SBEInstance = SBEInstance10
 """Default SBE instance"""

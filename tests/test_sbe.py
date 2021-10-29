@@ -47,8 +47,7 @@ def test_invalid_to_dict():
         f.close
         assert errors
 
-
-def test_to_from_dict():
+def test_to_from_xml():
     sbe = SBE()
     xml_path = os.path.join(XML_FILE_DIR, 'Examples.xml')
     output_path = os.path.join(output_dir(), 'Examples-copy.xml')

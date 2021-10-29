@@ -28,10 +28,8 @@ class SBEOrchestraTranslator:
                 self.logger.error(error)
             return errors
         else:
-            translate_errors = []
             sbe_instance = self.orchestra_2sbe_dict(orch_instance)
-            self.sbe.write_xml(sbe_instance, sbe_stream)
-            return translate_errors
+            return self.sbe.write_xml(sbe_instance, sbe_stream)
 
     def orchestra_2sbe_dict(self, orch: OrchestraInstance) -> SBEInstance:
         sbe = SBEInstance()
@@ -41,7 +39,7 @@ class SBEOrchestraTranslator:
         codesets = orch.codesets()
         self.orch2sbe_codesets(codesets, sbe)
         messages = orch.messages()
-        self.orch2sbe_messages(messages, sbe)
+        self.orch2sbe_messages(messages, sbe, orch)
         return sbe
 
     def orch2sbe_metadata(self, orch: OrchestraInstance, sbe: SBEInstance):
@@ -59,7 +57,7 @@ class SBEOrchestraTranslator:
         Append SBE types from Orchestra datatypes
         """
         for datatype in datatypes:
-            sbe_type_attr = {'@name': datatype['@name'], '@semanticType': datatype['@name']}
+            sbe_type_attr = {'@name': datatype['@name'], '@semanticType': datatype['@name'], '@primitiveType': 'int64'}
             mappings = datatype.get('fixr:mappedDatatype', None)
             if mappings:
                 mapping = next(
@@ -72,13 +70,12 @@ class SBEOrchestraTranslator:
                     base = mapping.get('@base', None)
                     if base:
                         sbe_type_attr['@primitiveType'] = base
-                    minInclusive = mapping.get('@minInclusive', None)
-                    if minInclusive:
-                        sbe_type_attr['minValue'] = minInclusive
-                    maxInclusive = mapping.get('@maxInclusive', None)
-                    if maxInclusive:
-                        sbe_type_attr['maxValue'] = maxInclusive
-            sbe.append_encoding_type(sbe_type_attr)
+                    min_inclusive = mapping.get('@minInclusive', None)
+                    if min_inclusive:
+                        sbe_type_attr['minValue'] = min_inclusive
+                    max_inclusive = mapping.get('@maxInclusive', None)
+                    if max_inclusive:
+                        sbe_type_attr['maxValue'] = max_inclusive
 
     def orch2sbe_codesets(self, codesets: list, sbe: SBEInstance):
         """
@@ -96,10 +93,41 @@ class SBEOrchestraTranslator:
 
             sbe.append_enum(sbe_enum_attr)
 
-    def orch2sbe_messages(self, messages: list, sbe: SBEInstance):
+    def orch2sbe_messages(self, messages: list, sbe: SBEInstance, orch: OrchestraInstance):
         """
         Append SBE messages from Orchestra
         """
         for msg in messages:
             sbe_msg_attr = {'@name': msg['@name'], '@id': msg['@id'], '@semanticType': msg['@msgType']}
+            structure = OrchestraInstance.structure(msg)
+            field_refs = OrchestraInstance.field_refs(structure)
+            self.orch2sbe_fields(sbe_msg_attr, field_refs, orch)
+            component_refs = OrchestraInstance.component_refs(structure)
+            group_refs = OrchestraInstance.group_refs(structure)
             sbe.append_message(sbe_msg_attr)
+
+    def orch2sbe_fields(self, sbe_msg_attr: dict, field_refs: list, orch: OrchestraInstance):
+        sbe_fields = SBEInstance.fields(sbe_msg_attr)
+        for fieldRef in field_refs:
+            self.orch2sbe_field(sbe_fields, fieldRef, orch)
+
+    def orch2sbe_field(self, sbe_fields: list, field_ref: dict, orch: OrchestraInstance) -> dict:
+        field = orch.field(field_ref['@id'])
+        name = field['@name'] if field else 'Unknown'
+        presence = SBEOrchestraTranslator.orch2sbe_presence(field_ref['@presence']) if field else 'required'
+        field_type = field['@type'] if field else 'Unknown'
+        sbe_field_attr = {'@id': field_ref['@id'],
+                          '@name': name,
+                          '@presence': presence,
+                          '@type': field_type}
+        sbe_fields.append(sbe_field_attr)
+        return sbe_field_attr
+
+    @staticmethod
+    def orch2sbe_presence(orch_presence: str) -> str:
+        if not orch_presence or orch_presence == 'required':
+            return 'required'
+        elif orch_presence == 'constant':
+            return 'constant'
+        else:
+            return 'optional'
