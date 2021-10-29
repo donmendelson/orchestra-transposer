@@ -67,6 +67,20 @@ class OrchestraInstance10:
             fields['fixr:field'] = field
         return field
 
+    def components(self) -> list:
+        """
+        :return: a list of  components of an Orchestra instance
+        """
+        components = self.obj.get('fixr:components', None)
+        if not components:
+            components = {}
+            self.obj['fixr:components'] = components
+        component = components.get('fixr:component', None)
+        if not component:
+            component = []
+            components['fixr:component'] = component
+        return component
+
     def messages(self) -> list:
         """
         :return: a list of messages of an Orchestra instance
@@ -99,24 +113,27 @@ class OrchestraInstance10:
 
     @staticmethod
     def component_refs(structure: dict) -> list:
-        component_refs = structure.get('fixr:fieldRef', None)
+        component_refs = structure.get('fixr:componentRef', None)
         if not component_refs:
             component_refs = []
-            structure['fixr:fieldRef'] = component_refs
+            structure['fixr:componentRef'] = component_refs
         return component_refs
 
     @staticmethod
     def group_refs(structure: dict) -> list:
-        groups_refs = structure.get('fixr:fieldRef', None)
+        groups_refs = structure.get('fixr:groupRef', None)
         if not groups_refs:
             groups_refs = []
-            structure['fixr:fieldRef'] = groups_refs
+            structure['fixr:groupRef'] = groups_refs
         return groups_refs
 
-    def field(self, id: int) -> Union[dict, None]:
+    def field(self, field_id: int) -> Union[dict, None]:
         fields: list = self.fields()
-        return next((field for field in fields if field['@id'] == id), None)
+        return next((field for field in fields if field['@id'] == field_id), None)
 
+    def component(self, component_id: int) -> Union[dict, None]:
+        components: list = self.components()
+        return next((component for component in components if component['@id'] == component_id), None)
 
 OrchestraInstance = OrchestraInstance10
 """Default Orchestra instance"""

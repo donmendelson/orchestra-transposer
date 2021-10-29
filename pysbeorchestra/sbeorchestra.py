@@ -79,6 +79,7 @@ class SBEOrchestraTranslator:
                         max_inclusive = mapping.get('@maxInclusive', None)
                         if max_inclusive:
                             sbe_type_attr['maxValue'] = max_inclusive
+                sbe.append_encoding_type(sbe_type_attr)
 
     def orch2sbe_codesets(self, codesets: list, sbe: SBEInstance):
         """
@@ -106,6 +107,7 @@ class SBEOrchestraTranslator:
             field_refs = OrchestraInstance.field_refs(structure)
             self.orch2sbe_fields(sbe_msg_attr, field_refs, orch)
             component_refs = OrchestraInstance.component_refs(structure)
+            self.orch2sbe_components(sbe_msg_attr, component_refs, orch)
             group_refs = OrchestraInstance.group_refs(structure)
             sbe.append_message(sbe_msg_attr)
 
@@ -125,6 +127,26 @@ class SBEOrchestraTranslator:
                 else:
                     SBEInstance.append_field(sbe_msg_attr, sbe_field_attr)
 
+    def orch2sbe_components(self, sbe_msg_attr: dict, component_refs: list, orch: OrchestraInstance):
+        """
+        Expand an Orchestra component into its members
+
+        Special case: do not expand StandardHeader or StandardTrailer
+        :param sbe_msg_attr: an SBE message to populate
+        :param component_refs: a List of componentRefs contained by an Orchestra message or component
+        :param orch: an Orchestra file
+        :return:
+        """
+        for component_ref in component_refs:
+            component = orch.component(component_ref['@id'])
+            name = component['@name'] if component else 'Unknown'
+            if (component and not name in ['StandardHeader', 'StandardTrailer']):
+                field_refs = OrchestraInstance.field_refs(component)
+                self.orch2sbe_fields(sbe_msg_attr, field_refs, orch)
+                nested_component_refs = OrchestraInstance.component_refs(component)
+                self.orch2sbe_components(sbe_msg_attr, nested_component_refs, orch)
+                group_refs = OrchestraInstance.group_refs(component)
+
     @staticmethod
     def orch2sbe_presence(orch_presence: str) -> str:
         if not orch_presence or orch_presence == 'required':
@@ -133,3 +155,5 @@ class SBEOrchestraTranslator:
             return 'constant'
         else:
             return 'optional'
+
+
