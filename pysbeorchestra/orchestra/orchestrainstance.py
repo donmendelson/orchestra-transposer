@@ -81,6 +81,20 @@ class OrchestraInstance10:
             components['fixr:component'] = component
         return component
 
+    def groups(self) -> list:
+        """
+        :return: a list of  components of an Orchestra instance
+        """
+        groups = self.obj.get('fixr:groups', None)
+        if not groups:
+            groups = {}
+            self.obj['fixr:groups'] = groups
+        group = groups.get('fixr:group', None)
+        if not group:
+            group = []
+            groups['fixr:group'] = group
+        return group
+
     def messages(self) -> list:
         """
         :return: a list of messages of an Orchestra instance
@@ -134,6 +148,10 @@ class OrchestraInstance10:
     def component(self, component_id: int) -> Union[dict, None]:
         components: list = self.components()
         return next((component for component in components if component['@id'] == component_id), None)
+
+    def group(self, group_id: int) -> Union[dict, None]:
+        groups: list = self.groups()
+        return next((group for group in groups if group['@id'] == group_id), None)
 
 OrchestraInstance = OrchestraInstance10
 """Default Orchestra instance"""

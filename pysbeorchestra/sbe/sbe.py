@@ -44,7 +44,7 @@ class SBE10:
         data, errors = [], []
         for result in self.xsd.iter_decode(xml):
             if not isinstance(result, ValueError):
-                data.append(SBEInstance10(result))
+                data.append(result)
             else:
                 errors.append(result)
         return SBEInstance10(data[0]), errors

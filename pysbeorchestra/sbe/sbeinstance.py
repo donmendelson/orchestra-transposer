@@ -71,6 +71,11 @@ class SBEInstance10:
         data.append(field)
 
     @staticmethod
+    def append_group(message, group):
+        groups = SBEInstance.groups(message)
+        groups.append(group)
+
+    @staticmethod
     def fields(message: dict) -> list:
         fields = message.get('field', None)
         if not fields:
