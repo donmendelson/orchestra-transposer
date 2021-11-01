@@ -17,6 +17,10 @@ Translates between Orchestra and Simple Binary Encoding (SBE) files. Initial imp
 * Convert an Orchestra file to an SBE message schema. Support datatype customization.
 * Convert an SBE message schema to an Orchestra file.
 
+## Prerequisites
+
+Implemented with [Python 3.9](https://www.python.org/downloads/release/python-390/). Unit tests use [pytest](https://docs.pytest.org/en/6.2.x/) framework.
+
 ## License
 
 © Copyright 2021 FIX Protocol Limited
