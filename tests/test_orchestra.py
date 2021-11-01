@@ -1,7 +1,6 @@
 import os
 
-import pytest
-from pysbeorchestra import Orchestra
+from orchestratransposer import Orchestra
 
 XML_FILE_DIR = os.path.join(os.path.dirname(__file__), 'xml/')
 
@@ -33,7 +32,7 @@ def test_to_dict():
     with open(output_path, 'w') as f:
         (instance, errors) = orchestra.read_xml(xml_path)
         print(str(instance), file=f)
-        f.close
+        f.close()
         assert not errors
 
 
@@ -44,7 +43,7 @@ def test_invalid_to_dict():
     with open(output_path, 'w') as f:
         (instance, errors) = orchestra.read_xml(xml_path)
         print(str(instance), file=f)
-        f.close
+        f.close()
         assert errors
 
 
@@ -55,5 +54,5 @@ def test_to_from_dict():
     with open(output_path, 'wb') as f:
         (instance, errors) = orchestra.read_xml(xml_path)
         orchestra.write_xml(instance, f)
-        f.close
+        f.close()
         assert not errors

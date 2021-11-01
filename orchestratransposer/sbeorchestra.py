@@ -1,12 +1,12 @@
 import logging
 from typing import List
 
-from pysbeorchestra import Orchestra, SBE
-from pysbeorchestra.orchestra.orchestrainstance import OrchestraInstance10
-from pysbeorchestra.sbe.sbeinstance import SBEInstance10
+from orchestratransposer import Orchestra, SBE
+from orchestratransposer.orchestra.orchestrainstance import OrchestraInstance10
+from orchestratransposer.sbe.sbeinstance import SBEInstance10
 
 
-class SBEOrchestraTranslator10_10:
+class SBEOrchestraTransposer10_10:
     """
     Translates between a Simple Binary Encoding message schema version 1.0 and 
     an FIX Orchestra file version 1.0.
@@ -60,7 +60,7 @@ class SBEOrchestraTranslator10_10:
         """
         for datatype in datatypes:
             name = datatype['@name']
-            if not name in ['NumInGroup', 'Length', 'Reserved100Plus', 'Reserved1000Plus', 'Reserved4000Plus', 'XID',
+            if name not in ['NumInGroup', 'Length', 'Reserved100Plus', 'Reserved1000Plus', 'Reserved4000Plus', 'XID',
                             'XIDREF']:
                 sbe_type_attr = {'@name': name, '@semanticType': datatype['@name'], '@primitiveType': 'int64'}
                 mappings = datatype.get('fixr:mappedDatatype', None)
@@ -111,15 +111,16 @@ class SBEOrchestraTranslator10_10:
             component_refs = OrchestraInstance10.component_refs(structure)
             self.orch2sbe_components(sbe_msg_attr, component_refs, orch)
             group_refs = OrchestraInstance10.group_refs(structure)
+            self.orch2sbe_groups(sbe_msg_attr, group_refs, orch)
             sbe.append_message(sbe_msg_attr)
 
     def orch2sbe_fields(self, sbe_msg_attr: dict, field_refs: list, orch: OrchestraInstance10):
         for field_ref in field_refs:
             field = orch.field(field_ref['@id'])
             name = field['@name'] if field else 'Unknown'
-            presence = SBEOrchestraTranslator.orch2sbe_presence(field_ref['@presence']) if field else 'required'
+            presence = SBEOrchestraTransposer.orch2sbe_presence(field_ref['@presence']) if field else 'required'
             field_type = field['@type'] if field else 'Unknown'
-            if not field_type in ['Length', 'NumInGroup']:
+            if field_type not in ['Length', 'NumInGroup']:
                 sbe_field_attr = {'@id': field_ref['@id'],
                                   '@name': name,
                                   '@presence': presence,
@@ -142,7 +143,7 @@ class SBEOrchestraTranslator10_10:
         for component_ref in component_refs:
             component = orch.component(component_ref['@id'])
             name = component['@name'] if component else 'Unknown'
-            if (component and not name in ['StandardHeader', 'StandardTrailer']):
+            if component and name not in ['StandardHeader', 'StandardTrailer']:
                 field_refs = OrchestraInstance10.field_refs(component)
                 self.orch2sbe_fields(sbe_msg_attr, field_refs, orch)
                 nested_component_refs = OrchestraInstance10.component_refs(component)
@@ -161,7 +162,7 @@ class SBEOrchestraTranslator10_10:
         for group_ref in group_refs:
             group = orch.group(group_ref['@id'])
             name = group['@name'] if group else 'Unknown'
-            if (group):
+            if group:
                 sbe_group_attr = {'@id': group_ref['@id'],
                                   '@name': name}
                 SBEInstance10.append_group(sbe_msg_attr, sbe_group_attr)
@@ -182,5 +183,5 @@ class SBEOrchestraTranslator10_10:
             return 'optional'
 
 
-SBEOrchestraTranslator = SBEOrchestraTranslator10_10
-"""Translate between SBE version 1.0 and Orchestra version 1.0"""
+SBEOrchestraTransposer = SBEOrchestraTransposer10_10
+"""Translates between SBE version 1.0 and Orchestra version 1.0"""

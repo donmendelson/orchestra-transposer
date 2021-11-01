@@ -153,5 +153,6 @@ class OrchestraInstance10:
         groups: list = self.groups()
         return next((group for group in groups if group['@id'] == group_id), None)
 
+
 OrchestraInstance = OrchestraInstance10
 """Default Orchestra instance"""

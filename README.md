@@ -1,6 +1,8 @@
-# pysbeorchestra
+# orchestra-transposer
 
-Translates between Orchestra and Simple Binary Encoding (SBE) files. Initial implementation covers Orchestra version 1.0 and SBE version 1.0.
+Converts between a FIX Orchestra file and other artifacts.
+
+Initial implementation converts between Orchestra version 1.0 and Simple Binary Encoding (SBE) version 1.0.
 
 ### FIX standards and schemas
 
@@ -11,15 +13,23 @@ Translates between Orchestra and Simple Binary Encoding (SBE) files. Initial imp
 ## Features
 
 * Validate an Orchestra file against its XML schema.
+* Access elements of an Orchestra file in "pythonic" data structures that are aware of XML Schema datatypes.
 * Validate an SBE message schema against its XML schema.
 * Access elements of an SBE message schema in "pythonic" data structures that are aware of XML Schema datatypes.
-* Access elements of an Orchestra file in "pythonic" data structures that are aware of XML Schema datatypes.
 * Convert an Orchestra file to an SBE message schema. Support datatype customization.
 * Convert an SBE message schema to an Orchestra file.
 
 ## Prerequisites
 
-Implemented with [Python 3.9](https://www.python.org/downloads/release/python-390/). Unit tests use [pytest](https://docs.pytest.org/en/6.2.x/) framework.
+Requires [Python 3.9](https://www.python.org/downloads/release/python-390/) or later. (Earlier versions may work but have not been tested.)
+
+Unit tests use the [pytest](https://docs.pytest.org/en/6.2.x/) framework.
+
+Assuming that Python and pip are already installed, get started as follows:
+1. Clone this Git repository
+2. In the working directory, create a Python virtual environment, e.g. `python -m venv .venv`
+3. Install required dependencies: `pip install -r requirements.txt`
+
 
 ## License
 
