@@ -5,7 +5,7 @@ from typing import Iterator, List, Tuple
 from xmlschema import XMLSchema
 
 from .orchestrainstance import OrchestraInstance10
-from .. import SBE
+from ..sbe.sbe import SBE10
 
 
 class Orchestra10:
@@ -70,9 +70,8 @@ class Orchestra10WithSBETypes(Orchestra10):
     """
 
     def __init__(self):
-        super().__init__()
         orch_xsd_path = Orchestra10.get_xsd_path()
-        sbe_xsd_path = SBE.get_xsd_path()
+        sbe_xsd_path = SBE10.get_xsd_path()
         self.xsd = XMLSchema([orch_xsd_path, sbe_xsd_path])
 
     def write_xml(self, instance: OrchestraInstance10, stream):

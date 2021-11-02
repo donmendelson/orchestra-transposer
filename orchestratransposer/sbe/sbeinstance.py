@@ -2,6 +2,9 @@ from pprint import pformat
 
 
 class SBEInstance10:
+    """
+    Represents a message schema as defined by Simple Binary Encoding (SBE) version 1.0
+    """
 
     def __init__(self, obj=None):
         self.obj = obj if obj is not None else {}
@@ -10,9 +13,11 @@ class SBEInstance10:
         return pformat(self.obj)
 
     def root(self) -> dict:
+        """ Returns the data dictionary of this SBE instance """
         return self.obj
 
     def all_types(self) -> list:
+        """ Returns a List of all types """
         all_types = self.obj.get('types', None)
         if all_types is None:
             all_types = []
@@ -20,12 +25,15 @@ class SBEInstance10:
         return all_types
 
     def encoding_types(self):
+        """ Returns simple encoding types"""
         return self.__types('type')
 
     def composites(self):
+        """ Returns composite encoding types """
         return self.__types('composite')
 
     def enums(self):
+        """ Returns enumerations, aka code sets """
         return self.__types('enum')
 
     def __types(self, category: str):
@@ -41,16 +49,19 @@ class SBEInstance10:
         return d
 
     def append_encoding_type(self, encoding_type):
+        """ Appends a simple encoding type """
         types_d = self.encoding_types()
         types_l = list(types_d.values())[0]
         types_l.append(encoding_type)
 
     def append_enum(self, enum):
+        """ Appends an enumeration, aka code set """
         types_d = self.enums()
         types_l = list(types_d.values())[0]
         types_l.append(enum)
 
     def messages(self) -> list:
+        """ Accesses A List of messages"""
         messages = self.obj.get('sbe:message', None)
         if messages is None:
             messages = []
@@ -58,45 +69,64 @@ class SBEInstance10:
         return messages
 
     def append_message(self, message):
+        """ Appends a message """
         self.messages().append(message)
 
     @staticmethod
-    def append_field(message, field):
-        fields = SBEInstance.fields(message)
+    def append_field(structure: dict, field):
+        """
+        Append a fixed-length field to a message or group structure
+        """
+        fields = SBEInstance.fields(structure)
         fields.append(field)
 
     @staticmethod
-    def append_data_field(message, field):
-        data = SBEInstance.data(message)
+    def append_data_field(structure: dict, field):
+        """
+        Append a variable-length data field to a message or group structure
+        """
+        data = SBEInstance.data(structure)
         data.append(field)
 
     @staticmethod
-    def append_group(message, group):
-        groups = SBEInstance.groups(message)
+    def append_group(structure: dict, group):
+        """
+        Append a repeating group to a message or group structure
+        """
+        groups = SBEInstance.groups(structure)
         groups.append(group)
 
     @staticmethod
-    def fields(message: dict) -> list:
-        fields = message.get('field', None)
+    def fields(structure: dict) -> list:
+        """
+        Access the fixed-length fields of a message or group structure
+        """
+        fields = structure.get('field', None)
         if not fields:
             fields = []
-            message['field'] = fields
+            structure['field'] = fields
         return fields
 
     @staticmethod
-    def data(message: dict) -> list:
-        data = message.get('data', None)
+    def data(structure: dict) -> list:
+        """
+        Access the variable-length data fields of a message or group structure
+        """
+        data = structure.get('data', None)
         if not data:
             data = []
-            message['data'] = data
+            structure['data'] = data
         return data
 
     @staticmethod
-    def groups(message: dict) -> list:
-        groups = message.get('group', None)
+    def groups(structure: dict) -> list:
+        """
+        Access the repeating groups of a message or group structure
+        """
+        groups = structure.get('group', None)
         if not groups:
             groups = []
-            message['group'] = groups
+            structure['group'] = groups
         return groups
 
 

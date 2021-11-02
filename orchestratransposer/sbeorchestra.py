@@ -13,7 +13,7 @@ class SBEOrchestraTransposer10_10:
     """
 
     def __init__(self):
-        self.logger = logging.getLogger('SBEOrchestraTranslator')
+        self.logger = logging.getLogger('SBEOrchestraTransposer')
         self.orchestra = Orchestra()
         self.sbe = SBE()
 
@@ -34,6 +34,11 @@ class SBEOrchestraTransposer10_10:
             return self.sbe.write_xml(sbe_instance, sbe_stream)
 
     def orchestra_2sbe_dict(self, orch: OrchestraInstance10) -> SBEInstance10:
+        """
+        Translate an Orchestra dictionary to an SBE message schema dictionary
+        :param orch: an Orchestra version 1.0 data dictionary
+        :return: an SBE version 1.0 data dictionary
+        """
         sbe = SBEInstance10()
         self.orch2sbe_metadata(orch, sbe)
         datatypes = orch.datatypes()
@@ -107,74 +112,99 @@ class SBEOrchestraTransposer10_10:
             sbe_msg_attr = {'@name': msg['@name'], '@id': msg['@id'], '@semanticType': msg['@msgType']}
             structure = OrchestraInstance10.structure(msg)
             field_refs = OrchestraInstance10.field_refs(structure)
-            self.orch2sbe_fields(sbe_msg_attr, field_refs, orch)
             component_refs = OrchestraInstance10.component_refs(structure)
-            self.orch2sbe_components(sbe_msg_attr, component_refs, orch)
             group_refs = OrchestraInstance10.group_refs(structure)
-            self.orch2sbe_groups(sbe_msg_attr, group_refs, orch)
+            self.append_members(sbe_msg_attr, field_refs, component_refs, group_refs, orch)
             sbe.append_message(sbe_msg_attr)
 
-    def orch2sbe_fields(self, sbe_msg_attr: dict, field_refs: list, orch: OrchestraInstance10):
+    def append_members(self, sbe_structure, field_refs, component_refs, group_refs, orch):
+        """ Appends members to an SBE message or group structure from Orchestra """
+        sbe_fields = []
+        sbe_groups = []
+        sbe_data = []
+        self.orch2sbe_fields(sbe_fields, sbe_data, field_refs, orch)
+        self.orch2sbe_components(sbe_fields, sbe_data, sbe_groups, component_refs, orch)
+        self.orch2sbe_groups(sbe_groups, group_refs, orch)
+        # Order must be fixed fields / groups / variable length data
+        for field in sbe_fields:
+            SBEInstance10.append_field(sbe_structure, field)
+        for group in sbe_groups:
+            SBEInstance10.append_group(sbe_structure, group)
+        for data_field in sbe_data:
+            SBEInstance10.append_data_field(sbe_structure, data_field)
+
+    def orch2sbe_fields(self, sbe_fields: list, sbe_data: list, field_refs: list, orch: OrchestraInstance10):
         for field_ref in field_refs:
-            field = orch.field(field_ref['@id'])
+            field_id = field_ref['@id']
+            field = orch.field(field_id)
             name = field['@name'] if field else 'Unknown'
             presence = SBEOrchestraTransposer.orch2sbe_presence(field_ref['@presence']) if field else 'required'
             field_type = field['@type'] if field else 'Unknown'
             if field_type not in ['Length', 'NumInGroup']:
-                sbe_field_attr = {'@id': field_ref['@id'],
+                sbe_field_attr = {'@id': field_id,
                                   '@name': name,
                                   '@presence': presence,
                                   '@type': field_type}
                 if field_type == 'data':
-                    SBEInstance10.append_data_field(sbe_msg_attr, sbe_field_attr)
+                    sbe_data.append(sbe_field_attr)
                 else:
-                    SBEInstance10.append_field(sbe_msg_attr, sbe_field_attr)
+                    sbe_fields.append(sbe_field_attr)
+            else:
+                self.logger.error('Field id=%d not found', field_id)
 
-    def orch2sbe_components(self, sbe_msg_attr: dict, component_refs: list, orch: OrchestraInstance10):
+    def orch2sbe_components(self, sbe_fields: list, sbe_data: list, sbe_groups: list, component_refs: list,
+                            orch: OrchestraInstance10):
         """
         Recursively expand an Orchestra component into its members
 
         Special case: do not expand StandardHeader or StandardTrailer
-        :param sbe_msg_attr: an SBE message to populate
+        :param sbe_groups: a List of SBE groups to append
+        :param sbe_data: a List of SBE variable-length fields to append
+        :param sbe_fields: a List of SBE fixed-length fields to append
         :param component_refs: a List of componentRefs contained by an Orchestra message or component
         :param orch: an Orchestra file
         :return:
         """
         for component_ref in component_refs:
-            component = orch.component(component_ref['@id'])
+            component_id = component_ref['@id']
+            component = orch.component(component_id)
             name = component['@name'] if component else 'Unknown'
             if component and name not in ['StandardHeader', 'StandardTrailer']:
                 field_refs = OrchestraInstance10.field_refs(component)
-                self.orch2sbe_fields(sbe_msg_attr, field_refs, orch)
+                self.orch2sbe_fields(sbe_fields, sbe_data, field_refs, orch)
                 nested_component_refs = OrchestraInstance10.component_refs(component)
-                self.orch2sbe_components(sbe_msg_attr, nested_component_refs, orch)
+                self.orch2sbe_components(sbe_fields, sbe_data, sbe_groups, nested_component_refs, orch)
                 group_refs = OrchestraInstance10.group_refs(component)
-                self.orch2sbe_groups(sbe_msg_attr, group_refs, orch)
+                self.orch2sbe_groups(sbe_groups, group_refs, orch)
+            else:
+                self.logger.error('Component id=%d not found', component_id)
 
-    def orch2sbe_groups(self, sbe_msg_attr, group_refs, orch):
+    def orch2sbe_groups(self, sbe_groups, group_refs, orch):
         """
-        Append repeating groups to a message
-        :param sbe_msg_attr: an SBE message to populate
+        Append repeating groups to a message or outer group
+        :param sbe_groups: a List of SBE groups to append
         :param group_refs: a List of groupsRefs contained by an Orchestra message or component
         :param orch: an Orchestra file
         :return:
         """
         for group_ref in group_refs:
-            group = orch.group(group_ref['@id'])
+            group_id = group_ref['@id']
+            group = orch.group(group_id)
             name = group['@name'] if group else 'Unknown'
             if group:
                 sbe_group_attr = {'@id': group_ref['@id'],
                                   '@name': name}
-                SBEInstance10.append_group(sbe_msg_attr, sbe_group_attr)
+                sbe_groups.append(sbe_group_attr)
                 field_refs = OrchestraInstance10.field_refs(group)
-                self.orch2sbe_fields(sbe_group_attr, field_refs, orch)
-                nested_component_refs = OrchestraInstance10.component_refs(group)
-                self.orch2sbe_components(sbe_group_attr, nested_component_refs, orch)
+                component_refs = OrchestraInstance10.component_refs(group)
                 group_refs = OrchestraInstance10.group_refs(group)
-                self.orch2sbe_groups(sbe_group_attr, group_refs, orch)
+                self.append_members(sbe_group_attr, field_refs, component_refs, group_refs, orch)
+            else:
+                self.logger.error('Group id=%d not found', group_id)
 
     @staticmethod
     def orch2sbe_presence(orch_presence: str) -> str:
+        """ Translate Orchestra presence to SBE presence string """
         if not orch_presence or orch_presence == 'required':
             return 'required'
         elif orch_presence == 'constant':
