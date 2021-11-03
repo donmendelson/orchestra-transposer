@@ -24,41 +24,44 @@ class SBEInstance10:
             self.obj['types'] = all_types
         return all_types
 
-    def encoding_types(self):
+    def encoding_types(self) -> list:
         """ Returns simple encoding types"""
         return self.__types('type')
 
-    def composites(self):
+    def composites(self) -> list:
         """ Returns composite encoding types """
         return self.__types('composite')
 
-    def enums(self):
+    def enums(self) -> list:
         """ Returns enumerations, aka code sets """
         return self.__types('enum')
 
-    def __types(self, category: str):
+    def __types(self, category: str) -> list:
         all_types = self.all_types()
 
         for d in all_types:
             for key, val in d.items():
                 if key == category:
-                    return d
-
-        d = {category: []}
+                    return val
+        l = []
+        d = {category: l}
         all_types.append(d)
-        return d
+        return l
 
     def append_encoding_type(self, encoding_type):
         """ Appends a simple encoding type """
-        types_d = self.encoding_types()
-        types_l = list(types_d.values())[0]
+        types_l = self.encoding_types()
         types_l.append(encoding_type)
 
     def append_enum(self, enum):
         """ Appends an enumeration, aka code set """
-        types_d = self.enums()
-        types_l = list(types_d.values())[0]
+        types_l = self.enums()
         types_l.append(enum)
+
+    def composite(self, composite):
+        """ Appends a composite type """
+        types_l = self.composites()
+        types_l.append(composite)
 
     def messages(self) -> list:
         """ Accesses A List of messages"""

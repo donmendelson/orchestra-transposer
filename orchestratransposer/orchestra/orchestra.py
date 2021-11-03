@@ -13,6 +13,7 @@ class Orchestra10:
     Represents the XML schema for FIX Orchestra version 1.0 and processing of XML instances \
     that conform to that schema.
     """
+
     def __init__(self):
         self.xsd = XMLSchema(Orchestra10.get_xsd_path())
 
@@ -55,7 +56,10 @@ class Orchestra10:
         :param instance: an OrchestraInstance dictionary
         :param stream: a file like object
         """
-        et = self.xsd.encode(instance.root(), validation='lax')
+        et = self.xsd.encode(instance.root(), validation='lax', use_defaults=False,
+                             namespaces={'fixr': 'http://fixprotocol.io/2020/orchestra/repository',
+                                         'dcterms': 'http://purl.org/dc/terms/',
+                                         'dc': 'http://purl.org/dc/elements/1.1/'})
         ET.register_namespace(
             'fixr', 'http://fixprotocol.io/2020/orchestra/repository')
         ET.register_namespace('dcterms', 'http://purl.org/dc/terms/')
@@ -81,7 +85,11 @@ class Orchestra10WithSBETypes(Orchestra10):
         :param instance: an OrchestraInstance dictionary
         :param stream: a file like object
         """
-        et = self.xsd.encode(instance.root(), validation='lax')
+        et = self.xsd.encode(instance.root(), validation='lax', use_defaults=False,
+                             namespaces={'fixr': 'http://fixprotocol.io/2020/orchestra/repository',
+                                         'dcterms': 'http://purl.org/dc/terms/',
+                                         'dc': 'http://purl.org/dc/elements/1.1/',
+                                         'sbe': 'http://fixprotocol.io/2016/sbe'})
         ET.register_namespace(
             'fixr', 'http://fixprotocol.io/2020/orchestra/repository')
         ET.register_namespace('dcterms', 'http://purl.org/dc/terms/')

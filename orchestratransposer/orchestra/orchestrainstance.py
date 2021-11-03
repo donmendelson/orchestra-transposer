@@ -23,7 +23,11 @@ class OrchestraInstance10:
         """
         :return: the metadata section of an Orchestra instance containing Dublin Core Terms
         """
-        return self.obj.get("fixr:metadata", None)
+        metadata = self.obj.get('fixr:metadata', None)
+        if not metadata:
+            metadata = {}
+            self.obj['fixr:metadata'] = metadata
+        return metadata
 
     def datatypes(self) -> list:
         """
@@ -46,7 +50,7 @@ class OrchestraInstance10:
         codesets = self.obj.get('fixr:codeSets', None)
         if not codesets:
             codesets = {}
-            self.obj['fixr:datatypes'] = codesets
+            self.obj['fixr:codeSets'] = codesets
         codeset = codesets.get('fixr:codeSet', None)
         if not codeset:
             codeset = []

@@ -5,6 +5,9 @@ from orchestratransposer import Orchestra, SBE
 from orchestratransposer.orchestra.orchestrainstance import OrchestraInstance10
 from orchestratransposer.sbe.sbeinstance import SBEInstance10
 
+TEXT_KEY = '$'
+""" Symbol used by XMLSchema package for text content of an element (#text) """
+
 
 class SBEOrchestraTransposer10_10:
     """
@@ -17,7 +20,7 @@ class SBEOrchestraTransposer10_10:
         self.orchestra = Orchestra()
         self.sbe = SBE()
 
-    def orchestra2sbe_xml(self, orchestra_xml, sbe_stream) -> List[ValueError]:
+    def orch2sbe_xml(self, orchestra_xml, sbe_stream) -> List[ValueError]:
         """
         Translate an Orchestra file to an SBE message schema file
         :param orchestra_xml: an XML file-like object in Orchestra schema
@@ -30,10 +33,10 @@ class SBEOrchestraTransposer10_10:
                 self.logger.error(error)
             return errors
         else:
-            sbe_instance = self.orchestra_2sbe_dict(orch_instance)
+            sbe_instance = self.orch2sbe_dict(orch_instance)
             return self.sbe.write_xml(sbe_instance, sbe_stream)
 
-    def orchestra_2sbe_dict(self, orch: OrchestraInstance10) -> SBEInstance10:
+    def orch2sbe_dict(self, orch: OrchestraInstance10) -> SBEInstance10:
         """
         Translate an Orchestra dictionary to an SBE message schema dictionary
         :param orch: an Orchestra version 1.0 data dictionary
@@ -49,15 +52,60 @@ class SBEOrchestraTransposer10_10:
         self.orch2sbe_messages(messages, sbe, orch)
         return sbe
 
+    def sbe2orch_dict(self, sbe: SBEInstance10) -> OrchestraInstance10:
+        """
+        Translate an SBE message schema dictionary to an Orchestra dictionary
+        :param sbe: an SBE version 1.0 data dictionary
+        :return: an Orchestra version 1.0 data dictionary
+        """
+        orch = OrchestraInstance10()
+        self.sbe2orch_metadata(sbe, orch)
+        datatypes = orch.datatypes()
+        self.sbe2orch_datatypes(sbe, datatypes)
+        codesets = orch.codesets()
+        #self.sbe2orch_codesets(codesets, sbe)
+        field = orch.fields()
+        messages = orch.messages()
+        #self.sbe2orch_messages(messages, sbe, orch)
+        return orch
+
+    def sbe2orch_xml(self, sbe_xml, orch_stream) -> List[ValueError]:
+        """
+        Translate an SBE message schema into an Orchestra file
+        :param sbe_xml: an XML file-like object in SBE schema
+        :param orch_stream: an output stream to write an Orchestra file
+        :return: a list of errors, if any
+        """
+        (sbe_instance, errors) = self.sbe.read_xml(sbe_xml)
+        if errors:
+            for error in errors:
+                self.logger.error(error)
+            return errors
+        else:
+            orch_instance = self.sbe2orch_dict(sbe_instance)
+            return self.orchestra.write_xml(orch_instance, orch_stream)
+
     def orch2sbe_metadata(self, orch: OrchestraInstance10, sbe: SBEInstance10):
         """
         Set SBE message schema metadata from Orchestra
+
+        SBE schema id is derived from Orchestra metadata dcterms:identifier, defaults to 1.
         """
         repository = orch.root()
         sbe_ms = sbe.root()
         sbe_ms['@package'] = repository.get('@name', 'Unknown')
-        sbe_ms['@id'] = 1
+        sbe_ms['@id'] = int(orch.metadata().get('dcterms:identifier', 1))
         sbe_ms['@version'] = 0
+
+    def sbe2orch_metadata(self, sbe: SBEInstance10, orch: OrchestraInstance10):
+        """
+        Set Orchestra metadata from an SBE message schema
+        """
+        repository = orch.root()
+        sbe_ms = sbe.root()
+        repository['@name'] = sbe_ms['@package']
+        orch.metadata()['dcterms:identifier'] = str(sbe_ms['@id'])
+        repository['@version'] = str(sbe_ms['@version'])
 
     def orch2sbe_datatypes(self, datatypes: list, sbe: SBEInstance10):
         """
@@ -88,6 +136,26 @@ class SBEOrchestraTransposer10_10:
                             sbe_type_attr['maxValue'] = max_inclusive
                 sbe.append_encoding_type(sbe_type_attr)
 
+    def sbe2orch_datatypes(self, sbe: SBEInstance10, orch_datatypes: list):
+        """
+        Append Orchestra datatypes from SBE simple and composite types
+
+        An SBE type can have 'semanticType' to map to FIX datatypes. It is optional, so mapping to a FIX datatype may
+        not be provided. Moreover, multiple SBE types may map to single datatype in Orchestra, e.g. 32-  and 64-bit
+        integers both map to 'int' FIX type. The Orchestra v1.0 schema does not handle this case. Therefore, each SBE
+        type will be mapped to its own Orchestra datatype.
+        """
+        sbe_types = sbe.encoding_types()
+        for sbe_type in sbe_types:
+            orch_mappings = []
+            orch2sbe_mapping = {'@standard': 'SBE', '@base': sbe_type['@primitiveType']}
+            orch_mappings.append(orch2sbe_mapping)
+            orch_datatype = {'@name': sbe_type['@name'], 'fixr:mappedDatatype': orch_mappings}
+            orch_datatypes.append(orch_datatype)
+
+        #sbe_composites = sbe.composites()
+
+
     def orch2sbe_codesets(self, codesets: list, sbe: SBEInstance10):
         """
         Append SBE enums from Orchestra codesets
@@ -98,7 +166,7 @@ class SBEOrchestraTransposer10_10:
             sbe_enum_attr['validValue'] = sbe_codes
             cd_lst = codeset['fixr:code']
             for code in cd_lst:
-                sbe_code_attr = {'@name': code['@name'], '$': code['@value']}
+                sbe_code_attr = {'@name': code['@name'], TEXT_KEY: code['@value']}
                 # $ represents element text
                 sbe_codes.append(sbe_code_attr)
 

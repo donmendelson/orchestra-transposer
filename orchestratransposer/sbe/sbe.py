@@ -58,7 +58,7 @@ class SBE10:
 
         :return: a list of errors, if any
         """
-        data, errors = self.xsd.encode(sbe_instance.root(), validation='lax',
+        data, errors = self.xsd.encode(sbe_instance.root(), validation='lax', use_defaults=False,
                                        namespaces={'sbe': 'http://fixprotocol.io/2016/sbe'})
         ET.register_namespace('sbe', "http://fixprotocol.io/2016/sbe")
         stream.write(ET.tostring(data, encoding='utf8', method='xml'))
