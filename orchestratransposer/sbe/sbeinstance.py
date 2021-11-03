@@ -103,6 +103,8 @@ class SBEInstance10:
     def fields(structure: dict) -> list:
         """
         Access the fixed-length fields of a message or group structure
+
+        Does not include the fields in nested groups.
         """
         fields = structure.get('field', None)
         if not fields:
@@ -111,9 +113,43 @@ class SBEInstance10:
         return fields
 
     @staticmethod
+    def all_fields(structure: dict, all_sbe_fields: list):
+        """
+        Access the fixed-length fields of a message or group structure
+
+        Recursively gathers the fields in nested groups.
+        :param structure: message or group structure
+        :param all_sbe_fields: list of fields to populate
+        :return:
+        """
+        fields = SBEInstance10.fields(structure)
+        all_sbe_fields.extend(fields)
+        groups = SBEInstance10.groups(structure)
+        for group in groups:
+            SBEInstance10.all_fields(group, all_sbe_fields)
+
+    @staticmethod
+    def all_data(structure: dict, all_sbe_fields: list):
+        """
+        Access the variable-length fields of a message or group structure
+
+        Recursively gathers the fields in nested groups.
+        :param structure: message or group structure
+        :param all_sbe_fields: list of fields to populate
+        :return:
+        """
+        fields = SBEInstance10.data(structure)
+        all_sbe_fields.extend(fields)
+        groups = SBEInstance10.groups(structure)
+        for group in groups:
+            SBEInstance10.all_data(group, all_sbe_fields)
+
+    @staticmethod
     def data(structure: dict) -> list:
         """
         Access the variable-length data fields of a message or group structure
+
+        Does not include data fields in nested groups.
         """
         data = structure.get('data', None)
         if not data:
@@ -131,6 +167,10 @@ class SBEInstance10:
             groups = []
             structure['group'] = groups
         return groups
+
+    @staticmethod
+    def id(structure: dict) -> int:
+        return structure.get('@id')
 
 
 SBEInstance = SBEInstance10

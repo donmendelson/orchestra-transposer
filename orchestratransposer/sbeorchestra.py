@@ -63,10 +63,11 @@ class SBEOrchestraTransposer10_10:
         datatypes = orch.datatypes()
         self.sbe2orch_datatypes(sbe, datatypes)
         codesets = orch.codesets()
-        #self.sbe2orch_codesets(codesets, sbe)
-        field = orch.fields()
+        self.sbe2orch_codesets(sbe, codesets)
+        fields = orch.fields()
+        self.sbe2orch_fields(sbe, fields)
         messages = orch.messages()
-        #self.sbe2orch_messages(messages, sbe, orch)
+        # self.sbe2orch_messages(messages, sbe, orch)
         return orch
 
     def sbe2orch_xml(self, sbe_xml, orch_stream) -> List[ValueError]:
@@ -153,8 +154,13 @@ class SBEOrchestraTransposer10_10:
             orch_datatype = {'@name': sbe_type['@name'], 'fixr:mappedDatatype': orch_mappings}
             orch_datatypes.append(orch_datatype)
 
-        #sbe_composites = sbe.composites()
-
+        sbe_composites = sbe.composites()
+        for sbe_composite in sbe_composites:
+            orch_mappings = []
+            orch2sbe_mapping = {'@standard': 'SBE', 'fixr:extension': sbe_composite}
+            orch_mappings.append(orch2sbe_mapping)
+            orch_datatype = {'@name': sbe_composite['@name'], 'fixr:mappedDatatype': orch_mappings}
+            orch_datatypes.append(orch_datatype)
 
     def orch2sbe_codesets(self, codesets: list, sbe: SBEInstance10):
         """
@@ -167,10 +173,20 @@ class SBEOrchestraTransposer10_10:
             cd_lst = codeset['fixr:code']
             for code in cd_lst:
                 sbe_code_attr = {'@name': code['@name'], TEXT_KEY: code['@value']}
-                # $ represents element text
                 sbe_codes.append(sbe_code_attr)
 
             sbe.append_enum(sbe_enum_attr)
+
+    def sbe2orch_codesets(self, sbe: SBEInstance10, codesets: list):
+        sbe_enums: list = sbe.enums()
+        for sbe_enum in sbe_enums:
+            codes = []
+            codeset_attr = {'@name': sbe_enum['@name'], '@type': sbe_enum['@encodingType'], 'fixr:code': codes}
+            sbe_codes = sbe_enum['validValue']
+            for sbe_code in sbe_codes:
+                code_attr = {'@name': sbe_code['@name'], 'value': sbe_code[TEXT_KEY]}
+                codes.append(code_attr)
+            codesets.append(codeset_attr)
 
     def orch2sbe_messages(self, messages: list, sbe: SBEInstance10, orch: OrchestraInstance10):
         """
@@ -182,10 +198,10 @@ class SBEOrchestraTransposer10_10:
             field_refs = OrchestraInstance10.field_refs(structure)
             component_refs = OrchestraInstance10.component_refs(structure)
             group_refs = OrchestraInstance10.group_refs(structure)
-            self.append_members(sbe_msg_attr, field_refs, component_refs, group_refs, orch)
+            self.orch2sbe_append_members(sbe_msg_attr, field_refs, component_refs, group_refs, orch)
             sbe.append_message(sbe_msg_attr)
 
-    def append_members(self, sbe_structure, field_refs, component_refs, group_refs, orch):
+    def orch2sbe_append_members(self, sbe_structure, field_refs, component_refs, group_refs, orch):
         """ Appends members to an SBE message or group structure from Orchestra """
         sbe_fields = []
         sbe_groups = []
@@ -219,6 +235,31 @@ class SBEOrchestraTransposer10_10:
                     sbe_fields.append(sbe_field_attr)
             else:
                 self.logger.error('Field id=%d not found', field_id)
+
+    def sbe2orch_fields(self, sbe: SBEInstance10, fields: list):
+        """
+        Append unique fields from all SBE messages, by field id
+        :param sbe: an SBE instance
+        :param fields: Orchestra field list to populate
+        :return:
+        """
+        field_d = {}
+        sbe_messages: list = sbe.messages()
+        for sbe_message in sbe_messages:
+            all_sbe_fields = []
+            SBEInstance10.all_fields(sbe_message, all_sbe_fields)
+            for sbe_field in all_sbe_fields:
+                field_d[sbe_field['@id']] = sbe_field
+            all_sbe_data_fields = []
+            SBEInstance10.all_data(sbe_message, all_sbe_data_fields)
+            for sbe_field in all_sbe_data_fields:
+                field_d[sbe_field['@id']] = sbe_field
+        field_l = sorted(field_d.values(), key=SBEInstance10.id)
+        for sbe_field in field_l:
+            field = {'@id': sbe_field['@id'],
+                     '@name': sbe_field['@name'],
+                     '@type': sbe_field['@type']}
+            fields.append(field)
 
     def orch2sbe_components(self, sbe_fields: list, sbe_data: list, sbe_groups: list, component_refs: list,
                             orch: OrchestraInstance10):
@@ -266,7 +307,7 @@ class SBEOrchestraTransposer10_10:
                 field_refs = OrchestraInstance10.field_refs(group)
                 component_refs = OrchestraInstance10.component_refs(group)
                 group_refs = OrchestraInstance10.group_refs(group)
-                self.append_members(sbe_group_attr, field_refs, component_refs, group_refs, orch)
+                self.orch2sbe_append_members(sbe_group_attr, field_refs, component_refs, group_refs, orch)
             else:
                 self.logger.error('Group id=%d not found', group_id)
 
@@ -279,6 +320,16 @@ class SBEOrchestraTransposer10_10:
             return 'constant'
         else:
             return 'optional'
+
+    @staticmethod
+    def sbe2orch_presence(sbe_presence: str) -> str:
+        """ Translate SBE presence to Orchestra presence string """
+        if not sbe_presence or sbe_presence == 'optional':
+            return 'optional'
+        elif sbe_presence == 'constant':
+            return 'constant'
+        elif sbe_presence == 'required':
+            return 'required'
 
 
 SBEOrchestraTransposer = SBEOrchestraTransposer10_10
