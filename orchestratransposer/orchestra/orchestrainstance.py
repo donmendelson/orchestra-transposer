@@ -113,6 +113,14 @@ class OrchestraInstance10:
             messages['fixr:message'] = message
         return message
 
+    def append_message(self, message: dict):
+        messages = self.messages()
+        messages.append(message)
+
+    def append_group(self, group: dict):
+        groups = self.groups()
+        groups.append(group)
+
     @staticmethod
     def structure(message: dict) -> dict:
         structure = message.get('fixr:structure', None)
@@ -156,6 +164,22 @@ class OrchestraInstance10:
     def group(self, group_id: int) -> Union[dict, None]:
         groups: list = self.groups()
         return next((group for group in groups if group['@id'] == group_id), None)
+
+    @staticmethod
+    def append_field_ref(structure: dict, field_ref):
+        """
+        Append a fieldRef to a message or group structure
+        """
+        field_refs = OrchestraInstance10.field_refs(structure)
+        field_refs.append(field_ref)
+
+    @staticmethod
+    def append_group_ref(structure: dict, group_ref):
+        """
+        Append a groupRef to a message or group structure
+        """
+        group_refs = OrchestraInstance10.group_refs(structure)
+        group_refs.append(group_ref)
 
 
 OrchestraInstance = OrchestraInstance10

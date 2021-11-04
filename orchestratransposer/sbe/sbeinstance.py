@@ -80,7 +80,7 @@ class SBEInstance10:
         """
         Append a fixed-length field to a message or group structure
         """
-        fields = SBEInstance.fields(structure)
+        fields = SBEInstance10.fields(structure)
         fields.append(field)
 
     @staticmethod
@@ -88,7 +88,7 @@ class SBEInstance10:
         """
         Append a variable-length data field to a message or group structure
         """
-        data = SBEInstance.data(structure)
+        data = SBEInstance10.data(structure)
         data.append(field)
 
     @staticmethod
@@ -96,7 +96,7 @@ class SBEInstance10:
         """
         Append a repeating group to a message or group structure
         """
-        groups = SBEInstance.groups(structure)
+        groups = SBEInstance10.groups(structure)
         groups.append(group)
 
     @staticmethod

@@ -66,8 +66,7 @@ class SBEOrchestraTransposer10_10:
         self.sbe2orch_codesets(sbe, codesets)
         fields = orch.fields()
         self.sbe2orch_fields(sbe, fields)
-        messages = orch.messages()
-        # self.sbe2orch_messages(messages, sbe, orch)
+        self.sbe2orch_messages_and_groups(sbe, orch)
         return orch
 
     def sbe2orch_xml(self, sbe_xml, orch_stream) -> List[ValueError]:
@@ -179,12 +178,13 @@ class SBEOrchestraTransposer10_10:
 
     def sbe2orch_codesets(self, sbe: SBEInstance10, codesets: list):
         sbe_enums: list = sbe.enums()
-        for sbe_enum in sbe_enums:
+        for idx, sbe_enum in enumerate(sbe_enums, start=1):
             codes = []
-            codeset_attr = {'@name': sbe_enum['@name'], '@type': sbe_enum['@encodingType'], 'fixr:code': codes}
+            codeset_attr = {'@name': sbe_enum['@name'], '@id': idx * 100, '@type': sbe_enum['@encodingType'],
+                            'fixr:code': codes}
             sbe_codes = sbe_enum['validValue']
-            for sbe_code in sbe_codes:
-                code_attr = {'@name': sbe_code['@name'], 'value': sbe_code[TEXT_KEY]}
+            for idx2, sbe_code in enumerate(sbe_codes, start=1):
+                code_attr = {'@name': sbe_code['@name'], '@id': idx * 100 + idx2, '@value': sbe_code[TEXT_KEY]}
                 codes.append(code_attr)
             codesets.append(codeset_attr)
 
@@ -200,6 +200,37 @@ class SBEOrchestraTransposer10_10:
             group_refs = OrchestraInstance10.group_refs(structure)
             self.orch2sbe_append_members(sbe_msg_attr, field_refs, component_refs, group_refs, orch)
             sbe.append_message(sbe_msg_attr)
+
+    def sbe2orch_messages_and_groups(self, sbe: SBEInstance10, orch: OrchestraInstance10):
+        sbe_messages = sbe.messages()
+        for sbe_message in sbe_messages:
+            msg_attr = {'@name': sbe_message['@name'], '@id': sbe_message['@id'],
+                        '@msgType': sbe_message['@semanticType']}
+            structure = OrchestraInstance10.structure(msg_attr)
+            sbe_fields = sbe.fields(sbe_message)
+            sbe_groups = sbe.groups(sbe_message)
+            sbe_data_fields = sbe.data(sbe_message)
+            self.sbe2orch_append_members(structure, sbe_fields, sbe_groups, sbe_data_fields)
+            orch.append_message(msg_attr)
+
+            for sbe_group in sbe_groups:
+                group_attr = {'@name': sbe_group['@name'], '@id': sbe_group['@id']}
+                sbe_fields = sbe.fields(sbe_group)
+                sbe_groups = sbe.groups(sbe_group)
+                sbe_data_fields = sbe.data(sbe_group)
+                self.sbe2orch_append_members(group_attr, sbe_fields, sbe_groups, sbe_data_fields)
+                orch.append_group(group_attr)
+
+    def sbe2orch_append_members(self, structure, sbe_fields, sbe_groups, sbe_data_fields):
+        for sbe_field in sbe_fields:
+            field_ref_attr = {'@id': sbe_field['@id'], '@presence': self.sbe2orch_presence(sbe_field['@presence'])}
+            OrchestraInstance10.append_field_ref(structure, field_ref_attr)
+        for sbe_group in sbe_groups:
+            group_ref_attr = {'@id': sbe_group['@id']}
+            OrchestraInstance10.append_group_ref(structure, group_ref_attr)
+        for sbe_field in sbe_data_fields:
+            field_ref_attr = {'@id': sbe_field['@id'], '@presence': self.sbe2orch_presence(sbe_field['@presence'])}
+            OrchestraInstance10.append_field_ref(structure, field_ref_attr)
 
     def orch2sbe_append_members(self, sbe_structure, field_refs, component_refs, group_refs, orch):
         """ Appends members to an SBE message or group structure from Orchestra """
