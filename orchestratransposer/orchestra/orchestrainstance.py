@@ -1,6 +1,9 @@
 from pprint import pformat
 from typing import Union
 
+TEXT_KEY = '$'
+""" Symbol used by XMLSchema package for text content of an element (#text) """
+
 
 class OrchestraInstance10:
     """
@@ -128,6 +131,27 @@ class OrchestraInstance10:
             structure = {}
             message['fixr:structure'] = structure
         return structure
+
+    @staticmethod
+    def documentation(element: dict) -> Union[str, None]:
+        annotation = element.get('fixr:annotation', None)
+        if annotation:
+            documentations = annotation.get('fixr:documentation', None)
+            if documentations:
+                return ' '.join(d.get(TEXT_KEY, "") for d in documentations)
+        return None
+
+    @staticmethod
+    def append_documentation(element: dict, documentation: str):
+        annotation = element.get('fixr:annotation', None)
+        if not annotation:
+            annotation = {}
+            element['fixr:annotation'] = annotation
+        documentations = annotation['fixr:documentation']
+        if not documentations:
+            documentations = []
+            annotation['fixr:documentation'] = documentations
+        documentations.append({'$': documentation})
 
     @staticmethod
     def field_refs(structure: dict) -> list:
