@@ -1,6 +1,6 @@
 import os
 
-from orchestratransposer import SBEOrchestraTransposer, SBE
+from orchestratransposer import SBE2Orchestra, SBE
 
 XML_FILE_DIR = os.path.join(os.path.dirname(__file__), 'xml/')
 
@@ -13,7 +13,7 @@ def output_dir():
 def test_sbe2orchestra_xml():
     xml_path = os.path.join(XML_FILE_DIR, 'Examples.xml')
     output_path = os.path.join(output_dir(), 'Examples-orch.xml')
-    translator = SBEOrchestraTransposer()
+    translator = SBE2Orchestra()
     with open(output_path, 'wb') as f:
         errors = translator.sbe2orch_xml(xml_path, f)
         f.close()
@@ -25,7 +25,7 @@ def test_sbe2orchestra_dict():
     output_path = os.path.join(output_dir(), 'Examples-orch-dict.txt')
     sbe = SBE()
     (sbe_instance, errors) = sbe.read_xml(xml_path)
-    translator = SBEOrchestraTransposer()
+    translator = SBE2Orchestra()
     orch_instance = translator.sbe2orch_dict(sbe_instance)
     with open(output_path, 'w') as f:
         print(str(orch_instance), file=f)
