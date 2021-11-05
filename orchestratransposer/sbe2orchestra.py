@@ -1,7 +1,7 @@
 import logging
 from typing import List
 
-from orchestratransposer.orchestra.orchestra import Orchestra10
+from orchestratransposer.orchestra.orchestra import Orchestra10WithSBETypes
 from orchestratransposer.orchestra.orchestrainstance import OrchestraInstance10
 from orchestratransposer.sbe.sbe import SBE10
 from orchestratransposer.sbe.sbeinstance import SBEInstance10
@@ -18,7 +18,7 @@ class SBE2Orchestra10_10:
 
     """
     Translates between a Simple Binary Encoding message schema version 1.0 and 
-    an FIX Orchestra file version 1.0.
+    an FIX Orchestra file version 1.0. Supports embedded SBE datatypes.
     """
 
     def sbe2orch_dict(self, sbe: SBEInstance10) -> OrchestraInstance10:
@@ -53,8 +53,12 @@ class SBE2Orchestra10_10:
             return errors
         else:
             orch_instance = self.sbe2orch_dict(sbe_instance)
-            orchestra = Orchestra10()
-            return orchestra.write_xml(orch_instance, orch_stream)
+            orchestra = Orchestra10WithSBETypes()
+            errors = orchestra.write_xml(orch_instance, orch_stream)
+            if errors:
+                for error in errors:
+                    self.logger.error(error)
+            return errors
 
     def sbe2orch_metadata(self, sbe: SBEInstance10, orch: OrchestraInstance10):
         """
@@ -64,7 +68,8 @@ class SBE2Orchestra10_10:
         sbe_ms = sbe.root()
         repository['@name'] = sbe_ms['@package']
         orch.metadata()['dcterms:identifier'] = str(sbe_ms['@id'])
-        repository['@version'] = str(sbe_ms['@version'])
+        # a simple integer is not accepted as version in Orchestra 1.0
+        repository['@version'] = str(sbe_ms['@version']) + ".0"
 
     def sbe2orch_datatypes(self, sbe: SBEInstance10, orch_datatypes: list):
         """
@@ -75,6 +80,21 @@ class SBE2Orchestra10_10:
         integers both map to 'int' FIX type. The Orchestra v1.0 schema does not handle this case. Therefore, each SBE
         type will be mapped to its own Orchestra datatype.
         """
+        self.sbe2orch_simple_types(orch_datatypes, sbe)
+        self.sbe2orch_composite_types(orch_datatypes, sbe)
+
+    def sbe2orch_composite_types(self, orch_datatypes, sbe):
+        sbe_composites = sbe.composites()
+        for sbe_composite in sbe_composites:
+            prefix_composite = self.__prefix_attributes('sbe', sbe_composite)
+            extension = {'sbe:composite': [prefix_composite]}
+            orch2sbe_mapping = {'@standard': 'SBE', 'fixr:extension': extension}
+            orch_mappings = []
+            orch_mappings.append(orch2sbe_mapping)
+            orch_datatype = {'@name': sbe_composite['@name'], 'fixr:mappedDatatype': orch_mappings}
+            orch_datatypes.append(orch_datatype)
+
+    def sbe2orch_simple_types(self, orch_datatypes, sbe):
         sbe_types = sbe.encoding_types()
         for sbe_type in sbe_types:
             orch_mappings = []
@@ -83,13 +103,14 @@ class SBE2Orchestra10_10:
             orch_datatype = {'@name': sbe_type['@name'], 'fixr:mappedDatatype': orch_mappings}
             orch_datatypes.append(orch_datatype)
 
-        sbe_composites = sbe.composites()
-        for sbe_composite in sbe_composites:
-            orch_mappings = []
-            orch2sbe_mapping = {'@standard': 'SBE', 'fixr:extension': sbe_composite}
-            orch_mappings.append(orch2sbe_mapping)
-            orch_datatype = {'@name': sbe_composite['@name'], 'fixr:mappedDatatype': orch_mappings}
-            orch_datatypes.append(orch_datatype)
+    def __prefix_attributes(self, prefix: str, attr: dict):
+        prefixed = {}
+        for (k, v) in attr.items():
+            if k[0] == '@':
+                prefixed['@'+prefix+':'+k[1:]] = v
+            else:
+                prefixed[prefix+':'+k] = v
+        return prefixed
 
     def sbe2orch_codesets(self, sbe: SBEInstance10, codesets: list):
         sbe_enums: list = sbe.enums()

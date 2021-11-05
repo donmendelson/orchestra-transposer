@@ -1,6 +1,6 @@
 import os
-import xml.etree.ElementTree as ET
 from typing import Iterator, List, Tuple
+from xml.etree import ElementTree
 
 from xmlschema import XMLSchema
 
@@ -22,7 +22,7 @@ class Orchestra10:
         schemas_dir = os.path.join(os.path.dirname(__file__), 'schemas/')
         return os.path.join(schemas_dir, 'v1-0/repository.xsd')
 
-    def validate(self, xml) -> Iterator[ValueError]:
+    def validate(self, xml) -> Iterator[Exception]:
         """
         Validates an XML data against the XSD schema/component instance. Creates an iterator for the errors generated
         by the validation of an XML data against the XSD schema/component instance.
@@ -33,7 +33,7 @@ class Orchestra10:
         """
         return self.xsd.iter_errors(xml)
 
-    def read_xml(self, xml) -> Tuple[OrchestraInstance10, List[ValueError]]:
+    def read_xml(self, xml) -> Tuple[OrchestraInstance10, List[Exception]]:
         """
         Creates an OrchestraInstance and a possible List of validation errors.
 
@@ -43,28 +43,30 @@ class Orchestra10:
         """
         data, errors = [], []
         for result in self.xsd.iter_decode(xml):
-            if not isinstance(result, ValueError):
+            if not isinstance(result, Exception):
                 data.append(result)
             else:
                 errors.append(result)
         return OrchestraInstance10(data[0]), errors
 
-    def write_xml(self, instance: OrchestraInstance10, stream):
+    def write_xml(self, instance: OrchestraInstance10, stream) -> List[Exception]:
         """
         Encodes an OrchestraInstance and writes it to a stream.
 
         :param instance: an OrchestraInstance dictionary
         :param stream: a file like object
+        :return: a list of errors, if any
         """
-        et = self.xsd.encode(instance.root(), validation='lax', use_defaults=False,
-                             namespaces={'fixr': 'http://fixprotocol.io/2020/orchestra/repository',
-                                         'dcterms': 'http://purl.org/dc/terms/',
-                                         'dc': 'http://purl.org/dc/elements/1.1/'})
-        ET.register_namespace(
+        data, errors = self.xsd.encode(instance.root(), validation='lax', use_defaults=False,
+                                       namespaces={'fixr': 'http://fixprotocol.io/2020/orchestra/repository',
+                                                   'dcterms': 'http://purl.org/dc/terms/',
+                                                   'dc': 'http://purl.org/dc/elements/1.1/'})
+        ElementTree.register_namespace(
             'fixr', 'http://fixprotocol.io/2020/orchestra/repository')
-        ET.register_namespace('dcterms', 'http://purl.org/dc/terms/')
-        ET.register_namespace('dc', 'http://purl.org/dc/elements/1.1/')
-        stream.write(ET.tostring(et[0], encoding='utf8', method='xml'))
+        ElementTree.register_namespace('dcterms', 'http://purl.org/dc/terms/')
+        ElementTree.register_namespace('dc', 'http://purl.org/dc/elements/1.1/')
+        stream.write(ElementTree.tostring(data, encoding='utf8', method='xml'))
+        return errors
 
 
 class Orchestra10WithSBETypes(Orchestra10):
@@ -78,25 +80,25 @@ class Orchestra10WithSBETypes(Orchestra10):
         sbe_xsd_path = SBE10.get_xsd_path()
         self.xsd = XMLSchema([orch_xsd_path, sbe_xsd_path])
 
-    def write_xml(self, instance: OrchestraInstance10, stream):
+    def write_xml(self, instance: OrchestraInstance10, stream) -> List[Exception]:
         """
         Encodes an OrchestraInstance and writes it to a stream.
 
         :param instance: an OrchestraInstance dictionary
         :param stream: a file like object
         """
-        et = self.xsd.encode(instance.root(), validation='lax', use_defaults=False,
+        data, errors = self.xsd.encode(instance.root(), validation='lax', use_defaults=False,
                              namespaces={'fixr': 'http://fixprotocol.io/2020/orchestra/repository',
                                          'dcterms': 'http://purl.org/dc/terms/',
                                          'dc': 'http://purl.org/dc/elements/1.1/',
                                          'sbe': 'http://fixprotocol.io/2016/sbe'})
-        ET.register_namespace(
+        ElementTree.register_namespace(
             'fixr', 'http://fixprotocol.io/2020/orchestra/repository')
-        ET.register_namespace('dcterms', 'http://purl.org/dc/terms/')
-        ET.register_namespace('dc', 'http://purl.org/dc/elements/1.1/')
-        ET.register_namespace('sbe', "http://fixprotocol.io/2016/sbe")
-        stream.write(ET.tostring(et[0], encoding='utf8', method='xml'))
-
+        ElementTree.register_namespace('dcterms', 'http://purl.org/dc/terms/')
+        ElementTree.register_namespace('dc', 'http://purl.org/dc/elements/1.1/')
+        ElementTree.register_namespace('sbe', "http://fixprotocol.io/2016/sbe")
+        stream.write(ElementTree.tostring(data, encoding='utf8', method='xml'))
+        return errors
 
 Orchestra = Orchestra10WithSBETypes
 """ Default Orchestra schema implementation """

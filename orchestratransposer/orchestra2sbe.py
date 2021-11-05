@@ -47,7 +47,10 @@ class Orchestra2SBE10_10:
         else:
             sbe_instance = self.orch2sbe_dict(orch_instance)
             sbe = SBE10()
-            return sbe.write_xml(sbe_instance, sbe_stream)
+            errors = sbe.write_xml(sbe_instance, sbe_stream)
+            for error in errors:
+                self.logger.error(error)
+            return errors
 
     def orch2sbe_metadata(self, orch: OrchestraInstance10, sbe: SBEInstance10):
         """
