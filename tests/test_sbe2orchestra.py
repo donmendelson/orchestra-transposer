@@ -10,6 +10,7 @@ def output_dir():
     os.makedirs(path, exist_ok=True)
     return path
 
+
 def test_sbe2orchestra_xml():
     xml_path = os.path.join(XML_FILE_DIR, 'Examples.xml')
     output_path = os.path.join(output_dir(), 'Examples-orch.xml')

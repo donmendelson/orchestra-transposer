@@ -88,10 +88,10 @@ class Orchestra10WithSBETypes(Orchestra10):
         :param stream: a file like object
         """
         data, errors = self.xsd.encode(instance.root(), validation='lax', use_defaults=False,
-                             namespaces={'fixr': 'http://fixprotocol.io/2020/orchestra/repository',
-                                         'dcterms': 'http://purl.org/dc/terms/',
-                                         'dc': 'http://purl.org/dc/elements/1.1/',
-                                         'sbe': 'http://fixprotocol.io/2016/sbe'})
+                                       namespaces={'fixr': 'http://fixprotocol.io/2020/orchestra/repository',
+                                                   'dcterms': 'http://purl.org/dc/terms/',
+                                                   'dc': 'http://purl.org/dc/elements/1.1/',
+                                                   'sbe': 'http://fixprotocol.io/2016/sbe'})
         ElementTree.register_namespace(
             'fixr', 'http://fixprotocol.io/2020/orchestra/repository')
         ElementTree.register_namespace('dcterms', 'http://purl.org/dc/terms/')
@@ -99,6 +99,7 @@ class Orchestra10WithSBETypes(Orchestra10):
         ElementTree.register_namespace('sbe', "http://fixprotocol.io/2016/sbe")
         stream.write(ElementTree.tostring(data, encoding='utf8', method='xml'))
         return errors
+
 
 Orchestra = Orchestra10WithSBETypes
 """ Default Orchestra schema implementation """

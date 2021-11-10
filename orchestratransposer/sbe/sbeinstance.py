@@ -53,6 +53,11 @@ class SBEInstance10:
         types_l = self.encoding_types()
         types_l.append(encoding_type)
 
+    def append_composite(self, composite):
+        """ Appends a composite type """
+        types_l = self.composites()
+        types_l.append(composite)
+
     def append_enum(self, enum):
         """ Appends an enumeration, aka code set """
         types_l = self.enums()

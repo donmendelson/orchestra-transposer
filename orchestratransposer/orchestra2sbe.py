@@ -31,7 +31,7 @@ class Orchestra2SBE10_10:
         self.orch2sbe_messages(messages, sbe, orch)
         return sbe
 
-    def orch2sbe_xml(self, orchestra_xml, sbe_stream) -> List[ValueError]:
+    def orch2sbe_xml(self, orchestra_xml, sbe_stream) -> List[Exception]:
         """
         Translate an Orchestra file to an SBE message schema file
         :param orchestra_xml: an XML file-like object in Orchestra schema
@@ -72,29 +72,35 @@ class Orchestra2SBE10_10:
             name = datatype['@name']
             if name not in ['NumInGroup', 'Length', 'Reserved100Plus', 'Reserved1000Plus', 'Reserved4000Plus', 'XID',
                             'XIDREF']:
-                sbe_type_attr = {'@name': name, '@semanticType': datatype['@name'], '@primitiveType': 'int64'}
+                sbe_type_attr = {'@name': name, '@semanticType': datatype['@name']}
                 mappings = datatype.get('fixr:mappedDatatype', None)
                 if mappings:
                     mapping = next(
                         (mapping for mapping in mappings if mapping['@standard'] == 'SBE'), None)
                     if mapping:
-                        # sbe_encoding = mapping.get('fixr:extension', None)
-                        # if sbe_encoding:
-                        #    print(sbe_encoding)
-                        # else:
-                        base = mapping.get('@base', None)
-                        if base:
-                            sbe_type_attr['@primitiveType'] = base
-                        min_inclusive = mapping.get('@minInclusive', None)
-                        if min_inclusive:
-                            sbe_type_attr['minValue'] = min_inclusive
-                        max_inclusive = mapping.get('@maxInclusive', None)
-                        if max_inclusive:
-                            sbe_type_attr['maxValue'] = max_inclusive
+                        sbe_encoding = mapping.get('fixr:extension', None)
                         documentation = OrchestraInstance10.documentation(mapping)
                         if documentation:
                             sbe_type_attr['@description'] = documentation
-                sbe.append_encoding_type(sbe_type_attr)
+                        if sbe_encoding:
+                            try:
+                                sbe_schema = sbe_encoding['sbe:messageSchema'][0]
+                                sbe_types = sbe_schema['types'][0]
+                                sbe_composite = sbe_types['composite'][0]
+                                sbe.append_composite(sbe_composite)
+                            except AttributeError:
+                                self.logger.error('SBE datatype mapping not found for name=%s', name)
+                        else:
+                            base = mapping.get('@base', None)
+                            if base:
+                                sbe_type_attr['@primitiveType'] = base
+                            min_inclusive = mapping.get('@minInclusive', None)
+                            if min_inclusive:
+                                sbe_type_attr['minValue'] = min_inclusive
+                            max_inclusive = mapping.get('@maxInclusive', None)
+                            if max_inclusive:
+                                sbe_type_attr['maxValue'] = max_inclusive
+                            sbe.append_encoding_type(sbe_type_attr)
 
     def orch2sbe_codesets(self, codesets: list, sbe: SBEInstance10):
         """

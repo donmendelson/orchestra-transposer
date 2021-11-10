@@ -38,7 +38,7 @@ class SBE2Orchestra10_10:
         self.sbe2orch_messages_and_groups(sbe, orch)
         return orch
 
-    def sbe2orch_xml(self, sbe_xml, orch_stream) -> List[ValueError]:
+    def sbe2orch_xml(self, sbe_xml, orch_stream) -> List[Exception]:
         """
         Translate an SBE message schema into an Orchestra file
         :param sbe_xml: an XML file-like object in SBE schema
@@ -89,8 +89,7 @@ class SBE2Orchestra10_10:
             prefix_composite = self.__prefix_attributes('sbe', sbe_composite)
             extension = {'sbe:composite': [prefix_composite]}
             orch2sbe_mapping = {'@standard': 'SBE', 'fixr:extension': extension}
-            orch_mappings = []
-            orch_mappings.append(orch2sbe_mapping)
+            orch_mappings = [orch2sbe_mapping]
             orch_datatype = {'@name': sbe_composite['@name'], 'fixr:mappedDatatype': orch_mappings}
             orch_datatypes.append(orch_datatype)
 
