@@ -24,6 +24,13 @@ class SBEInstance10:
             self.obj['types'] = all_types
         return all_types
 
+    def first_types(self) -> dict:
+        """ Returns the first instance of types, suitable for appending new encoding types """
+        all_types = self.all_types()
+        if len(all_types) == 0:
+            all_types.append({})
+        return all_types[0]
+
     def encoding_types(self) -> list:
         """ Returns simple encoding types"""
         return self.__types('type')
@@ -37,15 +44,13 @@ class SBEInstance10:
         return self.__types('enum')
 
     def __types(self, category: str) -> list:
-        all_types = self.all_types()
+        first_types = self.first_types()
 
-        for d in all_types:
-            for key, val in d.items():
-                if key == category:
-                    return val
+        for key, val in first_types.items():
+            if key == category:
+                return val
         l = []
-        d = {category: l}
-        all_types.append(d)
+        first_types[category] = l
         return l
 
     def append_encoding_type(self, encoding_type):
