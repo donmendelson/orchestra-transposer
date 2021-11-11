@@ -163,6 +163,13 @@ class Orchestra2SBE10_10:
             field_id = field_ref['@id']
             field = orch.field(field_id)
             name = field['@name'] if field else 'Unknown'
+            abbr_name = field.get('@abbrName', None)
+            if len(name) > 64:
+                if abbr_name:
+                    name = abbr_name
+                else:
+                    name = name[:64]
+                self.logger.warning('Field id=%d name=%s shortened to %s', field_id, field['@name'], name)
             presence = Orchestra2SBE10_10.orch2sbe_presence(field_ref['@presence']) if field else 'required'
             field_type = field['@type'] if field else 'Unknown'
             if field_type not in ['Length', 'NumInGroup']:
@@ -219,6 +226,13 @@ class Orchestra2SBE10_10:
             group_id = group_ref['@id']
             group = orch.group(group_id)
             name = group['@name'] if group else 'Unknown'
+            abbr_name = group.get('@abbrName', None)
+            if len(name) > 64:
+                if abbr_name:
+                    name = abbr_name
+                else:
+                    name = name[:64]
+                self.logger.warning('Group id=%d name=%s shortened to %s', group_id, group['@name'], name)
             if group:
                 sbe_group_attr = {'@id': group_ref['@id'],
                                   '@name': name}
