@@ -28,7 +28,7 @@ def test_invalid():
 def test_to_dict():
     orchestra = Orchestra()
     xml_path = os.path.join(XML_FILE_DIR, 'OrchestraFIXLatestWithSBE.xml')
-    output_path = os.path.join(output_dir(), 'OrchestraFIXLatestSBE-dict.txt')
+    output_path = os.path.join(output_dir(), 'OrchestraFIXLatestWithSBE-dict.txt')
     with open(output_path, 'w') as f:
         (instance, errors) = orchestra.read_xml(xml_path)
         print(instance, file=f)

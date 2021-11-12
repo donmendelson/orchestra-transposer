@@ -76,7 +76,7 @@ class Orchestra10WithSBETypes(Orchestra10):
     """
 
     def __init__(self):
-        orch_xsd_path = Orchestra10.get_xsd_path()
+        orch_xsd_path = Orchestra10WithSBETypes.get_xsd_path()
         sbe_xsd_path = SBE10.get_xsd_path()
         self.xsd = XMLSchema([orch_xsd_path, sbe_xsd_path])
 

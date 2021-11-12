@@ -14,7 +14,7 @@ class OrchestraInstance10:
         self.obj = obj if obj is not None else {}
 
     def __str__(self):
-        return pformat(self.obj)
+        return pformat(self.obj, width=120)
 
     def root(self) -> dict:
         """
