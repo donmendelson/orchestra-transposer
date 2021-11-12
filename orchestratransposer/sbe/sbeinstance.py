@@ -17,7 +17,12 @@ class SBEInstance10:
         return self.obj
 
     def all_types(self) -> list:
-        """ Returns a List of all types """
+        """
+        Returns a List of all types
+
+        TODO: If an input SBE file has types spread across multiple instances of types element, merge them into
+        one dictionary.
+        """
         all_types = self.obj.get('types', None)
         if all_types is None:
             all_types = []
