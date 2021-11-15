@@ -117,10 +117,51 @@ class OrchestraInstance10:
         return message
 
     def append_message(self, message: dict):
+        """
+        Add a message to this Orchestra instance
+
+        :param message: a message is represented as a dictionary in the following format.
+
+        Note that all simple attributes start with '@' character.
+
+        .. code-block:: python
+
+       'fixr:message': [{
+             '@id': 1,
+             '@msgType': '0',
+             '@name': 'Heartbeat',
+             '@scenario': 'base',
+             'fixr:annotation': {
+                     'fixr:documentation': [{'$': 'The Heartbeat monitors the '
+                                                  'status of the communication '
+                                                  'link and identifies when the '
+                                                  'last of a string of messages '
+                                                  'was not received.',
+                                             '@contentType': 'text/plain',
+                                             '@purpose': 'SYNOPSIS'}]},
+                        'fixr:structure': {
+                            'fixr:componentRef': [{'@id': 1024,
+                               '@presence': 'required',
+                               '@scenario': 'base',}                                                                                                                         '@supported': 'supported'}]}},
+                                {'@id': 1025,
+                               '@presence': 'required',
+                               '@scenario': 'base'}],
+                            'fixr:fieldRef': [{
+                               '@id': 112,
+                               '@presence': 'optional',
+                               '@scenario': 'base'}]]
+        """
         messages = self.messages()
         messages.append(message)
 
     def append_group(self, group: dict):
+        """
+    Add a repeating group to this Orchestra instance
+
+    :param group: a group is represented as a dictionary 
+
+    Note that all simple attributes start with '@' character.
+     """
         groups = self.groups()
         groups.append(group)
 

@@ -19,10 +19,9 @@ class SBEInstance10:
     def all_types(self) -> list:
         """
         Returns a List of all types
-
-        TODO: If an input SBE file has types spread across multiple instances of types element, merge them into
-        one dictionary.
         """
+        # TODO: If an input SBE file has types spread across multiple instances of types element, merge them into one dictionary.
+
         all_types = self.obj.get('types', None)
         if all_types is None:
             all_types = []
@@ -59,22 +58,75 @@ class SBEInstance10:
         return l
 
     def append_encoding_type(self, encoding_type):
-        """ Appends a simple encoding type """
+        """
+        Appends a simple encoding type
+
+        A simple encoding type should have the attributes as shown below. Note that all simple attributes start with '@'
+        character.
+
+        .. code-block:: python
+
+            {'@length': 1,
+            '@name': 'timestampEncoding',
+            '@primitiveType': 'uint64',
+            '@semanticType': 'UTCTimestamp',
+            '@sinceVersion': 0}
+        """
         types_l = self.encoding_types()
         types_l.append(encoding_type)
 
     def append_composite(self, composite):
-        """ Appends a composite type """
+        """
+        Appends a composite type
+
+        A composite type should have the attributes as shown below. Note that all simple attributes start with '@'
+        character.
+
+        .. code-block:: python
+
+            {'@name': 'MONTH_YEAR',
+           '@semanticType': 'MonthYear',
+           'type': [{'@length': 1,
+                     '@name': 'year',
+                     '@presence': 'required',
+                     '@primitiveType': 'uint16'},
+                    {'@length': 1,
+                     '@name': 'month',
+                     '@presence': 'required',
+                     '@primitiveType': 'uint8'},
+                    {'@length': 1,
+                     '@name': 'day',
+                     '@presence': 'required',
+                     '@primitiveType': 'uint8'},
+                    {'@length': 1,
+                     '@name': 'week',
+                     '@presence': 'required',
+                     '@primitiveType': 'uint8']}
+        """
         types_l = self.composites()
         types_l.append(composite)
 
     def append_enum(self, enum):
-        """ Appends an enumeration, aka code set """
+        """
+        Appends an enumeration, aka code set
+
+        An enum should have the attributes as shown below.
+
+        Note that all simple attributes start with '@' character. The value of a code in the enumeration has
+        a key of '$'. That special symbol causes a translation to XML element text rather than an XML named attribute.
+
+        .. code-block:: python
+
+            {'@encodingType': 'enumEncoding',
+            '@name': 'sideEnum',
+            'validValue': [{'$': '1', '@name': 'Buy', '@sinceVersion': 0},
+                           {'$': '2', '@name': 'Sell', '@sinceVersion': 0}]}
+        """
         types_l = self.enums()
         types_l.append(enum)
 
     def composite(self, composite):
-        """ Appends a composite type """
+        """ Access composite types """
         types_l = self.composites()
         types_l.append(composite)
 
@@ -87,13 +139,48 @@ class SBEInstance10:
         return messages
 
     def append_message(self, message):
-        """ Appends a message """
+        """
+        Appends a message
+
+        A message should have the attributes as shown below.
+
+        .. code-block:: python
+
+            {'@id': 97,
+            '@name': 'BusinessMessageReject',
+            '@semanticType': 'j',
+            'data': [{'@id': 58,
+                    '@name': 'Text',
+                    '@presence': 'required',
+                    '@semanticType': 'data',
+                    '@type': 'DATA'},
+            'field': [{@id': 379,
+                     '@name': 'BusinesRejectRefId',
+                     '@presence': 'required',
+                     '@semanticType': 'String',
+                     '@type': 'idString'},
+                    {'@id': 380,
+                     '@name': 'BusinessRejectReason',
+                     '@offset': 8,
+                     '@presence': 'required',
+                     '@type': 'businessRejectReasonEnum'}]}
+"""
         self.messages().append(message)
 
     @staticmethod
     def append_field(structure: dict, field):
         """
         Append a fixed-length field to a message or group structure
+
+        A field should have the attributes as shown below.
+
+        .. code-block:: python
+
+            {'@id': 37,
+             '@name': 'OrderID',
+             '@presence': 'required',
+             '@semanticType': 'String',
+             '@type': 'idString'}
         """
         fields = SBEInstance10.fields(structure)
         fields.append(field)
@@ -102,6 +189,9 @@ class SBEInstance10:
     def append_data_field(structure: dict, field):
         """
         Append a variable-length data field to a message or group structure
+
+        Attributes for a variable-length field are the same as for fixed length, but the field is inserted into a
+        different part of a message structure.
         """
         data = SBEInstance10.data(structure)
         data.append(field)
