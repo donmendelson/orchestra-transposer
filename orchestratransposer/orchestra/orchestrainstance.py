@@ -158,7 +158,7 @@ class OrchestraInstance10:
         """
     Add a repeating group to this Orchestra instance
 
-    :param group: a group is represented as a dictionary 
+    :param group: a group is represented as a dictionary
 
     Note that all simple attributes start with '@' character.
      """
@@ -188,7 +188,7 @@ class OrchestraInstance10:
         if not annotation:
             annotation = {}
             element['fixr:annotation'] = annotation
-        documentations = annotation['fixr:documentation']
+        documentations = annotation.get('fixr:documentation', None)
         if not documentations:
             documentations = []
             annotation['fixr:documentation'] = documentations
