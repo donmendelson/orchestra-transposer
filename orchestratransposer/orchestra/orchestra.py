@@ -22,7 +22,7 @@ class Orchestra10:
         schemas_dir = os.path.join(os.path.dirname(__file__), 'schemas/')
         return os.path.join(schemas_dir, 'v1-0/repository.xsd')
 
-    def validate(self, xml) -> Iterator[Exception]:
+    def validate(self, xml) -> List[Exception]:
         """
         Validates an XML data against the XSD schema/component instance. Creates an iterator for the errors generated
         by the validation of an XML data against the XSD schema/component instance.
@@ -31,7 +31,10 @@ class Orchestra10:
         path to a file or an URI of a resource or an opened file-like object or an Element \
         instance or an ElementTree instance or a string containing the XML data.
         """
-        return self.xsd.iter_errors(xml)
+        errors = []
+        for result in self.xsd.iter_errors(xml):
+            errors.append(result)
+        return errors
 
     def read_xml(self, xml) -> Tuple[OrchestraInstance10, List[Exception]]:
         """

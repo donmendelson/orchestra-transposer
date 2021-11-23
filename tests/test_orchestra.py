@@ -14,15 +14,15 @@ def output_dir():
 def test_valid():
     orchestra = Orchestra()
     xml_path = os.path.join(XML_FILE_DIR, 'OrchestraFIXLatest.xml')
-    error_iter = orchestra.validate(xml_path)
-    assert not next(error_iter, None)
+    errors = orchestra.validate(xml_path)
+    assert not errors
 
 
 def test_invalid():
     orchestra = Orchestra()
     xml_path = os.path.join(XML_FILE_DIR, 'BadOrchestra.xml')
-    error_iter = orchestra.validate(xml_path)
-    assert next(error_iter, None)
+    errors = orchestra.validate(xml_path)
+    assert not errors
 
 
 def test_to_dict():

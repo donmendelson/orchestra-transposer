@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<ns2:messageSchema xmlns:ns2="http://www.fixprotocol.org/ns/simple/1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" package="mktdata" id="1" version="12" semanticVersion="FIX5SP2" description="20210310" byteOrder="littleEndian" xsi:schemaLocation="http://www.fixtradingcommunity.org/pg/file/fplpo/read/1196759/simple-binary-encoding-rc2xsd SimpleBinary-RC2.xsd">
+<sbe:messageSchema xmlns:sbe="http://fixprotocol.io/2016/sbe" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" package="mktdata" id="1" version="12" semanticVersion="FIX5SP2" description="20210310" byteOrder="littleEndian">
     <types>
         <type name="Asset" description="Asset" length="6" primitiveType="char" semanticType="String"/>
         <type name="CFICode" length="6" primitiveType="char" semanticType="String"/>
@@ -296,7 +296,7 @@
             <choice name="NullValue" description="1=Entire set is NULL, 0=not NULL">7</choice>
         </set>
     </types>
-    <ns2:message name="ChannelReset4" id="4" description="ChannelReset" blockLength="9" semanticType="X">
+    <sbe:message name="ChannelReset4" id="4" description="ChannelReset" blockLength="9" semanticType="X">
         <field name="TransactTime" id="60" type="uInt64" description="Start of event processing time in number of nanoseconds since Unix epoch" offset="0" semanticType="UTCTimestamp"/>
         <field name="MatchEventIndicator" id="5799" type="MatchEventIndicator" description="Bitmap field of eight Boolean type indicators reflecting the end of updates for a given Globex event" offset="8" semanticType="MultipleCharValue"/>
         <group name="NoMDEntries" id="268" description="Number of entries in Market Data message" blockLength="2" dimensionType="groupSize">
@@ -304,15 +304,15 @@
             <field name="MDEntryType" id="269" type="MDEntryTypeChannelReset" description="Market Data entry type  " semanticType="char"/>
             <field name="ApplID" id="1180" type="Int16" description="Indicates the channel ID as defined in the XML configuration file" offset="0" sinceVersion="3" semanticType="int"/>
         </group>
-    </ns2:message>
-    <ns2:message name="AdminHeartbeat12" id="12" description="AdminHeartbeat" blockLength="0" semanticType="0"/>
-    <ns2:message name="AdminLogin15" id="15" description="AdminLogin" blockLength="1" semanticType="A">
+    </sbe:message>
+    <sbe:message name="AdminHeartbeat12" id="12" description="AdminHeartbeat" blockLength="0" semanticType="0"/>
+    <sbe:message name="AdminLogin15" id="15" description="AdminLogin" blockLength="1" semanticType="A">
         <field name="HeartBtInt" id="108" type="Int8" description="Heartbeat interval (seconds)" offset="0" semanticType="int"/>
-    </ns2:message>
-    <ns2:message name="AdminLogout16" id="16" description="AdminLogout" blockLength="180" semanticType="5">
+    </sbe:message>
+    <sbe:message name="AdminLogout16" id="16" description="AdminLogout" blockLength="180" semanticType="5">
         <field name="Text" id="58" type="Text" description="Free format text string. May include logout confirmation or reason for logout" offset="0" semanticType="String"/>
-    </ns2:message>
-    <ns2:message name="SecurityStatus30" id="30" description="SecurityStatus" blockLength="30" semanticType="f" sinceVersion="2">
+    </sbe:message>
+    <sbe:message name="SecurityStatus30" id="30" description="SecurityStatus" blockLength="30" semanticType="f" sinceVersion="2">
         <field name="TransactTime" id="60" type="uInt64" description="Start of event processing time in number of nanoseconds since Unix epoch." offset="0" semanticType="UTCTimestamp"/>
         <field name="SecurityGroup" id="1151" type="SecurityGroup" description="Security Group" offset="8" semanticType="String"/>
         <field name="Asset" id="6937" type="Asset" description="Product Code within Security Group specified" offset="14" semanticType="String"/>
@@ -322,8 +322,8 @@
         <field name="SecurityTradingStatus" id="326" type="SecurityTradingStatus" description="Identifies the trading status applicable to the instrument or Security Group" offset="27" semanticType="int"/>
         <field name="HaltReason" id="327" type="HaltReason" description="Identifies the reason for the status change" offset="28" semanticType="int"/>
         <field name="SecurityTradingEvent" id="1174" type="SecurityTradingEvent" description="Identifies an additional event or a rule related to the status" offset="29" semanticType="int"/>
-    </ns2:message>
-    <ns2:message name="MDIncrementalRefreshVolume37" id="37" description="MDIncrementalRefreshVolume" blockLength="11" semanticType="X" sinceVersion="2">
+    </sbe:message>
+    <sbe:message name="MDIncrementalRefreshVolume37" id="37" description="MDIncrementalRefreshVolume" blockLength="11" semanticType="X" sinceVersion="2">
         <field name="TransactTime" id="60" type="uInt64" description="Start of event processing time in number of nanoseconds since Unix epoch" offset="0" semanticType="UTCTimestamp"/>
         <field name="MatchEventIndicator" id="5799" type="MatchEventIndicator" description="Bitmap field of eight Boolean type indicators reflecting the end of updates for a given Globex event" offset="8" semanticType="MultipleCharValue"/>
         <group name="NoMDEntries" id="268" description="Number of entries in Market Data message" blockLength="16" dimensionType="groupSize">
@@ -333,8 +333,8 @@
             <field name="MDUpdateAction" id="279" type="MDUpdateAction" description="Market Data update action" offset="12" semanticType="int"/>
             <field name="MDEntryType" id="269" type="MDEntryTypeVol" description="Electronic Volume entry provides cumulative session trade volume updated with the event" semanticType="char"/>
         </group>
-    </ns2:message>
-    <ns2:message name="QuoteRequest39" id="39" description="QuoteRequest" blockLength="35" semanticType="R" sinceVersion="3">
+    </sbe:message>
+    <sbe:message name="QuoteRequest39" id="39" description="QuoteRequest" blockLength="35" semanticType="R" sinceVersion="3">
         <field name="TransactTime" id="60" type="uInt64" description="Start of event processing time in number of nanoseconds since Unix epoch" offset="0" semanticType="UTCTimestamp"/>
         <field name="QuoteReqID" id="131" type="QuoteReqId" description="Quote Request ID defined by the exchange" offset="8" semanticType="String"/>
         <field name="MatchEventIndicator" id="5799" type="MatchEventIndicator" description="Bitmap field of eight Boolean type indicators reflecting the end of updates for a given Globex event" offset="31" semanticType="MultipleCharValue"/>
@@ -345,8 +345,8 @@
             <field name="QuoteType" id="537" type="Int8" description="Type of quote requested" offset="28" semanticType="int"/>
             <field name="Side" id="54" type="Int8NULL" description="Side requested" offset="29" semanticType="int"/>
         </group>
-    </ns2:message>
-    <ns2:message name="MDIncrementalRefreshBook46" id="46" description="MDIncrementalRefreshBook" blockLength="11" semanticType="X" sinceVersion="9">
+    </sbe:message>
+    <sbe:message name="MDIncrementalRefreshBook46" id="46" description="MDIncrementalRefreshBook" blockLength="11" semanticType="X" sinceVersion="9">
         <field name="TransactTime" id="60" type="uInt64" description="Start of event processing time in number of nanoseconds since Unix epoch" offset="0" semanticType="UTCTimestamp"/>
         <field name="MatchEventIndicator" id="5799" type="MatchEventIndicator" description="Bitmap field of eight Boolean type indicators reflecting the end of updates for a given Globex event" offset="8" semanticType="MultipleCharValue"/>
         <group name="NoMDEntries" id="268" description="Number of entries in Market Data message" blockLength="32" dimensionType="groupSize">
@@ -367,8 +367,8 @@
             <field name="ReferenceID" id="9633" type="uInt8NULL" description="Reference to corresponding Price and Security ID, sequence of MD entry in the message" offset="20" semanticType="int"/>
             <field name="OrderUpdateAction" id="37708" type="OrderUpdateAction" description="Order book update action to be applied to the order referenced by OrderID" offset="21" semanticType="int"/>
         </group>
-    </ns2:message>
-    <ns2:message name="MDIncrementalRefreshOrderBook47" id="47" description="MDIncrementalRefreshOrderBook" blockLength="11" semanticType="X" sinceVersion="9">
+    </sbe:message>
+    <sbe:message name="MDIncrementalRefreshOrderBook47" id="47" description="MDIncrementalRefreshOrderBook" blockLength="11" semanticType="X" sinceVersion="9">
         <field name="TransactTime" id="60" type="uInt64" description="Start of event processing time in number of nanoseconds since Unix epoch" offset="0" semanticType="UTCTimestamp"/>
         <field name="MatchEventIndicator" id="5799" type="MatchEventIndicator" description="Bitmap field of eight Boolean type indicators reflecting the end of updates for a given Globex event" offset="8" semanticType="MultipleCharValue"/>
         <group name="NoMDEntries" id="268" description="Number of entries in Market Data message" blockLength="40" dimensionType="groupSize">
@@ -380,8 +380,8 @@
             <field name="MDUpdateAction" id="279" type="MDUpdateAction" description="Order book update action to be applied to the order referenced by OrderID" offset="32" semanticType="int"/>
             <field name="MDEntryType" id="269" type="MDEntryTypeBook" description="Market Data entry type " offset="33" semanticType="char"/>
         </group>
-    </ns2:message>
-    <ns2:message name="MDIncrementalRefreshTradeSummary48" id="48" description="MDIncrementalRefreshTradeSummary" blockLength="11" semanticType="X" sinceVersion="9">
+    </sbe:message>
+    <sbe:message name="MDIncrementalRefreshTradeSummary48" id="48" description="MDIncrementalRefreshTradeSummary" blockLength="11" semanticType="X" sinceVersion="9">
         <field name="TransactTime" id="60" type="uInt64" description="Start of event processing time in number of nanoseconds since Unix epoch" offset="0" semanticType="UTCTimestamp"/>
         <field name="MatchEventIndicator" id="5799" type="MatchEventIndicator" description="Bitmap field of eight Boolean type indicators reflecting the end of updates for a given Globex event" offset="8" semanticType="MultipleCharValue"/>
         <group name="NoMDEntries" id="268" description="Number of Trade Summary entries" blockLength="32" dimensionType="groupSize">
@@ -399,8 +399,8 @@
             <field name="OrderID" id="37" type="uInt64" description="Unique order identifier as assigned by the exchange" offset="0" semanticType="int"/>
             <field name="LastQty" id="32" type="Int32" description="Quantity bought or sold on this last fill" offset="8" semanticType="Qty"/>
         </group>
-    </ns2:message>
-    <ns2:message name="MDIncrementalRefreshDailyStatistics49" id="49" description="MDIncrementalRefreshDailyStatistics" blockLength="11" semanticType="X" sinceVersion="9">
+    </sbe:message>
+    <sbe:message name="MDIncrementalRefreshDailyStatistics49" id="49" description="MDIncrementalRefreshDailyStatistics" blockLength="11" semanticType="X" sinceVersion="9">
         <field name="TransactTime" id="60" type="uInt64" description="Start of event processing time in number of nanoseconds since Unix epoch" offset="0" semanticType="UTCTimestamp"/>
         <field name="MatchEventIndicator" id="5799" type="MatchEventIndicator" description="Bitmap field of eight Boolean type indicators reflecting the end of updates for a given Globex event" offset="8" semanticType="MultipleCharValue"/>
         <group name="NoMDEntries" id="268" description="Number of entries in Market Data message" blockLength="32" dimensionType="groupSize">
@@ -413,8 +413,8 @@
             <field name="MDUpdateAction" id="279" type="MDUpdateAction" description="Market Data update action" offset="23" semanticType="int"/>
             <field name="MDEntryType" id="269" type="MDEntryTypeDailyStatistics" description="Market Data entry type" offset="24" semanticType="char"/>
         </group>
-    </ns2:message>
-    <ns2:message name="MDIncrementalRefreshLimitsBanding50" id="50" description="MDIncrementalRefreshLimitsBanding" blockLength="11" semanticType="X" sinceVersion="9">
+    </sbe:message>
+    <sbe:message name="MDIncrementalRefreshLimitsBanding50" id="50" description="MDIncrementalRefreshLimitsBanding" blockLength="11" semanticType="X" sinceVersion="9">
         <field name="TransactTime" id="60" type="uInt64" description="Start of event processing time in number of nanoseconds since Unix epoch" offset="0" semanticType="UTCTimestamp"/>
         <field name="MatchEventIndicator" id="5799" type="MatchEventIndicator" description="Bitmap field of eight Boolean type indicators reflecting the end of updates for a given Globex event" offset="8" semanticType="MultipleCharValue"/>
         <group name="NoMDEntries" id="268" description="Number of entries in Market Data message" blockLength="32" dimensionType="groupSize">
@@ -426,8 +426,8 @@
             <field name="MDUpdateAction" id="279" type="MDUpdateActionNew" description="Market Data entry update action. In order to delete banding value, high or low limit, the deleted price field is populated with a NULL " semanticType="int"/>
             <field name="MDEntryType" id="269" type="MDEntryTypeLimits" description="Market Data entry type   " semanticType="char"/>
         </group>
-    </ns2:message>
-    <ns2:message name="MDIncrementalRefreshSessionStatistics51" id="51" description="MDIncrementalRefreshSessionStatistics" blockLength="11" semanticType="X" sinceVersion="9">
+    </sbe:message>
+    <sbe:message name="MDIncrementalRefreshSessionStatistics51" id="51" description="MDIncrementalRefreshSessionStatistics" blockLength="11" semanticType="X" sinceVersion="9">
         <field name="TransactTime" id="60" type="uInt64" description="Start of event processing time in number of nanoseconds since Unix epoch" offset="0" semanticType="UTCTimestamp"/>
         <field name="MatchEventIndicator" id="5799" type="MatchEventIndicator" description="Bitmap field of eight Boolean type indicators reflecting the end of updates for a given Globex event" offset="8" semanticType="MultipleCharValue"/>
         <group name="NoMDEntries" id="268" description="Number of entries in Market Data message" blockLength="24" dimensionType="groupSize">
@@ -439,8 +439,8 @@
             <field name="MDEntryType" id="269" type="MDEntryTypeStatistics" description="Market Data entry type   " offset="18" semanticType="char"/>
             <field name="MDEntrySize" id="271" type="Int32NULL" description="Indicative Opening Quantity " offset="19" semanticType="Qty"/>
         </group>
-    </ns2:message>
-    <ns2:message name="SnapshotFullRefresh52" id="52" description="SnapshotFullRefresh" blockLength="59" semanticType="W" sinceVersion="9">
+    </sbe:message>
+    <sbe:message name="SnapshotFullRefresh52" id="52" description="SnapshotFullRefresh" blockLength="59" semanticType="W" sinceVersion="9">
         <field name="LastMsgSeqNumProcessed" id="369" type="uInt32" description="Sequence number of the last Incremental feed packet processed. This value is used to synchronize the snapshot loop with the real-time feed" offset="0" semanticType="SeqNum"/>
         <field name="TotNumReports" id="911" type="uInt32" description="Total number of messages replayed in the loop" offset="4" semanticType="int"/>
         <field name="SecurityID" id="48" type="Int32" description="Security ID" offset="8" semanticType="int"/>
@@ -462,8 +462,8 @@
             <field name="SettlPriceType" id="731" type="SettlPriceType" description="Bitmap field of eight Boolean type indicators representing settlement price type" offset="20" semanticType="MultipleCharValue"/>
             <field name="MDEntryType" id="269" type="MDEntryType" description="Market Data entry type" offset="21" semanticType="char"/>
         </group>
-    </ns2:message>
-    <ns2:message name="SnapshotFullRefreshOrderBook53" id="53" description="SnapshotFullRefreshOrderBook" blockLength="28" semanticType="W" sinceVersion="9">
+    </sbe:message>
+    <sbe:message name="SnapshotFullRefreshOrderBook53" id="53" description="SnapshotFullRefreshOrderBook" blockLength="28" semanticType="W" sinceVersion="9">
         <field name="LastMsgSeqNumProcessed" id="369" type="uInt32" description="Sequence number of the last Incremental feed packet processed. This value is used to synchronize the snapshot loop with the real-time feed" offset="0" semanticType="SeqNum"/>
         <field name="TotNumReports" id="911" type="uInt32" description="Total number of instruments in the replayed loop" offset="4" semanticType="int"/>
         <field name="SecurityID" id="48" type="Int32" description="Security ID" offset="8" semanticType="int"/>
@@ -477,8 +477,8 @@
             <field name="MDDisplayQty" id="37706" type="Int32" description="Visible order qty" offset="24" semanticType="Qty"/>
             <field name="MDEntryType" id="269" type="MDEntryTypeBook" description="Market Data entry type" offset="28" semanticType="char"/>
         </group>
-    </ns2:message>
-    <ns2:message name="MDInstrumentDefinitionFuture54" id="54" description="MDInstrumentDefinitionFuture" blockLength="224" semanticType="d" sinceVersion="9">
+    </sbe:message>
+    <sbe:message name="MDInstrumentDefinitionFuture54" id="54" description="MDInstrumentDefinitionFuture" blockLength="224" semanticType="d" sinceVersion="9">
         <field name="MatchEventIndicator" id="5799" type="MatchEventIndicator" description="Bitmap field of eight Boolean type indicators reflecting the end of updates for a given Globex event" offset="0" semanticType="MultipleCharValue"/>
         <field name="TotNumReports" id="911" type="uInt32NULL" description="Total number of instruments in the Replay loop. Used on Replay Feed only " offset="1" semanticType="int"/>
         <field name="SecurityUpdateAction" id="980" type="SecurityUpdateAction" description="Last Security update action on Incremental feed, 'D' or 'M' is used when a mid-week deletion or modification (i.e. extension) occurs" offset="5" semanticType="char"/>
@@ -541,8 +541,8 @@
             <field name="LotType" id="1093" type="Int8" description="This tag is required to interpret the value in tag 1231-MinLotSize" offset="0" semanticType="int"/>
             <field name="MinLotSize" id="1231" type="DecimalQty" description="Minimum quantity accepted for order entry. If tag 1093-LotType=4, this value is the minimum quantity for order entry expressed in the applicable units, specified in tag 996-UnitOfMeasure, e.g. megawatts" offset="1" semanticType="Qty"/>
         </group>
-    </ns2:message>
-    <ns2:message name="MDInstrumentDefinitionOption55" id="55" description="MDInstrumentDefinitionOption" blockLength="221" semanticType="d" sinceVersion="9">
+    </sbe:message>
+    <sbe:message name="MDInstrumentDefinitionOption55" id="55" description="MDInstrumentDefinitionOption" blockLength="221" semanticType="d" sinceVersion="9">
         <field name="MatchEventIndicator" id="5799" type="MatchEventIndicator" description="Bitmap field of eight Boolean type indicators reflecting the end of updates for a given Globex event" offset="0" semanticType="MultipleCharValue"/>
         <field name="TotNumReports" id="911" type="uInt32NULL" description="Total number of instruments in the Replay loop. Used on Replay Feed only " offset="1" semanticType="int"/>
         <field name="SecurityUpdateAction" id="980" type="SecurityUpdateAction" description="Last Security update action on Incremental feed, 'D' or 'M' is used when a mid-week deletion or modification (i.e. extension) occurs" offset="5" semanticType="char"/>
@@ -613,8 +613,8 @@
             <field name="RelatedSecurityIDSource" id="1651" type="SecurityIDSource" description="Related Security ID source" semanticType="char"/>
             <field name="RelatedSymbol" id="1649" type="Symbol" description="Related instrument Symbol" offset="4" semanticType="String"/>
         </group>
-    </ns2:message>
-    <ns2:message name="MDInstrumentDefinitionSpread56" id="56" description="MDInstrumentDefinitionSpread" blockLength="255" semanticType="d" sinceVersion="9">
+    </sbe:message>
+    <sbe:message name="MDInstrumentDefinitionSpread56" id="56" description="MDInstrumentDefinitionSpread" blockLength="255" semanticType="d" sinceVersion="9">
         <field name="MatchEventIndicator" id="5799" type="MatchEventIndicator" description="Bitmap field of eight Boolean type indicators reflecting the end of updates for a given Globex event" offset="0" semanticType="MultipleCharValue"/>
         <field name="TotNumReports" id="911" type="uInt32NULL" description="Total number of instruments in the Replay loop. Used on Replay Feed only" offset="1" semanticType="int"/>
         <field name="SecurityUpdateAction" id="980" type="SecurityUpdateAction" description="Last Security update action on Incremental feed, 'D' or 'M' is used when a mid-week deletion or modification (i.e. extension) occurs" offset="5" semanticType="char"/>
@@ -683,8 +683,8 @@
             <field name="LegPrice" id="566" type="PRICENULL9" description="Price for the future leg of a UDS Covered instrument " offset="6" semanticType="Price"/>
             <field name="LegOptionDelta" id="1017" type="DecimalQty" description="Delta used to calculate the quantity of futures used to cover the option or option strategy" offset="14" semanticType="Qty"/>
         </group>
-    </ns2:message>
-    <ns2:message name="MDInstrumentDefinitionFixedIncome57" id="57" description="MDInstrumentDefinitionFixedIncome" blockLength="338" semanticType="d" sinceVersion="10">
+    </sbe:message>
+    <sbe:message name="MDInstrumentDefinitionFixedIncome57" id="57" description="MDInstrumentDefinitionFixedIncome" blockLength="338" semanticType="d" sinceVersion="10">
         <field name="MatchEventIndicator" id="5799" type="MatchEventIndicator" description="Bitmap field of eight Boolean type indicators reflecting the end of updates for a given Globex event" offset="0" semanticType="MultipleCharValue"/>
         <field name="TotNumReports" id="911" type="uInt32NULL" description="Total number of instruments in the Replay loop. Used on Replay Feed only" offset="1" semanticType="int"/>
         <field name="SecurityUpdateAction" id="980" type="SecurityUpdateAction" description="Last Security update action on Incremental feed, 'D' or 'M' is used when a mid-week deletion or modification (i.e. extension) occurs." offset="5" semanticType="char"/>
@@ -754,8 +754,8 @@
             <field name="LotType" id="1093" type="Int8" description="This tag is required to interpret the value in tag 1231-MinLotSize." offset="0" semanticType="int"/>
             <field name="MinLotSize" id="1231" type="DecimalQty" description="Minimum quantity accepted for order entry. If tag 1093-LotType=4, this value is the minimum quantity for order entry expressed in the applicable units, specified in tag 996-UnitOfMeasure, (e.g., megawatts). If tag 1093-LotType= 5, this value represents order qty increment" offset="1" semanticType="Qty"/>
         </group>
-    </ns2:message>
-    <ns2:message name="MDInstrumentDefinitionRepo58" id="58" description="MDInstrumentDefinitionRepo" blockLength="275" semanticType="d" sinceVersion="10">
+    </sbe:message>
+    <sbe:message name="MDInstrumentDefinitionRepo58" id="58" description="MDInstrumentDefinitionRepo" blockLength="275" semanticType="d" sinceVersion="10">
         <field name="MatchEventIndicator" id="5799" type="MatchEventIndicator" description="Bitmap field of eight Boolean type indicators reflecting the end of updates for a given Globex event" offset="0" semanticType="MultipleCharValue"/>
         <field name="TotNumReports" id="911" type="uInt32NULL" description="Total number of instruments in the Replay loop. Used on Replay Feed only.  " offset="1" semanticType="int"/>
         <field name="SecurityUpdateAction" id="980" type="SecurityUpdateAction" description="Last Security update action on Incremental feed, 'D' or 'M' is used when a mid-week deletion or modification (i.e. extension) occurs." offset="5" semanticType="char"/>
@@ -837,8 +837,8 @@
             <field name="RelatedSymbol" id="1649" type="Symbol" description="Related Instrument Symbol" offset="4" semanticType="String"/>
             <field name="RelatedInstrumentGUID" id="37724" type="uInt64NULL" description="Related Instrument GUID" offset="24" semanticType="int"/>
         </group>
-    </ns2:message>
-    <ns2:message name="SnapshotRefreshTopOrders59" id="59" description="SnapshotRefreshTopOrders" blockLength="13" semanticType="W" sinceVersion="10">
+    </sbe:message>
+    <sbe:message name="SnapshotRefreshTopOrders59" id="59" description="SnapshotRefreshTopOrders" blockLength="13" semanticType="W" sinceVersion="10">
         <field name="TransactTime" id="60" type="uInt64" description="Start of event processing time in number of nanoseconds since Unix epoch" offset="0" semanticType="UTCTimestamp"/>
         <field name="MatchEventIndicator" id="5799" type="MatchEventIndicator" description="Bitmap field of eight Boolean type indicators reflecting the end of updates for a given Globex event" offset="8" semanticType="MultipleCharValue"/>
         <field name="SecurityID" id="48" type="Int32" description="Security ID" offset="9" semanticType="int"/>
@@ -849,8 +849,8 @@
             <field name="MDDisplayQty" id="37706" type="Int32" description="Visible qty of order" offset="24" semanticType="Qty"/>
             <field name="MDEntryType" id="269" type="MDEntryTypeBook" description="Market Data entry type" offset="28" semanticType="char"/>
         </group>
-    </ns2:message>
-    <ns2:message name="SecurityStatusWorkup60" id="60" description="SecurityStatusWorkup" blockLength="30" semanticType="f" sinceVersion="10">
+    </sbe:message>
+    <sbe:message name="SecurityStatusWorkup60" id="60" description="SecurityStatusWorkup" blockLength="30" semanticType="f" sinceVersion="10">
         <field name="TransactTime" id="60" type="uInt64" description="Start of event processing time in number of nanoseconds since Unix epoch" offset="0" semanticType="UTCTimestamp"/>
         <field name="MDEntryPx" id="270" type="PRICENULL9" description="Workup price" offset="8" semanticType="Price"/>
         <field name="SecurityID" id="48" type="Int32" description="Security ID " offset="16" semanticType="int"/>
@@ -865,8 +865,8 @@
             <field name="Side" id="54" type="Side" description="Side of order" offset="8" semanticType="int"/>
             <field name="AggressorIndicator" id="1057" type="AggressorFlag" description="Aggressor Indicator 1=Aggressor Order 0=Passive Order" offset="9" semanticType="int"/>
         </group>
-    </ns2:message>
-    <ns2:message name="SnapshotFullRefreshTCP61" id="61" description="SnapshotFullRefreshTCP" blockLength="37" semanticType="W" sinceVersion="10">
+    </sbe:message>
+    <sbe:message name="SnapshotFullRefreshTCP61" id="61" description="SnapshotFullRefreshTCP" blockLength="37" semanticType="W" sinceVersion="10">
         <field name="TransactTime" id="60" type="uInt64" description="Start of event processing time in number of nanoseconds since Unix epoch" offset="0" semanticType="UTCTimestamp"/>
         <field name="MatchEventIndicator" id="5799" type="MatchEventIndicator" description="Bitmap field of eight Boolean type indicators reflecting the end of updates for a given Globex event" offset="8" semanticType="MultipleCharValue"/>
         <field name="SecurityID" id="48" type="Int32" description="Unique instrument ID " offset="9" semanticType="int"/>
@@ -884,8 +884,8 @@
             <field name="TradingReferenceDate" id="5796" type="LocalMktDate" description="Trading session date corresponding to a statistic entry, applicable only to Daily Statistics" offset="23" semanticType="LocalMktDate"/>
             <field name="SettlPriceType" id="731" type="SettlPriceType" description="Bitmap field of eight Boolean type indicators representing settlement price type" offset="25" semanticType="MultipleCharValue"/>
         </group>
-    </ns2:message>
-    <ns2:message name="CollateralMarketValue62" id="62" description="CollateralMarketValue" blockLength="11" semanticType="" sinceVersion="11">
+    </sbe:message>
+    <sbe:message name="CollateralMarketValue62" id="62" description="CollateralMarketValue" blockLength="11" semanticType="" sinceVersion="11">
         <field name="TransactTime" id="60" type="uInt64" description="Time of execution/order creation; expressed in UTC." offset="0" semanticType="UTCTimestamp"/>
         <field name="MatchEventIndicator" id="5799" type="MatchEventIndicator" description="Bitmap field of eight Boolean type indicators reflecting the end of updates for a given Globex event" offset="8" semanticType="MultipleCharValue"/>
         <group name="NoMDEntries" id="268" description="Number of data blocks listed in the Incremental message" blockLength="40" dimensionType="groupSize">
@@ -896,8 +896,8 @@
             <field name="UnderlyingInstrumentGUID" id="37519" type="uInt64" description="Underlying Instrument GUID. Collateral security identifier in REF Data API services" offset="29" semanticType="int"/>
             <field name="MDStreamID" id="1500" type="PriceSource" description="Source of the Clean Price" offset="37" semanticType="int"/>
         </group>
-    </ns2:message>
-    <ns2:message name="MDInstrumentDefinitionFX63" id="63" description="MDInstrumentDefinitionFX" blockLength="309" semanticType="d" sinceVersion="12">
+    </sbe:message>
+    <sbe:message name="MDInstrumentDefinitionFX63" id="63" description="MDInstrumentDefinitionFX" blockLength="309" semanticType="d" sinceVersion="12">
         <field name="MatchEventIndicator" id="5799" type="MatchEventIndicator" description="Bitmap field of eight Boolean type indicators reflecting the end of updates for a given Globex event" offset="0" semanticType="MultipleCharValue"/>
         <field name="TotNumReports" id="911" type="uInt32NULL" description="Total number of instruments in the Replay loop. Used on Replay Feed only" offset="1" semanticType="int"/>
         <field name="SecurityUpdateAction" id="980" type="SecurityUpdateAction" description="Last Security update action on Incremental feed, 'D' or 'M' is used when a mid-week deletion or modification (i.e. extension) occurs" offset="5" semanticType="char"/>
@@ -965,8 +965,8 @@
             <field name="SecurityAltID" id="455" type="String12" description="ISIN value as provided by ANNA, Association of National Numbering Agencies. This field is populated for MTF-Regulated NDFs and is unique for each Settle Date" offset="6" semanticType="String"/>
             <field name="SecurityAltIDSource" id="456" type="SecurityAltIDSourceISIN" description="Identifies class or source of the SecurityAltID (455) value" semanticType="int"/>
         </group>
-    </ns2:message>
-    <ns2:message name="MDIncrementalRefreshBookLongQty64" id="64" description="MDIncrementalRefreshBookLongQty" blockLength="11" semanticType="X" sinceVersion="12">
+    </sbe:message>
+    <sbe:message name="MDIncrementalRefreshBookLongQty64" id="64" description="MDIncrementalRefreshBookLongQty" blockLength="11" semanticType="X" sinceVersion="12">
         <field name="TransactTime" id="60" type="uInt64" description="Start of event processing time in number of nanoseconds since Unix epoch" offset="0" semanticType="UTCTimestamp"/>
         <field name="MatchEventIndicator" id="5799" type="MatchEventIndicator" description="Bitmap field of eight Boolean type indicators reflecting the end of updates for a given Globex event" offset="8" semanticType="MultipleCharValue"/>
         <group name="NoMDEntries" id="268" description="Number of entries in Market Data message." blockLength="32" dimensionType="groupSize">
@@ -986,8 +986,8 @@
             <field name="ReferenceID" id="9633" type="uInt8NULL" description="Reference to corresponding Price and SecurityID, sequence of MD entry in the message" offset="20" semanticType="int"/>
             <field name="OrderUpdateAction" id="37708" type="OrderUpdateAction" description="Order book update action to be applied to the order referenced by OrderID" offset="21" semanticType="int"/>
         </group>
-    </ns2:message>
-    <ns2:message name="MDIncrementalRefreshTradeSummaryLongQty65" id="65" description="MDIncrementalRefreshTradeSummaryLongQty" blockLength="11" semanticType="X" sinceVersion="12">
+    </sbe:message>
+    <sbe:message name="MDIncrementalRefreshTradeSummaryLongQty65" id="65" description="MDIncrementalRefreshTradeSummaryLongQty" blockLength="11" semanticType="X" sinceVersion="12">
         <field name="TransactTime" id="60" type="uInt64" description="Start of event processing time in number of nanoseconds since Unix epoch" offset="0" semanticType="UTCTimestamp"/>
         <field name="MatchEventIndicator" id="5799" type="MatchEventIndicator" description="Bitmap field of eight Boolean type indicators reflecting the end of updates for a given Globex event" offset="8" semanticType="MultipleCharValue"/>
         <group name="NoMDEntries" id="268" description="Number of Trade Summary entries" blockLength="40" dimensionType="groupSize">
@@ -1005,8 +1005,8 @@
             <field name="OrderID" id="37" type="uInt64" description="Unique order identifier as assigned by the exchange" offset="0" semanticType="int"/>
             <field name="LastQty" id="32" type="Int32" description="Quantity bought or sold on this last fill" offset="8" semanticType="Qty"/>
         </group>
-    </ns2:message>
-    <ns2:message name="MDIncrementalRefreshVolumeLongQty66" id="66" description="MDIncrementalRefreshVolumeLongQty" blockLength="11" semanticType="X" sinceVersion="12">
+    </sbe:message>
+    <sbe:message name="MDIncrementalRefreshVolumeLongQty66" id="66" description="MDIncrementalRefreshVolumeLongQty" blockLength="11" semanticType="X" sinceVersion="12">
         <field name="TransactTime" id="60" type="uInt64" description="Start of event processing time in number of nanoseconds since Unix epoch" offset="0" semanticType="UTCTimestamp"/>
         <field name="MatchEventIndicator" id="5799" type="MatchEventIndicator" description="Bitmap field of eight Boolean type indicators reflecting the end of updates for a given Globex event" offset="8" semanticType="MultipleCharValue"/>
         <group name="NoMDEntries" id="268" description="Number of entries in Market Data message" blockLength="24" dimensionType="groupSize">
@@ -1016,8 +1016,8 @@
             <field name="MDUpdateAction" id="279" type="MDUpdateAction" description="Market Data update action" offset="16" semanticType="int"/>
             <field name="MDEntryType" id="269" type="MDEntryTypeVol" description="Electronic Volume entry provides cumulative session trade volume updated with the event " semanticType="char"/>
         </group>
-    </ns2:message>
-    <ns2:message name="MDIncrementalRefreshSessionStatisticsLongQty67" id="67" description="MDIncrementalRefreshSessionStatisticsLongQty" blockLength="11" semanticType="X" sinceVersion="12">
+    </sbe:message>
+    <sbe:message name="MDIncrementalRefreshSessionStatisticsLongQty67" id="67" description="MDIncrementalRefreshSessionStatisticsLongQty" blockLength="11" semanticType="X" sinceVersion="12">
         <field name="TransactTime" id="60" type="uInt64" description="Start of event processing time in number of nanoseconds since Unix epoch" offset="0" semanticType="UTCTimestamp"/>
         <field name="MatchEventIndicator" id="5799" type="MatchEventIndicator" description="Bitmap field of eight Boolean type indicators reflecting the end of updates for a given Globex event" offset="8" semanticType="MultipleCharValue"/>
         <group name="NoMDEntries" id="268" description="Number of entries in Market Data message" blockLength="32" dimensionType="groupSize">
@@ -1029,8 +1029,8 @@
             <field name="MDUpdateAction" id="279" type="MDUpdateAction" description="Market Data update action" offset="25" semanticType="int"/>
             <field name="MDEntryType" id="269" type="MDEntryTypeStatistics" description="Market Data entry type" offset="26" semanticType="char"/>
         </group>
-    </ns2:message>
-    <ns2:message name="SnapshotFullRefreshTCPLongQty68" id="68" description="SnapshotFullRefreshTCPLongQty" blockLength="37" semanticType="W" sinceVersion="12">
+    </sbe:message>
+    <sbe:message name="SnapshotFullRefreshTCPLongQty68" id="68" description="SnapshotFullRefreshTCPLongQty" blockLength="37" semanticType="W" sinceVersion="12">
         <field name="TransactTime" id="60" type="uInt64" description="Start of event processing time in number of nanoseconds since Unix epoch" offset="0" semanticType="UTCTimestamp"/>
         <field name="MatchEventIndicator" id="5799" type="MatchEventIndicator" description="Bitmap field of eight Boolean type indicators reflecting the end of updates for a given Globex event. Set to last on the last Snapshot message sent in reply to customer request for snapshot" offset="8" semanticType="MultipleCharValue"/>
         <field name="SecurityID" id="48" type="Int32" description="Security ID " offset="9" semanticType="int"/>
@@ -1045,8 +1045,8 @@
             <field name="OpenCloseSettlFlag" id="286" type="OpenCloseSettlFlag" description="Flag that additionally describes market data entry type" offset="21" semanticType="int"/>
             <field name="MDEntryType" id="269" type="MDEntryType" description="Market Data entry type" offset="22" semanticType="char"/>
         </group>
-    </ns2:message>
-    <ns2:message name="SnapshotFullRefreshLongQty69" id="69" description="SnapshotFullRefreshLongQty" blockLength="59" semanticType="W" sinceVersion="12">
+    </sbe:message>
+    <sbe:message name="SnapshotFullRefreshLongQty69" id="69" description="SnapshotFullRefreshLongQty" blockLength="59" semanticType="W" sinceVersion="12">
         <field name="LastMsgSeqNumProcessed" id="369" type="uInt32" description="Sequence number of the last Incremental feed packet processed. This value is used to synchronize the snapshot loop with the real-time feed" offset="0" semanticType="SeqNum"/>
         <field name="TotNumReports" id="911" type="uInt32" description="Total number of instruments in the Replay loop. Used on Replay Feed only.  " offset="4" semanticType="int"/>
         <field name="SecurityID" id="48" type="Int32" description="Unique instrument ID " offset="8" semanticType="int"/>
@@ -1066,5 +1066,5 @@
             <field name="OpenCloseSettlFlag" id="286" type="OpenCloseSettlFlag" description="Flag that additionally describes a market data entry" offset="21" semanticType="int"/>
             <field name="MDEntryType" id="269" type="MDEntryType" description="Market Data entry type " offset="22" semanticType="char"/>
         </group>
-    </ns2:message>
-</ns2:messageSchema>
+    </sbe:message>
+</sbe:messageSchema>

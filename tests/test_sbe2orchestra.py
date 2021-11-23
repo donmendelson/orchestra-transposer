@@ -20,6 +20,15 @@ def test_sbe2orchestra_xml():
         f.close()
         assert not errors
 
+def test_ilink2orchestra_xml():
+    xml_path = os.path.join(XML_FILE_DIR, 'templates_FixBinary_v12.xml')
+    output_path = os.path.join(output_dir(), 'CMEOrchestra.xml')
+    translator = SBE2Orchestra()
+    with open(output_path, 'wb') as f:
+        errors = translator.sbe2orch_xml(xml_path, f)
+        f.close()
+        # assert not errors
+
 
 def test_sbe2orchestra_dict():
     xml_path = os.path.join(XML_FILE_DIR, 'Examples.xml')
