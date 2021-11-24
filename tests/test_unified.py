@@ -19,6 +19,29 @@ def test_valid():
     assert not errors
 
 
+def test_to_fix_version_dict():
+    unified = UnifiedNoPhrases()
+    xml_path = os.path.join(XML_FILE_DIR, 'FixRepository.xml')
+    output_path = os.path.join(output_dir(), 'FixRepository-fix-dict.txt')
+    with open(output_path, 'w') as f:
+        (instance, errors) = unified.read_xml(xml_path)
+        assert not errors
+        fix = instance.fix("FIX.Latest_EP269")
+        print(str(fix), file=f)
+        f.close()
+
+
+def test_to_fix_no_version_dict():
+    unified = UnifiedNoPhrases()
+    xml_path = os.path.join(XML_FILE_DIR, 'FixRepository.xml')
+    output_path = os.path.join(output_dir(), 'FixRepository-fix-dict.txt')
+    with open(output_path, 'w') as f:
+        (instance, errors) = unified.read_xml(xml_path)
+        assert not errors
+        fix = instance.fix()
+        print(str(fix), file=f)
+        f.close()
+
 def test_phrases_valid():
     unified = UnifiedPhrases()
     xml_path = os.path.join(XML_FILE_DIR, 'FIX.Latest_EP269_en_phrases.xml')

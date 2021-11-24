@@ -6,6 +6,7 @@ from .sbe.sbeinstance import SBEInstance
 from .sbe2orchestra import SBE2Orchestra
 from .unified import Unified
 from .unified.unifiedinstance import UnifiedInstance
+from .unified2orchestra import Unified2Orchestra
 
 
 

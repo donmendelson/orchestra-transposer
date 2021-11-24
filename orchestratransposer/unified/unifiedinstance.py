@@ -1,4 +1,5 @@
 from pprint import pformat
+from typing import Optional
 
 TEXT_KEY = '$'
 """ Symbol used by XMLSchema package for text content of an element (#text) """
@@ -20,6 +21,21 @@ class UnifiedInstanceNoPhrases:
         :return: the root of an Orchestra instance represented as a Python dictionary
         """
         return self.obj
+
+    def fix(self, version=None) -> Optional[dict]:
+        """
+        Returns a dictionary representing a fix version
+        :param version: a fix version to extract from a Unified Repository. If not provided, returns the first instance.
+        :return: a dictionary, or None if not found
+        """
+        try:
+            root = self.root()
+            if version:
+                return next(fix for fix in root['fix'] if fix['@version'] == version)
+            else:
+                return root['fix'][0]
+        except LookupError:
+            return None
 
 
 class UnifiedPhrasesInstance:
@@ -55,6 +71,7 @@ class UnifiedInstanceWithPhrases(UnifiedInstanceNoPhrases):
 
     def phrases(self):
         return self.phrases
+
 
 UnifiedInstance = UnifiedInstanceWithPhrases
 """Default Unified Repository instance"""
