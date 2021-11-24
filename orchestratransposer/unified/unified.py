@@ -1,5 +1,5 @@
 import os
-from typing import Iterator, List, Tuple
+from typing import List, Tuple
 from xml.etree import ElementTree
 
 from xmlschema import XMLSchema
@@ -49,7 +49,7 @@ class UnifiedNoPhrases:
                 errors.append(result)
         return UnifiedInstanceNoPhrases(data[0]), errors
 
-    def write_xml(self, instance: UnifiedInstance, stream) -> List[Exception]:
+    def write_xml(self, instance: UnifiedInstanceNoPhrases, stream) -> List[Exception]:
         """
         Encodes an UnifiedInstance and writes it to a stream.
 
@@ -116,17 +116,17 @@ class UnifiedPhrases:
         return errors
 
 
-class UnifiedWithPhrases:
+class UnifiedWithPhrases(UnifiedNoPhrases):
     """
     Represents the XML schema for FIX Unified Repository 2010 Edition and processing of XML instances \
     that conform to that schema.
     """
 
     def __init__(self):
-        self.unified = UnifiedNoPhrases()
+        super().__init__()
         self.phrases = UnifiedPhrases()
 
-    def validate(self, unified_xml, phrases_xml) -> Tuple[List[Exception], List[Exception]]:
+    def validate_all(self, unified_xml, phrases_xml) -> Tuple[List[Exception], List[Exception]]:
         """
         Validates an XML data against the XSD schema/component instance. Creates an iterator for the errors generated
         by the validation of an XML data against the XSD schema/component instance.
@@ -137,10 +137,10 @@ class UnifiedWithPhrases:
         :param phrases_xml: the source of XML data for phrases
         :return a pair of lists of exceptions, one for the main XML file, and the second for the phrases file
         """
-        errors = self.unified.validate(unified_xml)
+        errors = super().validate(unified_xml)
         return errors, self.phrases.validate(phrases_xml)
 
-    def read_xml(self, unified_xml, phrases_xml) -> Tuple[UnifiedInstance, List[Exception]]:
+    def read_xml_all(self, unified_xml, phrases_xml) -> Tuple[UnifiedInstanceWithPhrases, List[Exception]]:
         """
         Creates an UnifiedInstance and a possible List of validation errors.
 
@@ -150,22 +150,23 @@ class UnifiedWithPhrases:
         :param phrases_xml: the source of XML data for phrases
         """
         errors = []
-        obj, unified_errors = self.unified.read_xml(unified_xml)
+        obj, unified_errors = super().read_xml(unified_xml)
         errors.extend(unified_errors)
         phrases_obj, phrases_errors = self.phrases.read_xml(phrases_xml)
         errors.extend(phrases_errors)
         return UnifiedInstanceWithPhrases(obj, phrases_obj), errors
 
-    def write_xml(self, instance: UnifiedInstance, stream) -> List[Exception]:
+    def write_xml_all(self, instance: UnifiedInstanceWithPhrases, unified_stream, phrases_stream) -> List[Exception]:
         """
         Encodes an UnifiedInstance and writes it to a stream.
 
         :param instance: an UnifiedInstance dictionary
-        :param stream: a file like object
+        :param unified_stream: a file like object for writing the main repository file
+        :param phrases_stream: a file like object for writing the phrases file
         :return: a list of errors, if any
         """
-        errors = self.unified.write_xml(instance.root())
-        errors.extend(self.phrases.write_xml(instance.phrases_root()))
+        errors = super().write_xml(instance, unified_stream)
+        errors.extend(self.phrases.write_xml(instance.phrases, phrases_stream))
         return errors
 
 

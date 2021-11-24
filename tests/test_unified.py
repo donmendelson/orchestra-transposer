@@ -27,6 +27,17 @@ def test_phrases_valid():
 
 
 def test_to_dict():
+    unified = UnifiedPhrases()
+    xml_path = os.path.join(XML_FILE_DIR, 'FIX.Latest_EP269_en_phrases.xml')
+    output_path = os.path.join(output_dir(), 'FIX.Latest_EP269_en_phrases.xml-dict.txt')
+    with open(output_path, 'w') as f:
+        (instance, errors) = unified.read_xml(xml_path)
+        print(str(instance), file=f)
+        f.close()
+        assert not errors
+
+
+def test_phrases_to_dict():
     unified = UnifiedNoPhrases()
     xml_path = os.path.join(XML_FILE_DIR, 'FixRepository.xml')
     output_path = os.path.join(output_dir(), 'FixRepository-dict.txt')
@@ -54,7 +65,7 @@ def test_unified_to_dict():
     phrases_xml_path = os.path.join(XML_FILE_DIR, 'FIX.Latest_EP269_en_phrases.xml')
     output_path = os.path.join(output_dir(), 'FixRepository-phrases-dict.txt')
     with open(output_path, 'w') as f:
-        (instance, errors) = unified.read_xml(xml_path, phrases_xml_path)
+        (instance, errors) = unified.read_xml_all(xml_path, phrases_xml_path)
         print(str(instance), file=f)
         f.close()
         assert not errors
