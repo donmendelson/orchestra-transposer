@@ -4,11 +4,11 @@ from xml.etree import ElementTree
 
 from xmlschema import XMLSchema
 
-from .unifiedinstance import UnifiedInstance, UnifiedInstanceNoPhrases, UnifiedInstanceWithPhrases, \
+from .unifiedinstance import UnifiedMainInstance, UnifiedInstanceWithPhrases, \
     UnifiedPhrasesInstance
 
 
-class UnifiedNoPhrases:
+class UnifiedMain:
     """
     Represents the XML schema for FIX Unified Repository 2010 Edition and processing of XML instances \
     that conform to that schema.
@@ -33,7 +33,7 @@ class UnifiedNoPhrases:
             errors.append(result)
         return errors
 
-    def read_xml(self, xml) -> Tuple[UnifiedInstanceNoPhrases, List[Exception]]:
+    def read_xml(self, xml) -> Tuple[UnifiedMainInstance, List[Exception]]:
         """
         Creates an UnifiedInstance and a possible List of validation errors.
 
@@ -47,9 +47,9 @@ class UnifiedNoPhrases:
                 data.append(result)
             else:
                 errors.append(result)
-        return UnifiedInstanceNoPhrases(data[0]), errors
+        return UnifiedMainInstance(data[0]), errors
 
-    def write_xml(self, instance: UnifiedInstanceNoPhrases, stream) -> List[Exception]:
+    def write_xml(self, instance: UnifiedMainInstance, stream) -> List[Exception]:
         """
         Encodes an UnifiedInstance and writes it to a stream.
 
@@ -57,7 +57,8 @@ class UnifiedNoPhrases:
         :param stream: a file like object
         :return: a list of errors, if any
         """
-        data, errors = self.xsd.encode(instance.root(), validation='lax', use_defaults=False, path="fixRepository")
+        data, errors = self.xsd.encode(
+            instance.root(), validation='lax', use_defaults=False, path="fixRepository")
         stream.write(ElementTree.tostring(data, encoding='utf8', method='xml'))
         return errors
 
@@ -103,7 +104,7 @@ class UnifiedPhrases:
                 errors.append(result)
         return UnifiedPhrasesInstance(data[0]), errors
 
-    def write_xml(self, instance: UnifiedInstance, stream) -> List[Exception]:
+    def write_xml(self, instance: UnifiedPhrasesInstance, stream) -> List[Exception]:
         """
         Encodes an UnifiedInstance and writes it to a stream.
 
@@ -111,19 +112,20 @@ class UnifiedPhrases:
         :param stream: a file like object
         :return: a list of errors, if any
         """
-        data, errors = self.xsd.encode(instance.root(), validation='lax', use_defaults=False)
+        data, errors = self.xsd.encode(
+            instance.phrases_root(), validation='lax', use_defaults=False)
         stream.write(ElementTree.tostring(data, encoding='utf8', method='xml'))
         return errors
 
 
-class UnifiedWithPhrases(UnifiedNoPhrases):
+class UnifiedWithPhrases:
     """
     Represents the XML schema for FIX Unified Repository 2010 Edition and processing of XML instances \
     that conform to that schema.
     """
 
     def __init__(self):
-        super().__init__()
+        self.unified = UnifiedMain()
         self.phrases = UnifiedPhrases()
 
     def validate_all(self, unified_xml, phrases_xml) -> Tuple[List[Exception], List[Exception]]:
@@ -137,7 +139,7 @@ class UnifiedWithPhrases(UnifiedNoPhrases):
         :param phrases_xml: the source of XML data for phrases
         :return a pair of lists of exceptions, one for the main XML file, and the second for the phrases file
         """
-        errors = super().validate(unified_xml)
+        errors = self.unified.validate(unified_xml)
         return errors, self.phrases.validate(phrases_xml)
 
     def read_xml_all(self, unified_xml, phrases_xml) -> Tuple[UnifiedInstanceWithPhrases, List[Exception]]:
@@ -150,7 +152,7 @@ class UnifiedWithPhrases(UnifiedNoPhrases):
         :param phrases_xml: the source of XML data for phrases
         """
         errors = []
-        obj, unified_errors = super().read_xml(unified_xml)
+        obj, unified_errors = self.unified.read_xml(unified_xml)
         errors.extend(unified_errors)
         phrases_obj, phrases_errors = self.phrases.read_xml(phrases_xml)
         errors.extend(phrases_errors)
@@ -165,7 +167,7 @@ class UnifiedWithPhrases(UnifiedNoPhrases):
         :param phrases_stream: a file like object for writing the phrases file
         :return: a list of errors, if any
         """
-        errors = super().write_xml(instance, unified_stream)
+        errors = self.unified.write_xml(instance.unified, unified_stream)
         errors.extend(self.phrases.write_xml(instance.phrases, phrases_stream))
         return errors
 

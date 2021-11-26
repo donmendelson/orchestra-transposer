@@ -127,7 +127,7 @@ class OrchestraInstance10:
         .. code-block:: python
 
        'fixr:message': [{
-             '@id': 1,
+             '@text_id': 1,
              '@msgType': '0',
              '@name': 'Heartbeat',
              '@scenario': 'base',
@@ -140,14 +140,14 @@ class OrchestraInstance10:
                                              '@contentType': 'text/plain',
                                              '@purpose': 'SYNOPSIS'}]},
                         'fixr:structure': {
-                            'fixr:componentRef': [{'@id': 1024,
+                            'fixr:componentRef': [{'@text_id': 1024,
                                '@presence': 'required',
                                '@scenario': 'base',}                                                                                                                         '@supported': 'supported'}]}},
-                                {'@id': 1025,
+                                {'@text_id': 1025,
                                '@presence': 'required',
                                '@scenario': 'base'}],
                             'fixr:fieldRef': [{
-                               '@id': 112,
+                               '@text_id': 112,
                                '@presence': 'optional',
                                '@scenario': 'base'}]]
         """
@@ -220,15 +220,15 @@ class OrchestraInstance10:
 
     def field(self, field_id: int) -> Union[dict, None]:
         fields: list = self.fields()
-        return next((field for field in fields if field['@id'] == field_id), None)
+        return next((field for field in fields if field['@text_id'] == field_id), None)
 
     def component(self, component_id: int) -> Union[dict, None]:
         components: list = self.components()
-        return next((component for component in components if component['@id'] == component_id), None)
+        return next((component for component in components if component['@text_id'] == component_id), None)
 
     def group(self, group_id: int) -> Union[dict, None]:
         groups: list = self.groups()
-        return next((group for group in groups if group['@id'] == group_id), None)
+        return next((group for group in groups if group['@text_id'] == group_id), None)
 
     @staticmethod
     def append_field_ref(structure: dict, field_ref):

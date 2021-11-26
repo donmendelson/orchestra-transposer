@@ -30,7 +30,7 @@ def test_sbe2orchestra_dict():
     (unified_instance, errors) = unified.read_xml_all(xml_path, phrases_xml_path)
     assert not errors
     translator = Unified2Orchestra()
-    orch_instance = translator.unified2orch_dict(unified_instance)
+    orch_instance = translator.unified2orch_dict(unified_instance, "FIX.Latest_EP269")
     with open(output_path, 'w') as f:
         print(str(orch_instance), file=f)
         f.close()

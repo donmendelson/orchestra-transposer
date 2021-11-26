@@ -1,7 +1,7 @@
 import os
 
 from orchestratransposer import Unified
-from orchestratransposer.unified.unified import UnifiedNoPhrases, UnifiedPhrases
+from orchestratransposer.unified.unified import UnifiedMain, UnifiedPhrases
 
 XML_FILE_DIR = os.path.join(os.path.dirname(__file__), 'xml/')
 
@@ -13,14 +13,14 @@ def output_dir():
 
 
 def test_valid():
-    unified = UnifiedNoPhrases()
+    unified = UnifiedMain()
     xml_path = os.path.join(XML_FILE_DIR, 'FixRepository.xml')
     errors = unified.validate(xml_path)
     assert not errors
 
 
 def test_to_fix_version_dict():
-    unified = UnifiedNoPhrases()
+    unified = UnifiedMain()
     xml_path = os.path.join(XML_FILE_DIR, 'FixRepository.xml')
     output_path = os.path.join(output_dir(), 'FixRepository-fix-dict.txt')
     with open(output_path, 'w') as f:
@@ -32,7 +32,7 @@ def test_to_fix_version_dict():
 
 
 def test_to_fix_no_version_dict():
-    unified = UnifiedNoPhrases()
+    unified = UnifiedMain()
     xml_path = os.path.join(XML_FILE_DIR, 'FixRepository.xml')
     output_path = os.path.join(output_dir(), 'FixRepository-fix-dict.txt')
     with open(output_path, 'w') as f:
@@ -41,6 +41,7 @@ def test_to_fix_no_version_dict():
         fix = instance.fix()
         print(str(fix), file=f)
         f.close()
+
 
 def test_phrases_valid():
     unified = UnifiedPhrases()
@@ -58,10 +59,23 @@ def test_to_dict():
         print(str(instance), file=f)
         f.close()
         assert not errors
+        assert instance.text_id('FIELD_2217') == 'The fee amount due if different from MiscFeeAmt(137).'
+
+
+def test_text_id():
+    unified = UnifiedPhrases()
+    xml_path = os.path.join(XML_FILE_DIR, 'FIX.Latest_EP269_en_phrases.xml')
+    (instance, errors) = unified.read_xml(xml_path)
+    assert not errors
+    t = instance.text_id('FIELD_41163')
+    assert t == [
+        ('SYNOPSIS', 'The occurrence of the day of week on which fixing takes place.'),
+        ('ELABORATION', 'For example, a fixing of the 3rd Friday would be DayOfWk=5 DayNum=3. If omitted every '
+                        'day of the week is a fixing day.')]
 
 
 def test_phrases_to_dict():
-    unified = UnifiedNoPhrases()
+    unified = UnifiedMain()
     xml_path = os.path.join(XML_FILE_DIR, 'FixRepository.xml')
     output_path = os.path.join(output_dir(), 'FixRepository-dict.txt')
     with open(output_path, 'w') as f:
@@ -72,7 +86,7 @@ def test_phrases_to_dict():
 
 
 def test_to_from_dict():
-    unified = UnifiedNoPhrases()
+    unified = UnifiedMain()
     xml_path = os.path.join(XML_FILE_DIR, 'FixRepository.xml')
     output_path = os.path.join(output_dir(), 'FixRepository-copy.xml')
     with open(output_path, 'wb') as f:

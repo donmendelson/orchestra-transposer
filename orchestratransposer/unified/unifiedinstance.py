@@ -1,16 +1,16 @@
 from pprint import pformat
-from typing import Optional
+from typing import List, Optional, Tuple
 
 TEXT_KEY = '$'
 """ Symbol used by XMLSchema package for text content of an element (#text) """
 
 
-class UnifiedInstanceNoPhrases:
+class UnifiedMainInstance:
     """
     An instance of Unified Repository 2010 Edition
     """
 
-    def __init__(self, obj=None):
+    def __init__(self, obj: Optional[dict] = None):
         self.obj = obj if obj is not None else {}
 
     def __str__(self):
@@ -22,18 +22,18 @@ class UnifiedInstanceNoPhrases:
         """
         return self.obj
 
-    def fix(self, version=None) -> Optional[dict]:
+    def fix(self, version: Optional[str] = None) -> dict:
         """
         Returns a dictionary representing a fix version
         :param version: a fix version to extract from a Unified Repository. If not provided, returns the first instance.
         :return: a dictionary, or None if not found
         """
         try:
-            root = self.root()
+            main_root = self.root()
             if version:
-                return next(fix for fix in root['fix'] if fix['@version'] == version)
+                return next(fix for fix in main_root['fix'] if fix['@version'] == version)
             else:
-                return root['fix'][0]
+                return main_root['fix'][0]
         except LookupError:
             return None
 
@@ -43,7 +43,7 @@ class UnifiedPhrasesInstance:
     An instance of Unified Repository 2010 Edition Phrases file
     """
 
-    def __init__(self, phrases_obj=None):
+    def __init__(self, phrases_obj: Optional[dict] = None):
         self.phrases_obj = phrases_obj if phrases_obj is not None else {}
 
     def __str__(self):
@@ -55,19 +55,25 @@ class UnifiedPhrasesInstance:
         """
         return self.phrases_obj
 
+    def text_id(self, text_id: str) -> List[Tuple[str, str]]:
+        phrase = self.phrases_obj['phrase']
+        if not phrase:
+            phrase = []
+            self.phrases_obj['phrase'] = phrase
+        text = list(d['text'] for d in phrase if d['@textId'] == text_id)[0]
+        return [(i['@purpose'], i['para'][0]) for i in text]
 
-class UnifiedInstanceWithPhrases(UnifiedInstanceNoPhrases):
+
+class UnifiedInstanceWithPhrases(UnifiedMainInstance):
     """
     An instance of Unified Repository 2010 Edition with its phrases
     """
-
-    def __init__(self, obj=None, phrases_obj=None):
-        super().__init__(obj)
-        self.phrases = UnifiedPhrasesInstance(phrases_obj)
+    def __init__(self, unified: Optional[UnifiedMainInstance] = None, phrases: Optional[UnifiedPhrasesInstance] = None):
+        super().__init__(unified.root() if unified is not None else None)
+        self.phrases = phrases if phrases is not None else UnifiedPhrasesInstance()
 
     def __str__(self):
-        """ TODO not working - append phrases """
-        return super().__str__()
+        return super.__str__() + str(self.phrases)
 
     def phrases(self):
         return self.phrases

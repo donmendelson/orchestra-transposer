@@ -67,7 +67,7 @@ class SBE2Orchestra10_10:
         repository = orch.root()
         sbe_ms = sbe.root()
         repository['@name'] = sbe_ms['@package']
-        orch.metadata()['dcterms:identifier'] = str(sbe_ms['@id'])
+        orch.metadata()['dcterms:identifier'] = str(sbe_ms['@text_id'])
         # a simple integer is not accepted as version in Orchestra 1.0
         repository['@version'] = str(sbe_ms['@version']) + ".0"
 
@@ -115,14 +115,14 @@ class SBE2Orchestra10_10:
         sbe_enums: list = sbe.enums()
         for idx, sbe_enum in enumerate(sbe_enums, start=1):
             codes = []
-            codeset_attr = {'@name': sbe_enum['@name'], '@id': idx * 100, '@type': sbe_enum['@encodingType'],
+            codeset_attr = {'@name': sbe_enum['@name'], '@text_id': idx * 100, '@type': sbe_enum['@encodingType'],
                             'fixr:code': codes}
             documentation = sbe_enum.get('@description', None)
             if documentation:
                 OrchestraInstance10.append_documentation(codeset_attr, documentation)
             sbe_codes = sbe_enum['validValue']
             for idx2, sbe_code in enumerate(sbe_codes, start=1):
-                code_attr = {'@name': sbe_code['@name'], '@id': idx * 100 + idx2, '@value': sbe_code[TEXT_KEY]}
+                code_attr = {'@name': sbe_code['@name'], '@text_id': idx * 100 + idx2, '@value': sbe_code[TEXT_KEY]}
                 documentation = sbe_enum.get('@description', None)
                 if documentation:
                     OrchestraInstance10.append_documentation(code_attr, documentation)
@@ -132,7 +132,7 @@ class SBE2Orchestra10_10:
     def sbe2orch_messages_and_groups(self, sbe: SBEInstance10, orch: OrchestraInstance10):
         sbe_messages = sbe.messages()
         for sbe_message in sbe_messages:
-            msg_attr = {'@name': sbe_message['@name'], '@id': sbe_message['@id']}
+            msg_attr = {'@name': sbe_message['@name'], '@text_id': sbe_message['@text_id']}
             msg_type = sbe_message.get('@semanticType', None)
             if msg_type:
                 msg_attr['@msgType'] = msg_type
@@ -147,7 +147,7 @@ class SBE2Orchestra10_10:
             orch.append_message(msg_attr)
 
             for sbe_group in sbe_groups:
-                group_attr = {'@name': sbe_group['@name'], '@id': sbe_group['@id']}
+                group_attr = {'@name': sbe_group['@name'], '@text_id': sbe_group['@text_id']}
                 sbe_fields = sbe.fields(sbe_group)
                 sbe_groups = sbe.groups(sbe_group)
                 sbe_data_fields = sbe.data(sbe_group)
@@ -156,19 +156,19 @@ class SBE2Orchestra10_10:
 
     def sbe2orch_append_members(self, structure, sbe_fields, sbe_groups, sbe_data_fields):
         for sbe_field in sbe_fields:
-            field_ref_attr = {'@id': sbe_field['@id'], '@presence': self.sbe2orch_presence(sbe_field['@presence'])}
+            field_ref_attr = {'@text_id': sbe_field['@text_id'], '@presence': self.sbe2orch_presence(sbe_field['@presence'])}
             documentation = sbe_field.get('@description', None)
             if documentation:
                 OrchestraInstance10.append_documentation(field_ref_attr, documentation)
             OrchestraInstance10.append_field_ref(structure, field_ref_attr)
         for sbe_group in sbe_groups:
-            group_ref_attr = {'@id': sbe_group['@id']}
+            group_ref_attr = {'@text_id': sbe_group['@text_id']}
             documentation = sbe_group.get('@description', None)
             if documentation:
                 OrchestraInstance10.append_documentation(group_ref_attr, documentation)
             OrchestraInstance10.append_group_ref(structure, group_ref_attr)
         for sbe_field in sbe_data_fields:
-            field_ref_attr = {'@id': sbe_field['@id'], '@presence': self.sbe2orch_presence(sbe_field['@presence'])}
+            field_ref_attr = {'@text_id': sbe_field['@text_id'], '@presence': self.sbe2orch_presence(sbe_field['@presence'])}
             documentation = sbe_field.get('@description', None)
             if documentation:
                 OrchestraInstance10.append_documentation(field_ref_attr, documentation)
@@ -176,7 +176,7 @@ class SBE2Orchestra10_10:
 
     def sbe2orch_fields(self, sbe: SBEInstance10, fields: list):
         """
-        Append unique fields from all SBE messages, by field id
+        Append unique fields from all SBE messages, by field text_id
         :param sbe: an SBE instance
         :param fields: Orchestra field list to populate
         :return:
@@ -187,14 +187,14 @@ class SBE2Orchestra10_10:
             all_sbe_fields = []
             SBEInstance10.all_fields(sbe_message, all_sbe_fields)
             for sbe_field in all_sbe_fields:
-                field_d[sbe_field['@id']] = sbe_field
+                field_d[sbe_field['@text_id']] = sbe_field
             all_sbe_data_fields = []
             SBEInstance10.all_data(sbe_message, all_sbe_data_fields)
             for sbe_field in all_sbe_data_fields:
-                field_d[sbe_field['@id']] = sbe_field
+                field_d[sbe_field['@text_id']] = sbe_field
         field_l = sorted(field_d.values(), key=SBEInstance10.id)
         for sbe_field in field_l:
-            field = {'@id': sbe_field['@id'],
+            field = {'@text_id': sbe_field['@text_id'],
                      '@name': sbe_field['@name'],
                      '@type': sbe_field['@type']}
             documentation = sbe_field.get('@description', None)

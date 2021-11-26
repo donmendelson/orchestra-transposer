@@ -146,20 +146,20 @@ class SBEInstance10:
 
         .. code-block:: python
 
-            {'@id': 97,
+            {'@text_id': 97,
             '@name': 'BusinessMessageReject',
             '@semanticType': 'j',
-            'data': [{'@id': 58,
+            'data': [{'@text_id': 58,
                     '@name': 'Text',
                     '@presence': 'required',
                     '@semanticType': 'data',
                     '@type': 'DATA'},
-            'field': [{@id': 379,
+            'field': [{@text_id': 379,
                      '@name': 'BusinesRejectRefId',
                      '@presence': 'required',
                      '@semanticType': 'String',
                      '@type': 'idString'},
-                    {'@id': 380,
+                    {'@text_id': 380,
                      '@name': 'BusinessRejectReason',
                      '@offset': 8,
                      '@presence': 'required',
@@ -176,7 +176,7 @@ class SBEInstance10:
 
         .. code-block:: python
 
-            {'@id': 37,
+            {'@text_id': 37,
              '@name': 'OrderID',
              '@presence': 'required',
              '@semanticType': 'String',
@@ -275,7 +275,7 @@ class SBEInstance10:
 
     @staticmethod
     def id(structure: dict) -> int:
-        return structure.get('@id')
+        return structure.get('@text_id')
 
 
 SBEInstance = SBEInstance10

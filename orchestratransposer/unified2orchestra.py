@@ -1,7 +1,7 @@
 import logging
-from typing import List
+from typing import List, Optional
 
-from orchestratransposer import UnifiedInstance
+from orchestratransposer.orchestra.orchestra import Orchestra10
 from orchestratransposer.orchestra.orchestrainstance import OrchestraInstance10
 from orchestratransposer.unified.unified import UnifiedWithPhrases
 from orchestratransposer.unified.unifiedinstance import UnifiedInstanceWithPhrases
@@ -12,7 +12,8 @@ class Unified2Orchestra10:
     def __init__(self):
         self.logger = logging.getLogger('unified2orchestra')
 
-    def unified2orch_dict(self, unified: UnifiedInstanceWithPhrases, version=None) -> OrchestraInstance10:
+    def unified2orch_dict(self, unified: UnifiedInstanceWithPhrases,
+                          version: Optional[str] = None) -> OrchestraInstance10:
         """
         Translate an SBE message schema dictionary to an Orchestra dictionary
         :param unified: a Unified Repository instance
@@ -32,11 +33,21 @@ class Unified2Orchestra10:
         self.unified2orch_messages_and_groups(fix, orch)"""
         return orch
 
-    def unified2orch_xml(self, xml_path, phrases_xml_path, stream, version=None) -> List[Exception]:
+    def unified2orch_xml(self, xml_path, phrases_xml_path, orch_stream, version: Optional[str] = None) -> List[Exception]:
         unified = UnifiedWithPhrases()
         (unified_instance, errors) = unified.read_xml_all(xml_path, phrases_xml_path)
-        self.unified2orch_dict(unified, version)
-        return errors
+        if errors:
+            for error in errors:
+                self.logger.error(error)
+            return errors
+        else:
+            orch_instance = self.unified2orch_dict(unified_instance, version)
+            orchestra = Orchestra10()
+            errors = orchestra.write_xml(orch_instance, orch_stream)
+            if errors:
+                for error in errors:
+                    self.logger.error(error)
+            return errors
 
     def unified2orch_metadata(self, fix: dict, orch: OrchestraInstance10):
         """
