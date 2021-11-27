@@ -1,5 +1,5 @@
 from pprint import pformat
-from typing import Union
+from typing import Optional, Union
 
 TEXT_KEY = '$'
 """ Symbol used by XMLSchema package for text content of an element (#text) """
@@ -218,17 +218,17 @@ class OrchestraInstance10:
             structure['fixr:groupRef'] = groups_refs
         return groups_refs
 
-    def field(self, field_id: int) -> Union[dict, None]:
+    def field(self, field_id: int) -> Optional[dict]:
         fields: list = self.fields()
-        return next((field for field in fields if field['@text_id'] == field_id), None)
+        return next((field for field in fields if field['@id'] == field_id), None)
 
-    def component(self, component_id: int) -> Union[dict, None]:
+    def component(self, component_id: int) -> Optional[dict]:
         components: list = self.components()
-        return next((component for component in components if component['@text_id'] == component_id), None)
+        return next((component for component in components if component['@id'] == component_id), None)
 
-    def group(self, group_id: int) -> Union[dict, None]:
+    def group(self, group_id: int) -> Optional[dict]:
         groups: list = self.groups()
-        return next((group for group in groups if group['@text_id'] == group_id), None)
+        return next((group for group in groups if group['@id'] == group_id), None)
 
     @staticmethod
     def append_field_ref(structure: dict, field_ref):

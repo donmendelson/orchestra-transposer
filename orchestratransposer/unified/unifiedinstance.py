@@ -52,6 +52,26 @@ class UnifiedMainInstance:
             datatypes['datatype'] = datatype
         return datatype
 
+    @staticmethod
+    def fields(fix: dict) -> dict:
+        """
+        :return: a list of  fields of a fix version of UnifiedInstance
+        """
+        fields = fix.get('fields', None)
+        if not fields:
+            fields = {}
+            fix['fields'] = fields
+        field = fields.get('field', None)
+        if not field:
+            field = []
+            fields['field'] = field
+        return field
+
+    @staticmethod
+    def field(fix: dict, field_id: int) -> Optional[dict]:
+        fields = UnifiedMainInstance.fields(fix)
+        return next((field for field in fields if field['@id'] == field_id), None)
+
 class UnifiedPhrasesInstance:
     """
     An instance of Unified Repository 2010 Edition Phrases file

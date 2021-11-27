@@ -24,13 +24,13 @@ class Unified2Orchestra10:
         orch = OrchestraInstance10()
         fix = unified.fix(version)
         self.unified2orch_metadata(fix, orch)
-        orch_datatypes = orch.datatypes()
-        self.unified2orch_datatypes(fix, orch_datatypes)
+        datatypes = orch.datatypes()
+        self.unified2orch_datatypes(fix, datatypes)
         """codesets = orch.codesets()
-        self.unified2orch_codesets(fix, codesets)
+        self.unified2orch_codesets(fix, codesets)"""
         fields = orch.fields()
         self.unified2orch_fields(fix, fields)
-        self.unified2orch_messages_and_groups(fix, orch)"""
+        """self.unified2orch_messages_and_groups(fix, orch)"""
         return orch
 
     def unified2orch_xml(self, xml_path, phrases_xml_path, orch_stream, version: Optional[str] = None) -> List[Exception]:
@@ -55,22 +55,42 @@ class Unified2Orchestra10:
         """
         repository = orch.root()
         repository['@name'] = fix['@version']
-        repository['@version'] = fix['@version']
+        version = str(fix['@version']).partition('_')[0]
+        repository['@version'] = version
 
-    def unified2orch_datatypes(self, fix: dict, orch_datatypes):
-        datatypes = UnifiedMainInstance.datatypes(fix)
-        for datatype in datatypes:
+    def unified2orch_datatypes(self, fix: dict, datatypes):
+        unified_datatypes = UnifiedMainInstance.datatypes(fix)
+        for unified_datatype in unified_datatypes:
             exclude_keys = ['@textId', 'XML', 'Example']
-            orch_datatype = {k: datatype[k] for k in set(list(datatype.keys())) - set(exclude_keys)}
+            datatype = {k: unified_datatype[k] for k in set(list(unified_datatype.keys())) - set(exclude_keys)}
             """ TODO annotations with example"""
-            xml = datatype.get('XML', None)
+            xml = unified_datatype.get('XML', None)
             if xml:
-                orch_mappings = []
+                mappings = []
                 orch2xml_mapping = {k: xml[k] for k in set(list(xml.keys())) - set(exclude_keys)}
-                orch_mappings.append(orch2xml_mapping)
-                orch_datatype['fixr:mappedDatatype'] = orch_mappings
-            orch_datatypes.append(orch_datatype)
+                mappings.append(orch2xml_mapping)
+                datatype['fixr:mappedDatatype'] = mappings
+            datatypes.append(datatype)
 
+    def unified2orch_fields(self, fix: dict, fields: list):
+        unified_fields = UnifiedMainInstance.fields(fix)
+        for unified_field in unified_fields:
+            exclude_keys = ['@textId', '@notReqXML', 'enum', '@associatedDataTag', '@enumDatatype']
+            field = {k: unified_field[k] for k in set(list(unified_field.keys())) - set(exclude_keys)}
+            if 'enum' in unified_field:
+                codeset_name = unified_field['@name']
+                enum_id = unified_field.get('@enumDatatype', None)
+                if enum_id:
+                    enum_field = UnifiedMainInstance.field(fix, enum_id)
+                    if enum_field:
+                        codeset_name = enum_field['@name']
+                field['@type'] = codeset_name + 'CodeSet'
+            assoc_id = unified_field.get('@associatedDataTag', None)
+            if assoc_id:
+                assoc_field = UnifiedMainInstance.field(fix, assoc_id)
+                if assoc_field:
+                    field['lengthId'] = assoc_field['@id']
+            fields.append(field)
 
 Unified2Orchestra = Unified2Orchestra10
 """ Default implementation of Unified Repository to Orchestra conversion """
