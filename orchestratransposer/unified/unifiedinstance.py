@@ -37,6 +37,20 @@ class UnifiedMainInstance:
         except LookupError:
             return None
 
+    @staticmethod
+    def datatypes(fix: dict) -> dict:
+        """
+        :return: a list of  datatypes of a fix version of UnifiedInstance
+        """
+        datatypes = fix.get('datatypes', None)
+        if not datatypes:
+            datatypes = {}
+            fix['datatype'] = datatypes
+        datatype = datatypes.get('datatype', None)
+        if not datatype:
+            datatype = []
+            datatypes['datatype'] = datatype
+        return datatype
 
 class UnifiedPhrasesInstance:
     """

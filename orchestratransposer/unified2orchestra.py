@@ -4,7 +4,7 @@ from typing import List, Optional
 from orchestratransposer.orchestra.orchestra import Orchestra10
 from orchestratransposer.orchestra.orchestrainstance import OrchestraInstance10
 from orchestratransposer.unified.unified import UnifiedWithPhrases
-from orchestratransposer.unified.unifiedinstance import UnifiedInstanceWithPhrases
+from orchestratransposer.unified.unifiedinstance import UnifiedInstanceWithPhrases, UnifiedMainInstance
 
 
 class Unified2Orchestra10:
@@ -24,9 +24,9 @@ class Unified2Orchestra10:
         orch = OrchestraInstance10()
         fix = unified.fix(version)
         self.unified2orch_metadata(fix, orch)
-        """datatypes = orch.datatypes()
-        self.unified2orch_datatypes(fix, datatypes)
-        codesets = orch.codesets()
+        orch_datatypes = orch.datatypes()
+        self.unified2orch_datatypes(fix, orch_datatypes)
+        """codesets = orch.codesets()
         self.unified2orch_codesets(fix, codesets)
         fields = orch.fields()
         self.unified2orch_fields(fix, fields)
@@ -56,6 +56,20 @@ class Unified2Orchestra10:
         repository = orch.root()
         repository['@name'] = fix['@version']
         repository['@version'] = fix['@version']
+
+    def unified2orch_datatypes(self, fix: dict, orch_datatypes):
+        datatypes = UnifiedMainInstance.datatypes(fix)
+        for datatype in datatypes:
+            exclude_keys = ['@textId', 'XML', 'Example']
+            orch_datatype = {k: datatype[k] for k in set(list(datatype.keys())) - set(exclude_keys)}
+            """ TODO annotations with example"""
+            xml = datatype.get('XML', None)
+            if xml:
+                orch_mappings = []
+                orch2xml_mapping = {k: xml[k] for k in set(list(xml.keys())) - set(exclude_keys)}
+                orch_mappings.append(orch2xml_mapping)
+                orch_datatype['fixr:mappedDatatype'] = orch_mappings
+            orch_datatypes.append(orch_datatype)
 
 
 Unified2Orchestra = Unified2Orchestra10
