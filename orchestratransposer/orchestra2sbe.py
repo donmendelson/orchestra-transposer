@@ -1,14 +1,10 @@
 import logging
-from typing import List
+from typing import List, Optional
 
-from orchestratransposer.orchestra.orchestra import Orchestra10, Orchestra10WithSBETypes
+from orchestratransposer.orchestra.orchestra import Orchestra10WithSBETypes
 from orchestratransposer.orchestra.orchestrainstance import OrchestraInstance10
 from orchestratransposer.sbe.sbe import SBE10
 from orchestratransposer.sbe.sbeinstance import SBEInstance10
-
-
-TEXT_KEY = '$'
-""" Symbol used by XMLSchema package for text content of an element (#text) """
 
 
 class Orchestra2SBE10_10:
@@ -57,32 +53,39 @@ class Orchestra2SBE10_10:
         """
         Set SBE message schema metadata from Orchestra
 
-        SBE schema text_id is derived from Orchestra metadata dcterms:identifier, defaults to 1.
+        SBE schema id is derived from Orchestra metadata dcterms:identifier, defaults to 1.
         """
-        repository = orch.root()
-        sbe_ms = sbe.root()
-        sbe_ms['@package'] = repository.get('@name', 'Unknown')
-        sbe_ms['@text_id'] = int(orch.metadata().get('dcterms:identifier', 1))
-        sbe_ms['@version'] = 0
+        repository = orch.repository()
+        ms = sbe.message_schema()
+        ms['package'] = repository.get('name', 'Unknown')
+        metadata = orch.metadata()
+        try:
+            identifier = next(i for i in metadata if i[0] == 'dcterms:identifier')
+            ms['id'] = int(identifier[1])
+        except StopIteration:
+            ms['id'] = 1
+        ms['version'] = 0
 
     def orch2sbe_datatypes(self, datatypes: list, sbe: SBEInstance10):
         """
         Append SBE types from Orchestra datatypes
         """
-        for datatype in datatypes:
-            name = datatype['@name']
+        lst = filter(lambda l: isinstance(l, list) and l[0] == 'fixr:datatype', datatypes)
+        for datatype in lst:
+            name = datatype[1]['name']
             if name not in ['NumInGroup', 'Length', 'Reserved100Plus', 'Reserved1000Plus', 'Reserved4000Plus', 'XID',
                             'XIDREF']:
-                sbe_type_attr = {'@name': name, '@semanticType': datatype['@name']}
-                mappings = datatype.get('fixr:mappedDatatype', None)
+                sbe_type_attr = {'name': name, 'semanticType': name}
+                mappings = filter(lambda l: isinstance(l, list) and l[0] == 'fixr:mappedDatatype', datatype)
                 if mappings:
                     mapping = next(
-                        (mapping for mapping in mappings if mapping['@standard'] == 'SBE'), None)
+                        (mapping for mapping in mappings if mapping[1]['standard'] == 'SBE'), None)
                     if mapping:
-                        sbe_encoding = mapping.get('fixr:extension', None)
-                        documentation = OrchestraInstance10.documentation(mapping)
+                        pass
+                        """sbe_encoding = mapping[1].get('fixr:extension', None)
+                        documentation = Orchestra2SBE10_10.__documentation_str(mapping)
                         if documentation:
-                            sbe_type_attr['@description'] = documentation
+                            sbe_type_attr['description'] = documentation
                         if sbe_encoding:
                             try:
                                 sbe_schema = sbe_encoding['sbe:messageSchema'][0]
@@ -92,39 +95,49 @@ class Orchestra2SBE10_10:
                             except AttributeError:
                                 self.logger.error('SBE datatype mapping not found for name=%s', name)
                         else:
-                            base = mapping.get('@base', None)
+                            base = mapping[1].get('base', None)
                             if base:
-                                sbe_type_attr['@primitiveType'] = base
-                            min_inclusive = mapping.get('@minInclusive', None)
+                                sbe_type_attr['primitiveType'] = base
+                            min_inclusive = mapping[1].get('minInclusive', None)
                             if min_inclusive:
                                 sbe_type_attr['minValue'] = min_inclusive
-                            max_inclusive = mapping.get('@maxInclusive', None)
+                            max_inclusive = mapping[1].get('maxInclusive', None)
                             if max_inclusive:
                                 sbe_type_attr['maxValue'] = max_inclusive
-                            sbe.append_encoding_type(sbe_type_attr)
+                            sbe.append_encoding_type(sbe_type_attr)"""
 
     def orch2sbe_codesets(self, codesets: list, sbe: SBEInstance10):
         """
         Append SBE enums from Orchestra codesets
         """
-        for codeset in codesets:
-            sbe_enum_attr = {'@name': codeset['@name'], '@encodingType': codeset['@type']}
-            documentation = OrchestraInstance10.documentation(codeset)
+        codeset_lst = filter(lambda l: isinstance(l, list) and l[0] == 'fixr:codeSet', codesets)
+        for codeset in codeset_lst:
+            sbe_enum_attr = {'name': codeset[1]['name'], 'encodingType': codeset[1]['type']}
+            documentation = Orchestra2SBE10_10.__documentation_str(codeset)
             if documentation:
-                sbe_enum_attr['@description'] = documentation
-            sbe_codes = []
-            sbe_enum_attr['validValue'] = sbe_codes
-            cd_lst = codeset['fixr:code']
+                sbe_enum_attr['description'] = documentation
+            sbe_enum = ['enum', sbe_enum_attr]
+            cd_lst = filter(lambda l: isinstance(l, list) and l[0] == 'fixr:code', codeset)
             for code in cd_lst:
-                sbe_code_attr = {'@name': code['@name'], TEXT_KEY: code['@value']}
-                documentation = OrchestraInstance10.documentation(code)
+                sbe_code = ['validValue']
+                sbe_code_attr = {'name': code[1]['name']}
+                sbe_code.append(sbe_code_attr)
+                documentation = Orchestra2SBE10_10.__documentation_str(code)
                 if documentation:
-                    sbe_code_attr['@description'] = documentation
-                sbe_codes.append(sbe_code_attr)
-
+                    sbe_code_attr['description'] = documentation
+                sbe_enum.append(sbe_code)
             sbe.append_enum(sbe_enum_attr)
 
-    def orch2sbe_append_members(self, sbe_structure, field_refs, component_refs, group_refs, orch):
+    @staticmethod
+    def __documentation_str(element) -> Optional[str]:
+        # Use first instance of possibly multiple documentations; consider concatenation
+        try:
+            documentation = OrchestraInstance10.documentation(element)
+            return documentation[0][1]
+        except IndexError:
+            return None
+
+    def orch2sbe_append_members(self, sbe_structure: list, field_refs, component_refs, group_refs, orch):
         """ Appends members to an SBE message or group structure from Orchestra """
         sbe_fields = []
         sbe_groups = []
@@ -144,49 +157,61 @@ class Orchestra2SBE10_10:
         """
         Append SBE messages from Orchestra
         """
-        for msg in messages:
-            sbe_msg_attr = {'@name': msg['@name'], '@text_id': msg['@text_id']}
-            msg_type = msg.get('@msgType', None)
+        msg_lst = filter(lambda l: isinstance(l, list) and l[0] == 'fixr:message', messages)
+        for msg in msg_lst:
+            sbe_msg = ['sbe:message']
+            sbe_msg_attr = {'name': msg[1]['name'], 'id': msg[1]['id']}
+            sbe_msg.append(sbe_msg_attr)
+            msg_type = msg[1].get('msgType', None)
             if msg_type:
-                sbe_msg_attr['@semanticType'] = msg_type
-            documentation = OrchestraInstance10.documentation(msg)
+                sbe_msg_attr['semanticType'] = msg_type
+            documentation = Orchestra2SBE10_10.__documentation_str(msg)
             if documentation:
-                sbe_msg_attr['@description'] = documentation
+                sbe_msg_attr['description'] = documentation
             structure = OrchestraInstance10.structure(msg)
             field_refs = OrchestraInstance10.field_refs(structure)
             component_refs = OrchestraInstance10.component_refs(structure)
             group_refs = OrchestraInstance10.group_refs(structure)
-            self.orch2sbe_append_members(sbe_msg_attr, field_refs, component_refs, group_refs, orch)
-            sbe.append_message(sbe_msg_attr)
+            self.orch2sbe_append_members(sbe_msg, field_refs, component_refs, group_refs, orch)
+            sbe.append_message(sbe_msg)
 
     def orch2sbe_fields(self, sbe_fields: list, sbe_data: list, field_refs: list, orch: OrchestraInstance10):
         for field_ref in field_refs:
-            field_id = field_ref['@text_id']
+            field_id = field_ref[1]['id']
             field = orch.field(field_id)
-            name = field['@name'] if field else 'Unknown'
-            abbr_name = field.get('@abbrName', None)
-            if len(name) > 64:
-                if abbr_name:
-                    name = abbr_name
-                else:
-                    name = name[:64]
-                self.logger.warning('Field text_id=%d name=%s shortened to %s', field_id, field['@name'], name)
-            presence = Orchestra2SBE10_10.orch2sbe_presence(field_ref['@presence']) if field else 'required'
-            field_type = field['@type'] if field else 'Unknown'
-            if field_type not in ['Length', 'NumInGroup']:
-                sbe_field_attr = {'@text_id': field_id,
-                                  '@name': name,
-                                  '@presence': presence,
-                                  '@type': field_type}
-                documentation = OrchestraInstance10.documentation(field_ref)
-                if documentation:
-                    sbe_field_attr['@description'] = documentation
-                if field_type == 'data':
-                    sbe_data.append(sbe_field_attr)
-                else:
-                    sbe_fields.append(sbe_field_attr)
+            if field:
+                name = field[1].get('name', 'Unknown')
+                abbr_name = field[1].get('abbrName', None)
+                if len(name) > 64:
+                    if abbr_name:
+                        name = abbr_name
+                    else:
+                        name = name[:64]
+                    self.logger.warning('Field text_id=%d name=%s shortened to %s', field_id, field[1]['name'], name)
+                presence = Orchestra2SBE10_10.orch2sbe_presence(field_ref[1].get('presence', None))
+                field_type = field[1].get('type', 'Unknown')
+                if field_type not in ['Length', 'NumInGroup']:
+                    sbe_field_attr = {'id': field_id,
+                                      'name': name,
+                                      'presence': presence,
+                                      'type': field_type}
+                    documentation = Orchestra2SBE10_10.__documentation_str(field_ref)
+                    if documentation:
+                        sbe_field_attr['description'] = documentation
+                    if field_type in ['data', 'XMLData']:
+                        sbe_data_field = ['data', sbe_field_attr]
+                        sbe_data.append(sbe_data_field)
+                    else:
+                        sbe_field = ['field', sbe_field_attr]
+                        sbe_fields.append(sbe_field)
             else:
-                self.logger.warning('Field text_id=%d name=%s not defined', field_id, name)
+                self.logger.error('Field id=%d not found', field_id)
+                sbe_field_attr = {'id': field_id,
+                                  'name': 'Unknown',
+                                  'presence': 'required',
+                                  'type': 'Unknown'}
+                sbe_field = ['field', sbe_field_attr]
+                sbe_fields.append(sbe_field)
 
     def orch2sbe_components(self, sbe_fields: list, sbe_data: list, sbe_groups: list, component_refs: list,
                             orch: OrchestraInstance10):
@@ -202,18 +227,19 @@ class Orchestra2SBE10_10:
         :return:
         """
         for component_ref in component_refs:
-            component_id = component_ref['@text_id']
+            component_id = component_ref[1]['id']
             component = orch.component(component_id)
-            name = component['@name'] if component else 'Unknown'
-            if component and name not in ['StandardHeader', 'StandardTrailer']:
-                field_refs = OrchestraInstance10.field_refs(component)
-                self.orch2sbe_fields(sbe_fields, sbe_data, field_refs, orch)
-                nested_component_refs = OrchestraInstance10.component_refs(component)
-                self.orch2sbe_components(sbe_fields, sbe_data, sbe_groups, nested_component_refs, orch)
-                group_refs = OrchestraInstance10.group_refs(component)
-                self.orch2sbe_groups(sbe_groups, group_refs, orch)
+            if component:
+                name = component[1].get('name', 'Unknown')
+                if name not in ['StandardHeader', 'StandardTrailer']:
+                    field_refs = OrchestraInstance10.field_refs(component)
+                    self.orch2sbe_fields(sbe_fields, sbe_data, field_refs, orch)
+                    nested_component_refs = OrchestraInstance10.component_refs(component)
+                    self.orch2sbe_components(sbe_fields, sbe_data, sbe_groups, nested_component_refs, orch)
+                    group_refs = OrchestraInstance10.group_refs(component)
+                    self.orch2sbe_groups(sbe_groups, group_refs, orch)
             else:
-                self.logger.warning('Component text_id=%d name=%s not defined', component_id, name)
+                self.logger.error('Component id=%d not found', component_id)
 
     def orch2sbe_groups(self, sbe_groups, group_refs, orch):
         """
@@ -224,32 +250,35 @@ class Orchestra2SBE10_10:
         :return:
         """
         for group_ref in group_refs:
-            group_id = group_ref['@text_id']
+            group_id = group_ref[1]['id']
             group = orch.group(group_id)
-            name = group['@name'] if group else 'Unknown'
-            abbr_name = group.get('@abbrName', None)
-            if len(name) > 64:
-                if abbr_name:
-                    name = abbr_name
-                else:
-                    name = name[:64]
-                self.logger.warning('Group text_id=%d name=%s shortened to %s', group_id, group['@name'], name)
             if group:
-                sbe_group_attr = {'@text_id': group_ref['@text_id'],
-                                  '@name': name}
-                documentation = OrchestraInstance10.documentation(group)
-                if documentation:
-                    sbe_group_attr['@description'] = documentation
-                sbe_groups.append(sbe_group_attr)
-                field_refs = OrchestraInstance10.field_refs(group)
-                component_refs = OrchestraInstance10.component_refs(group)
-                group_refs = OrchestraInstance10.group_refs(group)
-                self.orch2sbe_append_members(sbe_group_attr, field_refs, component_refs, group_refs, orch)
+                name = group[1].get('name', 'Unknown')
+                abbr_name = group[1].get('abbrName', None)
+                if len(name) > 64:
+                    if abbr_name:
+                        name = abbr_name
+                    else:
+                        name = name[:64]
+                    self.logger.warning('Group text_id=%d name=%s shortened to %s', group_id, group[1]['name'], name)
+                if group:
+                    sbe_group = ['group']
+                    sbe_group_attr = {'id': group_id,
+                                      'name': name}
+                    sbe_group.append(sbe_group_attr)
+                    documentation = Orchestra2SBE10_10.__documentation_str(group)
+                    if documentation:
+                        sbe_group_attr['description'] = documentation
+                    sbe_groups.append(sbe_group_attr)
+                    field_refs = OrchestraInstance10.field_refs(group)
+                    component_refs = OrchestraInstance10.component_refs(group)
+                    group_refs = OrchestraInstance10.group_refs(group)
+                    self.orch2sbe_append_members(sbe_group, field_refs, component_refs, group_refs, orch)
             else:
-                self.logger.warning('Group text_id=%d name=%s not defined', group_id, name)
+                self.logger.error('Group id=%d not found', group_id)
 
     @staticmethod
-    def orch2sbe_presence(orch_presence: str) -> str:
+    def orch2sbe_presence(orch_presence: Optional[str]) -> str:
         """ Translate Orchestra presence to SBE presence string """
         if not orch_presence or orch_presence == 'required':
             return 'required'

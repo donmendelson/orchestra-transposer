@@ -1,8 +1,5 @@
 from pprint import pformat
-from typing import Optional, Union
-
-TEXT_KEY = '$'
-""" Symbol used by XMLSchema package for text content of an element (#text) """
+from typing import List, Optional, Tuple
 
 
 class OrchestraInstance10:
@@ -11,110 +8,80 @@ class OrchestraInstance10:
     """
 
     def __init__(self, obj=None):
-        self.obj = obj if obj is not None else {}
+        self.obj = obj if obj is not None else ['fixr:repository', {}]
 
     def __str__(self):
         return pformat(self.obj, width=120)
 
-    def root(self) -> dict:
+    def root(self) -> list:
         """
         :return: the root of an Orchestra instance represented as a Python dictionary
         """
         return self.obj
 
-    def metadata(self) -> dict:
+    def repository(self) -> dict:
+        """ Returns attributes of a repository """
+        try:
+            return next(i for i in self.obj if isinstance(i, dict))
+        except StopIteration:
+            d = {}
+            self.obj.append(d)
+            return d
+
+    def metadata(self) -> list:
         """
         :return: the metadata section of an Orchestra instance containing Dublin Core Terms
         """
-        metadata = self.obj.get('fixr:metadata', None)
-        if not metadata:
-            metadata = {}
-            self.obj['fixr:metadata'] = metadata
+        try:
+            metadata = next(l for l in self.root() if isinstance(l, list) and l[0] == 'fixr:metadata')
+        except StopIteration:
+            metadata = ['fixr:metadata']
+            self.root().append(metadata)
         return metadata
+
+    def __types(self, category: str) -> list:
+        try:
+            types = next(i for i in self.root() if isinstance(i, list) and i[0] == category)
+        except StopIteration:
+            types = [category]
+            self.root().append(types)
+        return types
 
     def datatypes(self) -> list:
         """
         :return: a list of  datatypes of an Orchestra instance
         """
-        datatypes = self.obj.get('fixr:datatypes', None)
-        if not datatypes:
-            datatypes = {}
-            self.obj['fixr:datatypes'] = datatypes
-        datatype = datatypes.get('fixr:datatype', None)
-        if not datatype:
-            datatype = []
-            datatypes['fixr:datatype'] = datatype
-        return datatype
+        return self.__types('fixr:datatypes')
 
     def codesets(self) -> list:
         """
         :return: a list of  codesets of an Orchestra instance
         """
-        codesets = self.obj.get('fixr:codeSets', None)
-        if not codesets:
-            codesets = {}
-            self.obj['fixr:codeSets'] = codesets
-        codeset = codesets.get('fixr:codeSet', None)
-        if not codeset:
-            codeset = []
-            codesets['fixr:codeSet'] = codeset
-        return codeset
+        return self.__types('fixr:codeSets')
 
     def fields(self) -> list:
         """
         :return: a list of  fields of an Orchestra instance
         """
-        fields = self.obj.get('fixr:fields', None)
-        if not fields:
-            fields = {}
-            self.obj['fixr:fields'] = fields
-        field = fields.get('fixr:field', None)
-        if not field:
-            field = []
-            fields['fixr:field'] = field
-        return field
+        return self.__types('fixr:fields')
 
     def components(self) -> list:
         """
         :return: a list of  components of an Orchestra instance
         """
-        components = self.obj.get('fixr:components', None)
-        if not components:
-            components = {}
-            self.obj['fixr:components'] = components
-        component = components.get('fixr:component', None)
-        if not component:
-            component = []
-            components['fixr:component'] = component
-        return component
+        return self.__types('fixr:components')
 
     def groups(self) -> list:
         """
         :return: a list of  components of an Orchestra instance
         """
-        groups = self.obj.get('fixr:groups', None)
-        if not groups:
-            groups = {}
-            self.obj['fixr:groups'] = groups
-        group = groups.get('fixr:group', None)
-        if not group:
-            group = []
-            groups['fixr:group'] = group
-        return group
+        return self.__types('fixr:groups')
 
     def messages(self) -> list:
         """
         :return: a list of messages of an Orchestra instance
         """
-        messages = self.obj.get('fixr:messages', None)
-        if not messages:
-            messages = {}
-            self.obj['fixr:messages'] = messages
-        message = messages.get('fixr:message', None)
-        if not message:
-            message = []
-            messages['fixr:message'] = message
-        return message
+        return self.__types('fixr:messages')
 
     def append_message(self, message: dict):
         """
@@ -166,21 +133,36 @@ class OrchestraInstance10:
         groups.append(group)
 
     @staticmethod
-    def structure(message: dict) -> dict:
-        structure = message.get('fixr:structure', None)
-        if not structure:
-            structure = {}
-            message['fixr:structure'] = structure
-        return structure
+    def structure(message: list) -> list:
+        try:
+            return next(filter(lambda l: isinstance(l, list) and l[0] == 'fixr:structure', message))
+        except StopIteration:
+            struct = ['fixr:structure']
+            message.append(struct)
+        return struct
 
     @staticmethod
-    def documentation(element: dict) -> Union[str, None]:
-        annotation = element.get('fixr:annotation', None)
-        if annotation:
-            documentations = annotation.get('fixr:documentation', None)
-            if documentations:
-                return ' '.join(d.get(TEXT_KEY, "") for d in documentations)
-        return None
+    def documentation(element: list) -> List[Tuple[str, str]]:
+        """ Returns a list of documentation elements, each a tuple of purpose (possibly None) and text """
+        try:
+            annotation = next(i for i in element if isinstance(i, list) and i[0] == 'fixr:annotation')
+            documentation = filter(lambda l: isinstance(l, list) and l[0] == 'fixr:documentation', annotation)
+            return list(map(OrchestraInstance10.__map_documentation, documentation))
+        except StopIteration:
+            return []
+
+    @staticmethod
+    def __map_documentation(element: list) -> Tuple[str, str]:
+        try:
+            attr = next(i for i in element if isinstance(i, dict))
+            purpose = attr['purpose']
+        except StopIteration:
+            purpose = None
+        try:
+            text = element[2]
+        except IndexError:
+            text = None
+        return purpose, text
 
     @staticmethod
     def append_documentation(element: dict, documentation: str):
@@ -195,43 +177,32 @@ class OrchestraInstance10:
         documentations.append({'$': documentation})
 
     @staticmethod
-    def field_refs(structure: dict) -> list:
-        field_refs = structure.get('fixr:fieldRef', None)
-        if not field_refs:
-            field_refs = []
-            structure['fixr:fieldRef'] = field_refs
-        return field_refs
+    def field_refs(structure: list) -> list:
+        return list(filter(lambda l: isinstance(l, list) and l[0] == 'fixr:fieldRef', structure))
 
     @staticmethod
-    def component_refs(structure: dict) -> list:
-        component_refs = structure.get('fixr:componentRef', None)
-        if not component_refs:
-            component_refs = []
-            structure['fixr:componentRef'] = component_refs
-        return component_refs
+    def component_refs(structure: list) -> list:
+        return list(filter(lambda l: isinstance(l, list) and l[0] == 'fixr:componentRef', structure))
 
     @staticmethod
-    def group_refs(structure: dict) -> list:
-        groups_refs = structure.get('fixr:groupRef', None)
-        if not groups_refs:
-            groups_refs = []
-            structure['fixr:groupRef'] = groups_refs
-        return groups_refs
+    def group_refs(structure: list) -> list:
+        return list(filter(lambda l: isinstance(l, list) and l[0] == 'fixr:groupRef', structure))
 
-    def field(self, field_id: int) -> Optional[dict]:
+    def field(self, field_id: int) -> Optional[list]:
         fields: list = self.fields()
-        return next((field for field in fields if field['@id'] == field_id), None)
+        return next((field for field in fields if isinstance(field, list) and field[1]['id'] == field_id), None)
 
-    def component(self, component_id: int) -> Optional[dict]:
+    def component(self, component_id: int) -> Optional[list]:
         components: list = self.components()
-        return next((component for component in components if component['@id'] == component_id), None)
+        return next((component for component in components if
+                     isinstance(component, list) and component[1]['id'] == component_id), None)
 
-    def group(self, group_id: int) -> Optional[dict]:
+    def group(self, group_id: int) -> Optional[list]:
         groups: list = self.groups()
-        return next((group for group in groups if group['@id'] == group_id), None)
+        return next((group for group in groups if isinstance(group, list) and group[1]['id'] == group_id), None)
 
     @staticmethod
-    def append_field_ref(structure: dict, field_ref):
+    def append_field_ref(structure: list, field_ref):
         """
         Append a fieldRef to a message or group structure
         """
@@ -239,7 +210,7 @@ class OrchestraInstance10:
         field_refs.append(field_ref)
 
     @staticmethod
-    def append_group_ref(structure: dict, group_ref):
+    def append_group_ref(structure: list, group_ref):
         """
         Append a groupRef to a message or group structure
         """

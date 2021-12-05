@@ -2,7 +2,7 @@ import os
 from typing import Iterator, List, Tuple
 from xml.etree import ElementTree
 
-from xmlschema import XMLSchema
+from xmlschema import JsonMLConverter, XMLSchema
 
 from .orchestrainstance import OrchestraInstance10
 from ..sbe.sbe import SBE10
@@ -45,7 +45,7 @@ class Orchestra10:
         instance or an ElementTree instance or a string containing the XML data.
         """
         data, errors = [], []
-        for result in self.xsd.iter_decode(xml):
+        for result in self.xsd.iter_decode(xml, use_defaults=False, converter=JsonMLConverter):
             if not isinstance(result, Exception):
                 data.append(result)
             else:
@@ -94,7 +94,8 @@ class Orchestra10WithSBETypes(Orchestra10):
                                        namespaces={'fixr': 'http://fixprotocol.io/2020/orchestra/repository',
                                                    'dcterms': 'http://purl.org/dc/terms/',
                                                    'dc': 'http://purl.org/dc/elements/1.1/',
-                                                   'sbe': 'http://fixprotocol.io/2016/sbe'})
+                                                   'sbe': 'http://fixprotocol.io/2016/sbe'},
+                                       **{'converter': JsonMLConverter})
         ElementTree.register_namespace(
             'fixr', 'http://fixprotocol.io/2020/orchestra/repository')
         ElementTree.register_namespace('dcterms', 'http://purl.org/dc/terms/')

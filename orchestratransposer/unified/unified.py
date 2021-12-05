@@ -2,7 +2,7 @@ import os
 from typing import List, Tuple
 from xml.etree import ElementTree
 
-from xmlschema import XMLSchema
+from xmlschema import JsonMLConverter, XMLSchema
 
 from .unifiedinstance import UnifiedMainInstance, UnifiedInstanceWithPhrases, \
     UnifiedPhrasesInstance
@@ -42,7 +42,7 @@ class UnifiedMain:
         instance or an ElementTree instance or a string containing the XML data.
         """
         data, errors = [], []
-        for result in self.xsd.iter_decode(xml):
+        for result in self.xsd.iter_decode(xml, use_defaults=False, converter=JsonMLConverter):
             if not isinstance(result, Exception):
                 data.append(result)
             else:
@@ -58,7 +58,8 @@ class UnifiedMain:
         :return: a list of errors, if any
         """
         data, errors = self.xsd.encode(
-            instance.root(), validation='lax', use_defaults=False, path="fixRepository")
+            instance.root(), validation='lax', use_defaults=False, path="fixRepository",
+            **{'converter': JsonMLConverter})
         stream.write(ElementTree.tostring(data, encoding='utf8', method='xml'))
         return errors
 
@@ -97,7 +98,7 @@ class UnifiedPhrases:
         instance or an ElementTree instance or a string containing the XML data.
         """
         data, errors = [], []
-        for result in self.xsd.iter_decode(xml):
+        for result in self.xsd.iter_decode(xml, use_defaults=False):
             if not isinstance(result, Exception):
                 data.append(result)
             else:

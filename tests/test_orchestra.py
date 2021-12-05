@@ -22,7 +22,7 @@ def test_invalid():
     orchestra = Orchestra()
     xml_path = os.path.join(XML_FILE_DIR, 'BadOrchestra.xml')
     errors = orchestra.validate(xml_path)
-    assert not errors
+    assert errors
 
 
 def test_to_dict():

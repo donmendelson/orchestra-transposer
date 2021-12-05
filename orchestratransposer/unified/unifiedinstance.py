@@ -31,14 +31,23 @@ class UnifiedMainInstance:
         try:
             main_root = self.root()
             if version:
-                return next(fix for fix in main_root['fix'] if fix['@version'] == version)
+                for i in main_root:
+                    if isinstance(i, list) and i[0] == 'fix':
+                        if isinstance(i[1], dict):
+                            v = i[1].get('version', None)
+                            if version == v:
+                                return i
+                return None
             else:
-                return main_root['fix'][0]
+                for i in main_root:
+                    if isinstance(i, list) and i[0] == 'fix':
+                        return i
+                return None
         except LookupError:
             return None
 
     @staticmethod
-    def datatypes(fix: dict) -> dict:
+    def datatypes(fix: dict) -> list:
         """
         :return: a list of  datatypes of a fix version of UnifiedInstance
         """
@@ -53,7 +62,7 @@ class UnifiedMainInstance:
         return datatype
 
     @staticmethod
-    def fields(fix: dict) -> dict:
+    def fields(fix: dict) -> list:
         """
         :return: a list of  fields of a fix version of UnifiedInstance
         """
@@ -71,6 +80,7 @@ class UnifiedMainInstance:
     def field(fix: dict, field_id: int) -> Optional[dict]:
         fields = UnifiedMainInstance.fields(fix)
         return next((field for field in fields if field['@id'] == field_id), None)
+
 
 class UnifiedPhrasesInstance:
     """

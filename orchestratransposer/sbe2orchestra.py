@@ -7,10 +7,6 @@ from orchestratransposer.sbe.sbe import SBE10
 from orchestratransposer.sbe.sbeinstance import SBEInstance10
 
 
-TEXT_KEY = '$'
-""" Symbol used by XMLSchema package for text content of an element (#text) """
-
-
 class SBE2Orchestra10_10:
 
     def __init__(self):
@@ -64,12 +60,12 @@ class SBE2Orchestra10_10:
         """
         Set Orchestra metadata from an SBE message schema
         """
-        repository = orch.root()
-        sbe_ms = sbe.root()
-        repository['@name'] = sbe_ms['@package']
-        orch.metadata()['dcterms:identifier'] = str(sbe_ms['@text_id'])
+        repository = orch.repository()
+        ms = sbe.message_schema()
+        repository['name'] = ms['package']
+        orch.metadata()['dcterms:identifier'] = str(ms['id'])
         # a simple integer is not accepted as version in Orchestra 1.0
-        repository['@version'] = str(sbe_ms['@version']) + ".0"
+        repository['version'] = str(ms['version']) + ".0"
 
     def sbe2orch_datatypes(self, sbe: SBEInstance10, orch_datatypes: list):
         """
@@ -81,49 +77,49 @@ class SBE2Orchestra10_10:
         type will be mapped to its own Orchestra datatype.
         """
         self.sbe2orch_simple_types(orch_datatypes, sbe)
-        self.sbe2orch_composite_types(orch_datatypes, sbe)
+        # self.sbe2orch_composite_types(orch_datatypes, sbe)
 
     def sbe2orch_composite_types(self, orch_datatypes, sbe):
         sbe_composites = sbe.composites()
         for sbe_composite in sbe_composites:
             prefix_composite = self.__prefix_attributes('sbe', sbe_composite)
             extension = {'sbe:composite': [prefix_composite]}
-            orch2sbe_mapping = {'@standard': 'SBE', 'fixr:extension': extension}
+            orch2sbe_mapping = {'standard': 'SBE', 'fixr:extension': extension}
             orch_mappings = [orch2sbe_mapping]
-            orch_datatype = {'@name': sbe_composite['@name'], 'fixr:mappedDatatype': orch_mappings}
+            orch_datatype = {'name': sbe_composite['@name'], 'fixr:mappedDatatype': orch_mappings}
             orch_datatypes.append(orch_datatype)
 
     def sbe2orch_simple_types(self, orch_datatypes, sbe):
         sbe_types = sbe.encoding_types()
         for sbe_type in sbe_types:
             orch_mappings = []
-            orch2sbe_mapping = {'@standard': 'SBE', '@base': sbe_type['@primitiveType']}
+            orch2sbe_mapping = {'standard': 'SBE', 'base': sbe_type[1]['primitiveType']}
             orch_mappings.append(orch2sbe_mapping)
-            orch_datatype = {'@name': sbe_type['@name'], 'fixr:mappedDatatype': orch_mappings}
+            orch_datatype = {'name': sbe_type[1]['name'], 'fixr:mappedDatatype': orch_mappings}
             orch_datatypes.append(orch_datatype)
 
     def __prefix_attributes(self, prefix: str, attr: dict):
         prefixed = {}
         for (k, v) in attr.items():
             if k[0] == '@':
-                prefixed['@'+prefix+':'+k[1:]] = v
+                prefixed['@' + prefix + ':' + k[1:]] = v
             else:
-                prefixed[prefix+':'+k] = v
+                prefixed[prefix + ':' + k] = v
         return prefixed
 
     def sbe2orch_codesets(self, sbe: SBEInstance10, codesets: list):
         sbe_enums: list = sbe.enums()
         for idx, sbe_enum in enumerate(sbe_enums, start=1):
             codes = []
-            codeset_attr = {'@name': sbe_enum['@name'], '@text_id': idx * 100, '@type': sbe_enum['@encodingType'],
+            codeset_attr = {'name': sbe_enum[1]['name'], 'id': idx * 100, 'type': sbe_enum[1]['encodingType'],
                             'fixr:code': codes}
-            documentation = sbe_enum.get('@description', None)
+            documentation = sbe_enum[1].get('description', None)
             if documentation:
                 OrchestraInstance10.append_documentation(codeset_attr, documentation)
-            sbe_codes = sbe_enum['validValue']
+            sbe_codes = filter(lambda c: isinstance(c, list) and c[0] == 'validValue', sbe_enum)
             for idx2, sbe_code in enumerate(sbe_codes, start=1):
-                code_attr = {'@name': sbe_code['@name'], '@text_id': idx * 100 + idx2, '@value': sbe_code[TEXT_KEY]}
-                documentation = sbe_enum.get('@description', None)
+                code_attr = {'name': sbe_code[1]['name'], 'id': idx * 100 + idx2, 'value': sbe_code[2]}
+                documentation = sbe_enum[1].get('description', None)
                 if documentation:
                     OrchestraInstance10.append_documentation(code_attr, documentation)
                 codes.append(code_attr)
@@ -132,11 +128,11 @@ class SBE2Orchestra10_10:
     def sbe2orch_messages_and_groups(self, sbe: SBEInstance10, orch: OrchestraInstance10):
         sbe_messages = sbe.messages()
         for sbe_message in sbe_messages:
-            msg_attr = {'@name': sbe_message['@name'], '@text_id': sbe_message['@text_id']}
-            msg_type = sbe_message.get('@semanticType', None)
+            msg_attr = {'name': sbe_message[1]['name'], 'id': sbe_message[1]['id']}
+            msg_type = sbe_message[1].get('semanticType', None)
             if msg_type:
-                msg_attr['@msgType'] = msg_type
-            documentation = sbe_message.get('@description', None)
+                msg_attr['msgType'] = msg_type
+            documentation = sbe_message[1].get('description', None)
             if documentation:
                 OrchestraInstance10.append_documentation(msg_attr, documentation)
             structure = OrchestraInstance10.structure(msg_attr)
@@ -146,37 +142,42 @@ class SBE2Orchestra10_10:
             self.sbe2orch_append_members(structure, sbe_fields, sbe_groups, sbe_data_fields)
             orch.append_message(msg_attr)
 
-            for sbe_group in sbe_groups:
-                group_attr = {'@name': sbe_group['@name'], '@text_id': sbe_group['@text_id']}
-                sbe_fields = sbe.fields(sbe_group)
-                sbe_groups = sbe.groups(sbe_group)
-                sbe_data_fields = sbe.data(sbe_group)
-                self.sbe2orch_append_members(group_attr, sbe_fields, sbe_groups, sbe_data_fields)
-                orch.append_group(group_attr)
+            if sbe_groups:
+                for sbe_group in sbe_groups:
+                    group_attr = {'name': sbe_group[1]['name'], 'id': sbe_group[1]['id']}
+                    sbe_fields = sbe.fields(sbe_group)
+                    sbe_groups = sbe.groups(sbe_group)
+                    sbe_data_fields = sbe.data(sbe_group)
+                    self.sbe2orch_append_members(group_attr, sbe_fields, sbe_groups, sbe_data_fields)
+                    orch.append_group(group_attr)
 
     def sbe2orch_append_members(self, structure, sbe_fields, sbe_groups, sbe_data_fields):
         for sbe_field in sbe_fields:
-            field_ref_attr = {'@text_id': sbe_field['@text_id'], '@presence': self.sbe2orch_presence(sbe_field['@presence'])}
-            documentation = sbe_field.get('@description', None)
+            field_ref_attr = {'@id': sbe_field[1]['id'],
+                              'presence': self.sbe2orch_presence(sbe_field[1].get('presence', 'required'))}
+            documentation = sbe_field[1].get('description', None)
             if documentation:
                 OrchestraInstance10.append_documentation(field_ref_attr, documentation)
             OrchestraInstance10.append_field_ref(structure, field_ref_attr)
-        for sbe_group in sbe_groups:
-            group_ref_attr = {'@text_id': sbe_group['@text_id']}
-            documentation = sbe_group.get('@description', None)
-            if documentation:
-                OrchestraInstance10.append_documentation(group_ref_attr, documentation)
-            OrchestraInstance10.append_group_ref(structure, group_ref_attr)
-        for sbe_field in sbe_data_fields:
-            field_ref_attr = {'@text_id': sbe_field['@text_id'], '@presence': self.sbe2orch_presence(sbe_field['@presence'])}
-            documentation = sbe_field.get('@description', None)
-            if documentation:
-                OrchestraInstance10.append_documentation(field_ref_attr, documentation)
-            OrchestraInstance10.append_field_ref(structure, field_ref_attr)
+        if sbe_groups:
+            for sbe_group in sbe_groups:
+                group_ref_attr = {'id': sbe_group[1]['id']}
+                documentation = sbe_group[1].get('description', None)
+                if documentation:
+                    OrchestraInstance10.append_documentation(group_ref_attr, documentation)
+                OrchestraInstance10.append_group_ref(structure, group_ref_attr)
+        if sbe_data_fields:
+            for sbe_field in sbe_data_fields:
+                field_ref_attr = {'id': sbe_field[1]['id'],
+                                  'presence': self.sbe2orch_presence(sbe_field[1]['presence'])}
+                documentation = sbe_field[1].get('description', None)
+                if documentation:
+                    OrchestraInstance10.append_documentation(field_ref_attr, documentation)
+                OrchestraInstance10.append_field_ref(structure, field_ref_attr)
 
     def sbe2orch_fields(self, sbe: SBEInstance10, fields: list):
         """
-        Append unique fields from all SBE messages, by field text_id
+        Append unique fields from all SBE messages, by field id
         :param sbe: an SBE instance
         :param fields: Orchestra field list to populate
         :return:
@@ -187,17 +188,17 @@ class SBE2Orchestra10_10:
             all_sbe_fields = []
             SBEInstance10.all_fields(sbe_message, all_sbe_fields)
             for sbe_field in all_sbe_fields:
-                field_d[sbe_field['@text_id']] = sbe_field
+                field_d[sbe_field[1]['id']] = sbe_field
             all_sbe_data_fields = []
             SBEInstance10.all_data(sbe_message, all_sbe_data_fields)
             for sbe_field in all_sbe_data_fields:
-                field_d[sbe_field['@text_id']] = sbe_field
+                field_d[sbe_field[1]['id']] = sbe_field
         field_l = sorted(field_d.values(), key=SBEInstance10.id)
         for sbe_field in field_l:
-            field = {'@text_id': sbe_field['@text_id'],
-                     '@name': sbe_field['@name'],
-                     '@type': sbe_field['@type']}
-            documentation = sbe_field.get('@description', None)
+            field = {'id': sbe_field[1]['id'],
+                     'name': sbe_field[1]['name'],
+                     'type': sbe_field[1]['type']}
+            documentation = sbe_field[1].get('description', None)
             if documentation:
                 OrchestraInstance10.append_documentation(field, documentation)
             fields.append(field)

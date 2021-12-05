@@ -3,6 +3,7 @@ import xml.etree.ElementTree as ET
 from typing import Iterator, List, Tuple
 
 import xmlschema
+from xmlschema import JsonMLConverter
 
 from .sbeinstance import SBEInstance10
 
@@ -45,7 +46,8 @@ class SBE10:
         :return: a list of errors, if any
         """
         data, errors = [], []
-        for result in self.xsd.iter_decode(xml):
+        # JsonMLConverter preserves order
+        for result in self.xsd.iter_decode(xml, use_defaults=False, converter=JsonMLConverter):
             if not isinstance(result, Exception):
                 data.append(result)
             else:
@@ -62,7 +64,8 @@ class SBE10:
         :return: a list of errors, if any
         """
         data, errors = self.xsd.encode(sbe_instance.root(), validation='lax', use_defaults=False,
-                                       namespaces={'sbe': 'http://fixprotocol.io/2016/sbe'})
+                                       namespaces={'sbe': 'http://fixprotocol.io/2016/sbe'},
+                                       **{'converter': JsonMLConverter})
         ET.register_namespace('sbe', "http://fixprotocol.io/2016/sbe")
         stream.write(ET.tostring(data, encoding='utf8', method='xml'))
         return errors
