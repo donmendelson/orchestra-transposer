@@ -81,18 +81,18 @@ class Orchestra2SBE10_10:
                     mapping = next(
                         (mapping for mapping in mappings if mapping[1]['standard'] == 'SBE'), None)
                     if mapping:
-                        pass
-                        """sbe_encoding = mapping[1].get('fixr:extension', None)
                         documentation = Orchestra2SBE10_10.__documentation_str(mapping)
                         if documentation:
                             sbe_type_attr['description'] = documentation
-                        if sbe_encoding:
-                            try:
-                                sbe_schema = sbe_encoding['sbe:messageSchema'][0]
-                                sbe_types = sbe_schema['types'][0]
-                                sbe_composite = sbe_types['composite'][0]
+                        extension = next(
+                            (i for i in mapping if isinstance(i, list) and i[0] == 'fixr:extension'), None)
+                        if extension:
+                            sbe_types = next(
+                                (i for i in extension if isinstance(i, list) and i[2] == 'types'), None)
+                            if sbe_types:
+                                sbe_composite = sbe_types[0]
                                 sbe.append_composite(sbe_composite)
-                            except AttributeError:
+                            else:
                                 self.logger.error('SBE datatype mapping not found for name=%s', name)
                         else:
                             base = mapping[1].get('base', None)
@@ -104,7 +104,8 @@ class Orchestra2SBE10_10:
                             max_inclusive = mapping[1].get('maxInclusive', None)
                             if max_inclusive:
                                 sbe_type_attr['maxValue'] = max_inclusive
-                            sbe.append_encoding_type(sbe_type_attr)"""
+                            sbe_type = ['type', sbe_type_attr]
+                            sbe.append_encoding_type(sbe_type)
 
     def orch2sbe_codesets(self, codesets: list, sbe: SBEInstance10):
         """
@@ -126,7 +127,7 @@ class Orchestra2SBE10_10:
                 if documentation:
                     sbe_code_attr['description'] = documentation
                 sbe_enum.append(sbe_code)
-            sbe.append_enum(sbe_enum_attr)
+            sbe.append_enum(sbe_enum)
 
     @staticmethod
     def __documentation_str(element) -> Optional[str]:
@@ -269,7 +270,7 @@ class Orchestra2SBE10_10:
                     documentation = Orchestra2SBE10_10.__documentation_str(group)
                     if documentation:
                         sbe_group_attr['description'] = documentation
-                    sbe_groups.append(sbe_group_attr)
+                    sbe_groups.append(sbe_group)
                     field_refs = OrchestraInstance10.field_refs(group)
                     component_refs = OrchestraInstance10.component_refs(group)
                     group_refs = OrchestraInstance10.group_refs(group)

@@ -89,46 +89,50 @@ class OrchestraInstance10:
 
         :param message: a message is represented as a dictionary in the following format.
 
-        Note that all simple attributes start with '@' character.
-
         .. code-block:: python
 
-       'fixr:message': [{
-             '@text_id': 1,
-             '@msgType': '0',
-             '@name': 'Heartbeat',
-             '@scenario': 'base',
-             'fixr:annotation': {
-                     'fixr:documentation': [{'$': 'The Heartbeat monitors the '
-                                                  'status of the communication '
-                                                  'link and identifies when the '
-                                                  'last of a string of messages '
-                                                  'was not received.',
-                                             '@contentType': 'text/plain',
-                                             '@purpose': 'SYNOPSIS'}]},
-                        'fixr:structure': {
-                            'fixr:componentRef': [{'@text_id': 1024,
-                               '@presence': 'required',
-                               '@scenario': 'base',}                                                                                                                         '@supported': 'supported'}]}},
-                                {'@text_id': 1025,
-                               '@presence': 'required',
-                               '@scenario': 'base'}],
-                            'fixr:fieldRef': [{
-                               '@text_id': 112,
-                               '@presence': 'optional',
-                               '@scenario': 'base'}]]
+        ['fixr:message',
+           {'abbrName': 'Heartbeat', 'added': 'FIX.2.7', 'category': 'Session', 'id': 1, 'msgType': '0', 'name': 'Heartbeat'},
+           ['fixr:structure',
+            ['fixr:componentRef',
+             {'added': 'FIX.2.7', 'id': 1024, 'presence': 'required'},
+             ['fixr:annotation', ['fixr:documentation', 'MsgType = 0']]],
+            ['fixr:fieldRef',
+             {'added': 'FIX.4.0', 'id': 112},
+             ['fixr:annotation',
+              ['fixr:documentation', 'Required when the heartbeat is the result of a Test Request message.']]],
+            ['fixr:componentRef',
+             {'added': 'FIX.2.7', 'id': 1025, 'presence': 'required'},
+             ['fixr:annotation', ['fixr:documentation']]]],
+           ['fixr:annotation',
+            ['fixr:documentation',
+             {'purpose': 'SYNOPSIS'},
+             'The Heartbeat monitors the status of the communication link and identifies when the last of a string of messages '
+             'was not received.']]],
         """
         messages = self.messages()
         messages.append(message)
 
     def append_group(self, group: dict):
         """
-    Add a repeating group to this Orchestra instance
+        Add a repeating group to this Orchestra instance
 
-    :param group: a group is represented as a dictionary
+        :param group: a group is represented as a dictionary
 
-    Note that all simple attributes start with '@' character.
-     """
+        .. code-block:: python
+          ['fixr:group',
+           {'abbrName': 'Stip', 'added': 'FIX.4.4', 'category': 'Common', 'id': 1007, 'name': 'LegStipulations'},
+           ['fixr:numInGroup', {'id': 683}, ['fixr:annotation', ['fixr:documentation']]],
+           ['fixr:fieldRef',
+            {'added': 'FIX.4.4', 'id': 688},
+            ['fixr:annotation', ['fixr:documentation', 'Required if NoLegStipulations >0']]],
+           ['fixr:fieldRef', {'added': 'FIX.4.4', 'id': 689}, ['fixr:annotation', ['fixr:documentation']]],
+           ['fixr:annotation',
+            ['fixr:documentation',
+             {'purpose': 'SYNOPSIS'},
+             'The LegStipulations component block has the same usage as the Stipulations component block, but for a leg '
+             'instrument in a multi-legged security.'],
+        """
         groups = self.groups()
         groups.append(group)
 

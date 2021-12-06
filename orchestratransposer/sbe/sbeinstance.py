@@ -52,14 +52,11 @@ class SBEInstance10:
 
         .. code-block:: python
 
-            {'@length': 1,
-            '@name': 'timestampEncoding',
-            '@primitiveType': 'uint64',
-            '@semanticType': 'UTCTimestamp',
-            '@sinceVersion': 0}
+           ['type', {'name': 'date', 'primitiveType': 'uint16', 'semanticType': 'LocalMktDate'}]
+
         """
         types_l = self.first_types()
-        types_l.append(['type', encoding_type])
+        types_l.append(encoding_type)
 
     def append_composite(self, composite):
         """
@@ -67,27 +64,15 @@ class SBEInstance10:
 
         .. code-block:: python
 
-            {'@name': 'MONTH_YEAR',
-           '@semanticType': 'MonthYear',
-           'type': [{'@length': 1,
-                     '@name': 'year',
-                     '@presence': 'required',
-                     '@primitiveType': 'uint16'},
-                    {'@length': 1,
-                     '@name': 'month',
-                     '@presence': 'required',
-                     '@primitiveType': 'uint8'},
-                    {'@length': 1,
-                     '@name': 'day',
-                     '@presence': 'required',
-                     '@primitiveType': 'uint8'},
-                    {'@length': 1,
-                     '@name': 'week',
-                     '@presence': 'required',
-                     '@primitiveType': 'uint8']}
+        ['composite',
+           {'name': 'MONTH_YEAR', 'semanticType': 'MonthYear'},
+           ['type', {'name': 'year', 'primitiveType': 'uint16'}],
+           ['type', {'name': 'month', 'primitiveType': 'uint8'}],
+           ['type', {'name': 'day', 'primitiveType': 'uint8'}],
+           ['type', {'name': 'week', 'primitiveType': 'uint8'}]]
         """
         types_l = self.first_types()
-        types_l.append(['composite', composite])
+        types_l.append( composite)
 
     def append_enum(self, enum):
         """
@@ -95,18 +80,15 @@ class SBEInstance10:
 
         An enum should have the attributes as shown below.
 
-        Note that all simple attributes start with '@' character. The value of a code in the enumeration has
-        a key of '$'. That special symbol causes a translation to XML element text rather than an XML named attribute.
-
         .. code-block:: python
 
-            {'@encodingType': 'enumEncoding',
-            '@name': 'sideEnum',
-            'validValue': [{'$': '1', '@name': 'Buy', '@sinceVersion': 0},
-                           {'$': '2', '@name': 'Sell', '@sinceVersion': 0}]}
+          ['enum',
+           {'encodingType': 'enumEncoding', 'name': 'sideEnum'},
+           ['validValue', {'name': 'Buy'}, '1'],
+           ['validValue', {'name': 'Sell'}, '2']]]
         """
         types_l = self.first_types()
-        types_l.append(['enum', enum])
+        types_l.append(enum)
 
     def encoding_types(self):
         """ Access simple encoding types """
@@ -135,24 +117,12 @@ class SBEInstance10:
 
         .. code-block:: python
 
-            {'@text_id': 97,
-            '@name': 'BusinessMessageReject',
-            '@semanticType': 'j',
-            'data': [{'@text_id': 58,
-                    '@name': 'Text',
-                    '@presence': 'required',
-                    '@semanticType': 'data',
-                    '@type': 'DATA'},
-            'field': [{@text_id': 379,
-                     '@name': 'BusinesRejectRefId',
-                     '@presence': 'required',
-                     '@semanticType': 'String',
-                     '@type': 'idString'},
-                    {'@text_id': 380,
-                     '@name': 'BusinessRejectReason',
-                     '@offset': 8,
-                     '@presence': 'required',
-                     '@type': 'businessRejectReasonEnum'}]}
+         ['sbe:message',
+          {'blockLength': 9, 'id': 97, 'name': 'BusinessMessageReject', 'semanticType': 'j'},
+          ['field', {'id': 379, 'name': 'BusinesRejectRefId', 'offset': 0, 'semanticType': 'String', 'type': 'idString'}],
+          ['field',
+           {'id': 380, 'name': 'BusinessRejectReason', 'offset': 8, 'semanticType': 'int', 'type': 'businessRejectReasonEnum'}],
+          ['data', {'id': 58, 'name': 'Text', 'semanticType': 'data', 'type': 'DATA'}]]
         """
         self.root().append(message)
 
@@ -165,11 +135,7 @@ class SBEInstance10:
 
         .. code-block:: python
 
-            {'@text_id': 37,
-             '@name': 'OrderID',
-             '@presence': 'required',
-             '@semanticType': 'String',
-             '@type': 'idString'}
+            ['field', {'id': 54, 'name': 'Side', 'offset': 24, 'semanticType': 'char', 'type': 'sideEnum'}]
         """
         try:
             pos = next(i for i in reversed(range(len(structure))) if isinstance(structure[i], list) and
