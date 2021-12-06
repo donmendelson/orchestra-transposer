@@ -1,5 +1,5 @@
+import itertools
 from pprint import pformat
-from typing import List
 
 
 class SBEInstance10:
@@ -9,6 +9,7 @@ class SBEInstance10:
 
     def __init__(self, obj=None):
         self.obj = obj if obj is not None else ['sbe:messageSchema', {}]
+        self._all_data = None
 
     def __str__(self):
         return pformat(self.obj, width=120)
@@ -26,11 +27,15 @@ class SBEInstance10:
             self.obj.append(d)
             return d
 
-    def all_types(self) -> List[list]:
+    @property
+    def all_types(self) -> list:
         """
         Returns a List of all types lists
         """
-        return filter(lambda l: isinstance(l, list) and l[0] == 'types', self.obj)
+        if self._all_data is None:
+            self._all_data = list(
+                itertools.chain(filter(lambda l: isinstance(l, list) and l[0] == 'types', self.root())))
+        return self._all_data
 
     def first_types(self) -> list:
         """ Returns the first instance of types list, suitable for appending new encoding types """
@@ -59,9 +64,6 @@ class SBEInstance10:
     def append_composite(self, composite):
         """
         Appends a composite type
-
-        A composite type should have the attributes as shown below. Note that all simple attributes start with '@'
-        character.
 
         .. code-block:: python
 
@@ -106,10 +108,20 @@ class SBEInstance10:
         types_l = self.first_types()
         types_l.append(['enum', enum])
 
-    def composite(self, composite):
+    def encoding_types(self):
+        """ Access simple encoding types """
+        types_l = self.first_types()
+        return list(filter(lambda l: isinstance(l, list) and l[0] == 'type', types_l))
+
+    def composites(self):
         """ Access composite types """
-        types_l = self.composites()
-        types_l.append(composite)
+        types_l = self.first_types()
+        return list(filter(lambda l: isinstance(l, list) and l[0] == 'composite', types_l))
+
+    def enums(self):
+        """ Access enums """
+        types_l = self.first_types()
+        return list(filter(lambda l: isinstance(l, list) and l[0] == 'enum', types_l))
 
     def messages(self) -> list:
         """ Accesses a List of messages"""
@@ -162,10 +174,8 @@ class SBEInstance10:
         try:
             pos = next(i for i in reversed(range(len(structure))) if isinstance(structure[i], list) and
                        structure[i][0] == 'field')
-            structure.insert(pos+1, field)
+            structure.insert(pos + 1, field)
         except StopIteration:
-            structure.append(field)
-        except KeyError:
             structure.append(field)
 
     @staticmethod
@@ -186,7 +196,7 @@ class SBEInstance10:
         try:
             pos = next(i for i in reversed(range(len(structure))) if isinstance(structure[i], list) and
                        structure[i][0] == 'group')
-            structure.insert(pos+1, group)
+            structure.insert(pos + 1, group)
         except StopIteration:
             structure.append(group)
 
@@ -241,14 +251,14 @@ class SBEInstance10:
 
         Does not include data fields in nested groups.
         """
-        list(filter(lambda l: isinstance(l, list) and l[0] == 'data', structure))
+        return list(filter(lambda l: isinstance(l, list) and l[0] == 'data', structure))
 
     @staticmethod
     def groups(structure: dict) -> list:
         """
         Access the repeating groups of a message or group structure
         """
-        list(filter(lambda l: isinstance(l, list) and l[0] == 'group', structure))
+        return list(filter(lambda l: isinstance(l, list) and l[0] == 'group', structure))
 
     @staticmethod
     def id(structure: list) -> int:

@@ -165,16 +165,12 @@ class OrchestraInstance10:
         return purpose, text
 
     @staticmethod
-    def append_documentation(element: dict, documentation: str):
-        annotation = element.get('fixr:annotation', None)
+    def append_documentation(element: list, documentation: str):
+        annotation = next((i for i in element if isinstance(i, list) and i[0] == 'fixr:annotation'), None)
         if not annotation:
-            annotation = {}
-            element['fixr:annotation'] = annotation
-        documentations = annotation.get('fixr:documentation', None)
-        if not documentations:
-            documentations = []
-            annotation['fixr:documentation'] = documentations
-        documentations.append({'$': documentation})
+            annotation = ['fixr:annotation']
+            element.append(annotation)
+        annotation.append(['fixr:documentation', {}, documentation])
 
     @staticmethod
     def field_refs(structure: list) -> list:
@@ -206,16 +202,24 @@ class OrchestraInstance10:
         """
         Append a fieldRef to a message or group structure
         """
-        field_refs = OrchestraInstance10.field_refs(structure)
-        field_refs.append(field_ref)
+        try:
+            pos = next(i for i in reversed(range(len(structure))) if isinstance(structure[i], list) and
+                       structure[i][0] == 'fixr:annotation')
+            structure.insert(pos, field_ref)
+        except StopIteration:
+            structure.append(field_ref)
 
     @staticmethod
     def append_group_ref(structure: list, group_ref):
         """
         Append a groupRef to a message or group structure
         """
-        group_refs = OrchestraInstance10.group_refs(structure)
-        group_refs.append(group_ref)
+        try:
+            pos = next(i for i in reversed(range(len(structure))) if isinstance(structure[i], list) and
+                       structure[i][0] == 'fixr:annotation')
+            structure.insert(pos, group_ref)
+        except StopIteration:
+            structure.append(group_ref)
 
 
 OrchestraInstance = OrchestraInstance10
