@@ -50,68 +50,73 @@ class Unified2Orchestra10:
                     self.logger.error(error)
             return errors
 
-    def unified2orch_metadata(self, fix: dict, orch: OrchestraInstance10):
+    def unified2orch_metadata(self, fix: list, orch: OrchestraInstance10):
         """
         Set Orchestra metadata from a Unified Repository
         """
-        repository = orch.root()
-        repository['@name'] = fix['@version']
-        version = str(fix['@version']).partition('_')[0]
-        repository['@version'] = version
+        repository = orch.repository()
+        version = fix[1]['version']
+        (first, sep, last) = version.partition('_')
+        repository['version'] = version
+        repository['name'] = first
 
-    def unified2orch_datatypes(self, fix: dict, datatypes):
+    def unified2orch_datatypes(self, fix: list, datatypes: list):
         unified_datatypes = UnifiedMainInstance.datatypes(fix)
-        for unified_datatype in unified_datatypes:
-            exclude_keys = ['@textId', 'XML', 'Example']
-            datatype_attr = {k: unified_datatype[k] for k in set(list(unified_datatype.keys())) - set(exclude_keys)}
+        lst = filter(lambda l: isinstance(l, list) and l[0] == 'datatype', unified_datatypes)
+        for unified_datatype in lst:
+            exclude_keys = ['textId']
+            datatype_attr = {k: unified_datatype[1][k] for k in set(list(unified_datatype[1].keys())) - set(exclude_keys)}
+            datatype = ['fixr:datatype', datatype_attr]
             """ TODO annotations with example"""
-            xml = unified_datatype.get('XML', None)
+            xml = next(filter(lambda l: isinstance(l, list) and l[0] == 'XML', unified_datatype), None)
             if xml:
-                mappings = []
-                orch2xml_mapping = {k: xml[k] for k in set(list(xml.keys())) - set(exclude_keys)}
-                mappings.append(orch2xml_mapping)
-                datatype_attr['fixr:mappedDatatype'] = mappings
-            datatypes.append(datatype_attr)
+                xml_mapping = ['fixr:mappedDatatype', {k: xml[1][k] for k in set(list(xml[1].keys())) - set(exclude_keys)}]
+                datatype.append(xml_mapping)
+            datatypes.append(datatype)
 
-    def unified2orch_fields(self, fix: dict, fields: list):
+    def unified2orch_fields(self, fix: list, fields: list):
         unified_fields = UnifiedMainInstance.fields(fix)
-        for unified_field in unified_fields:
-            exclude_keys = ['@textId', '@notReqXML', 'enum', '@associatedDataTag', '@enumDatatype']
-            field_attr = {k: unified_field[k] for k in set(list(unified_field.keys())) - set(exclude_keys)}
-            if 'enum' in unified_field:
-                codeset_name = unified_field['@name']
-                enum_id = unified_field.get('@enumDatatype', None)
+        lst = filter(lambda l: isinstance(l, list) and l[0] == 'field', unified_fields)
+        for unified_field in lst:
+            exclude_keys = ['textId', 'notReqXML', 'enum', 'associatedDataTag', 'enumDatatype']
+            field_attr = {k: unified_field[1][k] for k in set(list(unified_field[1].keys())) - set(exclude_keys)}
+            field = ['fixr:field', field_attr]
+            enum = next(filter(lambda l: isinstance(l, list) and l[0] == 'enum', unified_field), None)
+            if enum:
+                codeset_name = unified_field[1]['name']
+                enum_id = unified_field[1].get('enumDatatype', None)
                 if enum_id:
                     enum_field = UnifiedMainInstance.field(fix, enum_id)
                     if enum_field:
-                        codeset_name = enum_field['@name']
-                field_attr['@type'] = codeset_name + 'CodeSet'
-            assoc_id = unified_field.get('@associatedDataTag', None)
+                        codeset_name = enum_field[1]['name']
+                field_attr['type'] = codeset_name + 'CodeSet'
+            assoc_id = unified_field[1].get('associatedDataTag', None)
             if assoc_id:
                 assoc_field = UnifiedMainInstance.field(fix, assoc_id)
                 if assoc_field:
-                    field_attr['lengthId'] = assoc_field['@id']
-            fields.append(field_attr)
+                    field_attr['lengthId'] = assoc_field[1]['id']
+            fields.append(field)
 
-    def unified2orch_codesets(self, fix: dict, codesets: list):
+    def unified2orch_codesets(self, fix: list, codesets: list):
         unified_fields = UnifiedMainInstance.fields(fix)
-        enum_fields = [f for f in unified_fields if f.get('enum', None)]
-        for unified_field in enum_fields:
-            name = unified_field['@name'] + 'CodeSet'
-            codes = []
-            codeset_attr = {'@name': name, '@id': unified_field['@id'], 'type': unified_field['@type'],
-                            'fixr:code': codes}
-            d = {k: unified_field.get(k, None) for k in
-                 ['@added', '@addedEP', '@updated, @updatedEP', '@deprecated',
-                  '@deprecatedEP']}
+        lst = filter(lambda f: isinstance(f, list) and f[0] == 'field' and len(f) > 2 and f[2][0] == 'enum',
+                     unified_fields)
+        for unified_field in lst:
+            codeset_name = unified_field[1]['name'] + 'CodeSet'
+            codeset_attr = {'name': codeset_name, 'id': unified_field[1]['id'], 'type': unified_field[1]['type']}
+            codeset = ['fixr:codeSet', codeset_attr]
+            d = {k: unified_field[1].get(k, None) for k in
+                 ['added', 'addedEP', 'updated, updatedEP', 'deprecated',
+                  'deprecatedEP']}
             pedigree = dict(filter(lambda item: not item[1] is None, d.items()))
             codeset_attr.update(pedigree)
-            enums = unified_field['enum']
-            for idx, enum in enumerate(enums, start=1):
-                code_attr = {'@name': enum['@symbolicName'], '@id': unified_field['@id'] * 100 + idx,
-                             '@value': enum['@value']}
-                codes.append(code_attr)
-            codesets.append(codeset_attr)
+            enums = filter(lambda e: isinstance(e, list) and e[0] == 'enum', unified_field)
+            for idx, enum in enumerate(enums):
+                code_attr = {'name': enum[1]['symbolicName'], 'id': unified_field[1]['id'] * 100 + idx + 1,
+                             'value': enum[1]['value']}
+                code = ['fixr:code', code_attr]
+                codeset.append(code)
+            codesets.append(codeset)
 
 
 Unified2Orchestra = Unified2Orchestra10

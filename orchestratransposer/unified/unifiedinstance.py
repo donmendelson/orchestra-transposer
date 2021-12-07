@@ -22,7 +22,7 @@ class UnifiedMainInstance:
         """
         return self.obj
 
-    def fix(self, version: Optional[str] = None) -> dict:
+    def fix(self, version: Optional[str] = None) -> Optional[list]:
         """
         Returns a dictionary representing a fix version
         :param version: a fix version to extract from a Unified Repository. If not provided, returns the first instance.
@@ -47,39 +47,32 @@ class UnifiedMainInstance:
             return None
 
     @staticmethod
-    def datatypes(fix: dict) -> list:
+    def __types(fix: list, category: str) -> list:
+        try:
+            types = next(i for i in fix if isinstance(i, list) and i[0] == category)
+        except StopIteration:
+            types = [category]
+            fix.append(types)
+        return types
+
+    @staticmethod
+    def datatypes(fix: list) -> list:
         """
         :return: a list of  datatypes of a fix version of UnifiedInstance
         """
-        datatypes = fix.get('datatypes', None)
-        if not datatypes:
-            datatypes = {}
-            fix['datatype'] = datatypes
-        datatype = datatypes.get('datatype', None)
-        if not datatype:
-            datatype = []
-            datatypes['datatype'] = datatype
-        return datatype
+        return UnifiedMainInstance.__types(fix, 'datatypes')
 
     @staticmethod
-    def fields(fix: dict) -> list:
+    def fields(fix: list) -> list:
         """
         :return: a list of  fields of a fix version of UnifiedInstance
         """
-        fields = fix.get('fields', None)
-        if not fields:
-            fields = {}
-            fix['fields'] = fields
-        field = fields.get('field', None)
-        if not field:
-            field = []
-            fields['field'] = field
-        return field
+        return UnifiedMainInstance.__types(fix, 'fields')
 
     @staticmethod
-    def field(fix: dict, field_id: int) -> Optional[dict]:
+    def field(fix: list, field_id: int) -> Optional[list]:
         fields = UnifiedMainInstance.fields(fix)
-        return next((field for field in fields if field['@id'] == field_id), None)
+        return next((field for field in fields if isinstance(field, list) and field[1]['id'] == field_id), None)
 
 
 class UnifiedPhrasesInstance:
@@ -117,7 +110,7 @@ class UnifiedInstanceWithPhrases(UnifiedMainInstance):
         self.phrases = phrases if phrases is not None else UnifiedPhrasesInstance()
 
     def __str__(self):
-        return super.__str__() + str(self.phrases)
+        return super.__str__(self) + str(self.phrases)
 
     def phrases(self):
         return self.phrases

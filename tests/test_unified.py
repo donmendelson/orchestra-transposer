@@ -59,7 +59,7 @@ def test_to_dict():
         print(str(instance), file=f)
         f.close()
         assert not errors
-        assert instance.text_id('FIELD_2217') == 'The fee amount due if different from MiscFeeAmt(137).'
+        assert instance.text_id('FIELD_2217') == [('SYNOPSIS', 'The fee amount due if different from MiscFeeAmt(137).')]
 
 
 def test_text_id():
