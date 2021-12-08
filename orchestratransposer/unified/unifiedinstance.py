@@ -74,6 +74,33 @@ class UnifiedMainInstance:
         fields = UnifiedMainInstance.fields(fix)
         return next((field for field in fields if isinstance(field, list) and field[1]['id'] == field_id), None)
 
+    @staticmethod
+    def components(fix: list) -> list:
+        """
+        :return: a list of components and repeating groups of a fix version of UnifiedInstance
+        """
+        return UnifiedMainInstance.__types(fix, 'components')
+
+    @staticmethod
+    def messages(fix: list) -> list:
+        """
+        :return: a list of components and repeating groups of a fix version of UnifiedInstance
+        """
+        return UnifiedMainInstance.__types(fix, 'messages')
+
+    @staticmethod
+    def sections(fix: list) -> list:
+        """
+        :return: a list of sections of a fix version of UnifiedInstance
+        """
+        return UnifiedMainInstance.__types(fix, 'sections')
+
+    @staticmethod
+    def categories(fix: list) -> list:
+        """
+        :return: a list of categories of a fix version of UnifiedInstance
+        """
+        return UnifiedMainInstance.__types(fix, 'categories')
 
 class UnifiedPhrasesInstance:
     """

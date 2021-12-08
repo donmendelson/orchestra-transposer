@@ -24,13 +24,22 @@ class Unified2Orchestra10:
         orch = OrchestraInstance10()
         fix = unified.fix(version)
         self.unified2orch_metadata(fix, orch)
+        sections = orch.sections()
+        self.unified2orch_sections(fix, sections)
+        categories = orch.categories()
+        self.unified2orch_categories(fix, categories)
         datatypes = orch.datatypes()
         self.unified2orch_datatypes(fix, datatypes)
         codesets = orch.codesets()
         self.unified2orch_codesets(fix, codesets)
         fields = orch.fields()
         self.unified2orch_fields(fix, fields)
-        """self.unified2orch_messages_and_groups(fix, orch)"""
+        components = orch.components()
+        self.unified2orch_components(fix, components)
+        groups = orch.groups()
+        self.unified2orch_groups(fix, groups)
+        messages = orch.messages()
+        self.unified2orch_messages(fix, messages)
         return orch
 
     def unified2orch_xml(self, xml_path, phrases_xml_path, orch_stream, version: Optional[str] = None) -> \
@@ -60,17 +69,42 @@ class Unified2Orchestra10:
         repository['version'] = version
         repository['name'] = first
 
+    def unified2orch_sections(self, fix: list, sections: list):
+        unified_sections = UnifiedMainInstance.sections(fix)
+        lst = filter(lambda l: isinstance(l, list) and l[0] == 'section', unified_sections)
+        for unified_section in lst:
+            exclude_keys = ['textId', 'volume', 'id', 'notReqXML']
+            section_attr = {k: unified_section[1][k] for k in set(list(unified_section[1].keys())) - set(exclude_keys)}
+            section_attr['name'] = unified_section[1]['id']
+            section = ['fixr:section', section_attr]
+            sections.append(section)
+
+    def unified2orch_categories(self, fix: list, categories: list):
+        unified_categories = UnifiedMainInstance.categories(fix)
+        lst = filter(lambda l: isinstance(l, list) and l[0] == 'category', unified_categories)
+        for unified_category in lst:
+            exclude_keys = ['textId', 'volume', 'id', 'notReqXML','generateImplFile']
+            category_attr = {k: unified_category[1][k] for k in
+                             set(list(unified_category[1].keys())) - set(exclude_keys)}
+            category_attr['name'] = unified_category[1]['id']
+            category = ['fixr:category', category_attr]
+            categories.append(category)
+
     def unified2orch_datatypes(self, fix: list, datatypes: list):
         unified_datatypes = UnifiedMainInstance.datatypes(fix)
         lst = filter(lambda l: isinstance(l, list) and l[0] == 'datatype', unified_datatypes)
         for unified_datatype in lst:
-            exclude_keys = ['textId']
-            datatype_attr = {k: unified_datatype[1][k] for k in set(list(unified_datatype[1].keys())) - set(exclude_keys)}
+            exclude_keys = ['textId', 'builtin']
+            datatype_attr = {k: unified_datatype[1][k] for k in
+                             set(list(unified_datatype[1].keys())) - set(exclude_keys)}
             datatype = ['fixr:datatype', datatype_attr]
             """ TODO annotations with example"""
             xml = next(filter(lambda l: isinstance(l, list) and l[0] == 'XML', unified_datatype), None)
             if xml:
-                xml_mapping = ['fixr:mappedDatatype', {k: xml[1][k] for k in set(list(xml[1].keys())) - set(exclude_keys)}]
+                xml_mapping = ['fixr:mappedDatatype',
+                               {k: xml[1][k] for k in set(list(xml[1].keys())) - set(exclude_keys)}]
+                xml_mapping[1]['standard'] = 'XML'
+                xml_mapping[1]['builtin'] = bool(int(xml[1].get('builtin', '0')))
                 datatype.append(xml_mapping)
             datatypes.append(datatype)
 
@@ -117,6 +151,38 @@ class Unified2Orchestra10:
                 code = ['fixr:code', code_attr]
                 codeset.append(code)
             codesets.append(codeset)
+
+    def unified2orch_components(self, fix: list, components: list):
+        unified_components = UnifiedMainInstance.components(fix)
+        lst = filter(lambda l: isinstance(l, list) and l[0] == 'component' and l[1].get('repeating', 0) == 0,
+                     unified_components)
+        for unified_component in lst:
+            exclude_keys = ['textId', 'notReqXML', 'type', 'repeating']
+            component_attr = {k: unified_component[1][k] for k in
+                              set(list(unified_component[1].keys())) - set(exclude_keys)}
+            component = ['fixr:component', component_attr]
+            components.append(component)
+
+    def unified2orch_groups(self, fix: list, groups: list):
+        unified_components = UnifiedMainInstance.components(fix)
+        lst = filter(lambda l: isinstance(l, list) and l[0] == 'component' and l[1].get('repeating', 0) == 1,
+                     unified_components)
+        for unified_component in lst:
+            exclude_keys = ['textId', 'notReqXML', 'type', 'repeating']
+            group_attr = {k: unified_component[1][k] for k in
+                          set(list(unified_component[1].keys())) - set(exclude_keys)}
+            group = ['fixr:group', group_attr]
+            groups.append(group)
+
+    def unified2orch_messages(self, fix: list, messages: list):
+        unified_messages = UnifiedMainInstance.messages(fix)
+        lst = filter(lambda l: isinstance(l, list) and l[0] == 'message', unified_messages)
+        for unified_message in lst:
+            exclude_keys = ['textId', 'notReqXML', 'section']
+            message_attr = {k: unified_message[1][k] for k in
+                          set(list(unified_message[1].keys())) - set(exclude_keys)}
+            message = ['fixr:message', message_attr]
+            messages.append(message)
 
 
 Unified2Orchestra = Unified2Orchestra10

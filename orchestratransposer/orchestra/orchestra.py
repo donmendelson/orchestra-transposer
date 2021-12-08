@@ -63,7 +63,8 @@ class Orchestra10:
         data, errors = self.xsd.encode(instance.root(), validation='lax', use_defaults=False,
                                        namespaces={'fixr': 'http://fixprotocol.io/2020/orchestra/repository',
                                                    'dcterms': 'http://purl.org/dc/terms/',
-                                                   'dc': 'http://purl.org/dc/elements/1.1/'})
+                                                   'dc': 'http://purl.org/dc/elements/1.1/'},
+                                       **{'converter': JsonMLConverter})
         ElementTree.register_namespace(
             'fixr', 'http://fixprotocol.io/2020/orchestra/repository')
         ElementTree.register_namespace('dcterms', 'http://purl.org/dc/terms/')

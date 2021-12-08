@@ -47,6 +47,18 @@ class OrchestraInstance10:
             self.root().append(types)
         return types
 
+    def sections(self) -> list:
+        """
+        :return: a list of sections of an Orchestra instance
+        """
+        return self.__types('fixr:sections')
+
+    def categories(self) -> list:
+        """
+        :return: a list of categories of an Orchestra instance
+        """
+        return self.__types('fixr:categories')
+
     def datatypes(self) -> list:
         """
         :return: a list of  datatypes of an Orchestra instance
