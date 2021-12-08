@@ -102,6 +102,18 @@ class UnifiedMainInstance:
         """
         return UnifiedMainInstance.__types(fix, 'categories')
 
+    @staticmethod
+    def field(fix: list, field_id: int) -> Optional[list]:
+        fields: list = UnifiedMainInstance.fields(fix)
+        return next((field for field in fields if isinstance(field, list) and field[1]['id'] == field_id), None)
+
+    @staticmethod
+    def component(fix: list, component_id: int) -> Optional[list]:
+        components: list = UnifiedMainInstance.components(fix)
+        return next((component for component in components if
+                     isinstance(component, list) and component[1]['id'] == component_id), None)
+
+
 class UnifiedPhrasesInstance:
     """
     An instance of Unified Repository 2010 Edition Phrases file

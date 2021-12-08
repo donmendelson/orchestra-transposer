@@ -1,4 +1,5 @@
 import logging
+from datetime import datetime
 from typing import List, Optional
 
 from orchestratransposer.orchestra.orchestra import Orchestra10
@@ -68,6 +69,10 @@ class Unified2Orchestra10:
         (first, sep, last) = version.partition('_')
         repository['version'] = version
         repository['name'] = first
+        metadata = orch.metadata()
+        metadata.append(['dcterms:title', first])
+        my_date = datetime.now()
+        metadata.append(['dcterms:date', my_date.isoformat()])
 
     def unified2orch_sections(self, fix: list, sections: list):
         unified_sections = UnifiedMainInstance.sections(fix)
@@ -83,7 +88,7 @@ class Unified2Orchestra10:
         unified_categories = UnifiedMainInstance.categories(fix)
         lst = filter(lambda l: isinstance(l, list) and l[0] == 'category', unified_categories)
         for unified_category in lst:
-            exclude_keys = ['textId', 'volume', 'id', 'notReqXML','generateImplFile']
+            exclude_keys = ['textId', 'volume', 'id', 'notReqXML', 'generateImplFile']
             category_attr = {k: unified_category[1][k] for k in
                              set(list(unified_category[1].keys())) - set(exclude_keys)}
             category_attr['name'] = unified_category[1]['id']
@@ -161,6 +166,7 @@ class Unified2Orchestra10:
             component_attr = {k: unified_component[1][k] for k in
                               set(list(unified_component[1].keys())) - set(exclude_keys)}
             component = ['fixr:component', component_attr]
+            self.unified2orch_components_append_members(fix, component, unified_component)
             components.append(component)
 
     def unified2orch_groups(self, fix: list, groups: list):
@@ -172,6 +178,8 @@ class Unified2Orchestra10:
             group_attr = {k: unified_component[1][k] for k in
                           set(list(unified_component[1].keys())) - set(exclude_keys)}
             group = ['fixr:group', group_attr]
+            unified_repeating_group = unified_component[2]
+            self.unified2orch_components_append_members(fix, group, unified_repeating_group)
             groups.append(group)
 
     def unified2orch_messages(self, fix: list, messages: list):
@@ -180,9 +188,49 @@ class Unified2Orchestra10:
         for unified_message in lst:
             exclude_keys = ['textId', 'notReqXML', 'section']
             message_attr = {k: unified_message[1][k] for k in
-                          set(list(unified_message[1].keys())) - set(exclude_keys)}
+                            set(list(unified_message[1].keys())) - set(exclude_keys)}
             message = ['fixr:message', message_attr]
+            structure = OrchestraInstance10.structure(message)
+            self.unified2orch_components_append_members(fix, structure, unified_message)
             messages.append(message)
+
+    def unified2orch_components_append_members(self, fix: list, structure: list, unified_structure: list):
+        lst = filter(lambda l: isinstance(l, list), unified_structure)
+        for unified_member in lst:
+            if unified_member[0] == 'fieldRef':
+                exclude_keys = ['textId', 'inlined', 'legacyIndent', 'legacyPosition', 'name', 'required']
+                field_attr = {k: unified_member[1][k] for k in
+                              set(list(unified_member[1].keys())) - set(exclude_keys)}
+                field_attr['presence'] = Unified2Orchestra10.unified2orch_presence(unified_member[1].get('required', 0))
+                field_ref = ['fixr:fieldRef', field_attr]
+                structure.append(field_ref)
+            elif unified_member[0] == 'componentRef':
+                component_id = unified_member[1]['id']
+                component = UnifiedMainInstance.component(fix, component_id)
+                if component[1].get('repeating', 0) == 1:
+                    exclude_keys = ['textId', 'inlined', 'legacyIndent', 'legacyPosition', 'name', 'required']
+                    group_attr = {k: unified_member[1][k] for k in
+                                  set(list(unified_member[1].keys())) - set(exclude_keys)}
+                    group_attr['presence'] = Unified2Orchestra10.unified2orch_presence(
+                        unified_member[1].get('required', 0))
+                    group_ref = ['fixr:groupRef', group_attr]
+                    structure.append(group_ref)
+                else:
+                    exclude_keys = ['textId', 'inlined', 'legacyIndent', 'legacyPosition', 'name', 'required']
+                    component_attr = {k: unified_member[1][k] for k in
+                                      set(list(unified_member[1].keys())) - set(exclude_keys)}
+                    component_attr['presence'] = Unified2Orchestra10.unified2orch_presence(
+                        unified_member[1].get('required', 0))
+                    component_ref = ['fixr:componentRef', component_attr]
+                    structure.append(component_ref)
+
+    @staticmethod
+    def unified2orch_presence(unified_required: int) -> str:
+        """ Translate Unified required to Orchestra presence string """
+        if unified_required == 1:
+            return 'required'
+        else:
+            return 'optional'
 
 
 Unified2Orchestra = Unified2Orchestra10
