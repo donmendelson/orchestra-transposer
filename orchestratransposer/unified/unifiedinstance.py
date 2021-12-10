@@ -1,9 +1,6 @@
 from pprint import pformat
 from typing import List, Optional, Tuple
 
-TEXT_KEY = '$'
-""" Symbol used by XMLSchema package for text content of an element (#text) """
-
 
 class UnifiedMainInstance:
     """
@@ -120,7 +117,7 @@ class UnifiedPhrasesInstance:
     """
 
     def __init__(self, phrases_obj: Optional[dict] = None):
-        self.phrases_obj = phrases_obj if phrases_obj is not None else {}
+        self.phrases_obj = phrases_obj if phrases_obj is not None else ['phrases', {}]
 
     def __str__(self):
         return pformat(self.phrases_obj, width=120)
@@ -132,18 +129,28 @@ class UnifiedPhrasesInstance:
         return self.phrases_obj
 
     def text_id(self, text_id: str) -> List[Tuple[str, str]]:
-        phrase = self.phrases_obj['phrase']
-        if not phrase:
-            phrase = []
-            self.phrases_obj['phrase'] = phrase
-        text = list(d['text'] for d in phrase if d['@textId'] == text_id)[0]
-        return [(i['@purpose'], i['para'][0]) for i in text]
+        retv = []
+        phrase = next((p for p in self.phrases_obj if isinstance(p, list) and len(p) >= 2
+                      and p[1].get('textId', None) == text_id), None)
+        if phrase:
+            text = filter(lambda l: isinstance(l, list) and l[0] == 'text', phrase)
+            for i in text:
+                pd = next((p for p in i if isinstance(p, dict)), None)
+                if pd:
+                    purpose = pd.get('purpose', None)
+                else:
+                    purpose = None
+                para = filter(lambda l: isinstance(l, list) and l[0] == 'para', i)
+                paras = [p[1] for p in para]
+                retv.append((purpose, ' '.join(paras)))
+        return retv
 
 
 class UnifiedInstanceWithPhrases(UnifiedMainInstance):
     """
     An instance of Unified Repository 2010 Edition with its phrases
     """
+
     def __init__(self, unified: Optional[UnifiedMainInstance] = None, phrases: Optional[UnifiedPhrasesInstance] = None):
         super().__init__(unified.root() if unified is not None else None)
         self.phrases = phrases if phrases is not None else UnifiedPhrasesInstance()
@@ -151,8 +158,13 @@ class UnifiedInstanceWithPhrases(UnifiedMainInstance):
     def __str__(self):
         return super.__str__(self) + str(self.phrases)
 
-    def phrases(self):
-        return self.phrases
+    def text_id(self, text_id: str) -> List[Tuple[str, str]]:
+        """
+        Returns a list of documentation for an element, given a unique key
+
+        Each element of the returned list is a tuple of purpose and documentation text. Purpose may be None.
+        """
+        return self.phrases.text_id(text_id)
 
 
 UnifiedInstance = UnifiedInstanceWithPhrases

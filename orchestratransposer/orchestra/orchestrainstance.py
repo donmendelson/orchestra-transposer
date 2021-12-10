@@ -182,11 +182,28 @@ class OrchestraInstance10:
 
     @staticmethod
     def append_documentation(element: list, documentation: str):
-        annotation = next((i for i in element if isinstance(i, list) and i[0] == 'fixr:annotation'), None)
-        if not annotation:
-            annotation = ['fixr:annotation']
-            element.append(annotation)
-        annotation.append(['fixr:documentation', {}, documentation])
+        """ Appends an annotation with a single documentation string without Purpose """
+        if str:
+            annotation = next((i for i in element if isinstance(i, list) and i[0] == 'fixr:annotation'), None)
+            if not annotation:
+                annotation = ['fixr:annotation']
+                element.append(annotation)
+            annotation.append(['fixr:documentation', {}, documentation])
+
+    @staticmethod
+    def append_documentations(element: list, documentations: List[Tuple[str, str]]):
+        """ Appends an annotation with one or more documentations, each with optional Purpose and text """
+        if len(documentations) > 0:
+            annotation = next((i for i in element if isinstance(i, list) and i[0] == 'fixr:annotation'), None)
+            if not annotation:
+                annotation = ['fixr:annotation']
+                element.append(annotation)
+            for documentation in documentations:
+                if documentation[0]:
+                    attr = {'purpose': documentation[0]}
+                else:
+                    attr = {}
+                annotation.append(['fixr:documentation', attr, documentation[1]])
 
     @staticmethod
     def field_refs(structure: list) -> list:

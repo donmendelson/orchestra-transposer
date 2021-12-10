@@ -98,7 +98,7 @@ class UnifiedPhrases:
         instance or an ElementTree instance or a string containing the XML data.
         """
         data, errors = [], []
-        for result in self.xsd.iter_decode(xml, use_defaults=False):
+        for result in self.xsd.iter_decode(xml, use_defaults=False, converter=JsonMLConverter):
             if not isinstance(result, Exception):
                 data.append(result)
             else:
@@ -114,7 +114,8 @@ class UnifiedPhrases:
         :return: a list of errors, if any
         """
         data, errors = self.xsd.encode(
-            instance.phrases_root(), validation='lax', use_defaults=False)
+            instance.phrases_root(), validation='lax', use_defaults=False,
+            **{'converter': JsonMLConverter})
         stream.write(ElementTree.tostring(data, encoding='utf8', method='xml'))
         return errors
 

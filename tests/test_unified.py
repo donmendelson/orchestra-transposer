@@ -50,10 +50,10 @@ def test_phrases_valid():
     assert not errors
 
 
-def test_to_dict():
+def test_phrases_to_dict():
     unified = UnifiedPhrases()
     xml_path = os.path.join(XML_FILE_DIR, 'FIX.Latest_EP269_en_phrases.xml')
-    output_path = os.path.join(output_dir(), 'FIX.Latest_EP269_en_phrases.xml-dict.txt')
+    output_path = os.path.join(output_dir(), 'FIX.Latest_EP269_en_phrases-dict.txt')
     with open(output_path, 'w') as f:
         (instance, errors) = unified.read_xml(xml_path)
         print(str(instance), file=f)
@@ -74,7 +74,7 @@ def test_text_id():
                         'day of the week is a fixing day.')]
 
 
-def test_phrases_to_dict():
+def test_to_dict():
     unified = UnifiedMain()
     xml_path = os.path.join(XML_FILE_DIR, 'FixRepository.xml')
     output_path = os.path.join(output_dir(), 'FixRepository-dict.txt')
