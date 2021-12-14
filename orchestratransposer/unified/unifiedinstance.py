@@ -7,13 +7,13 @@ class UnifiedMainInstance:
     An instance of Unified Repository 2010 Edition
     """
 
-    def __init__(self, obj: Optional[dict] = None):
-        self.obj = obj if obj is not None else {}
+    def __init__(self, obj: Optional[list] = None):
+        self.obj = obj if obj is not None else ['fixRepository', {}]
 
     def __str__(self):
         return pformat(self.obj, width=120)
 
-    def root(self) -> dict:
+    def root(self) -> list:
         """
         :return: the root of an Orchestra instance represented as a Python dictionary
         """
@@ -23,7 +23,7 @@ class UnifiedMainInstance:
         """
         Returns a dictionary representing a fix version
         :param version: a fix version to extract from a Unified Repository. If not provided, returns the first instance.
-        :return: a dictionary, or None if not found
+        :return: a list describing one version of a protocol
         """
         try:
             main_root = self.root()
@@ -34,12 +34,18 @@ class UnifiedMainInstance:
                             v = i[1].get('version', None)
                             if version == v:
                                 return i
-                return None
+                fix_attr = {'version': version}
+                fix = ['fix', fix_attr]
+                main_root.append(fix)
+                return fix
             else:
                 for i in main_root:
                     if isinstance(i, list) and i[0] == 'fix':
                         return i
-                return None
+                fix_attr = {}
+                fix = ['fix', fix_attr]
+                main_root.append(fix)
+                return fix
         except LookupError:
             return None
 
@@ -128,9 +134,46 @@ class UnifiedPhrasesInstance:
         """
         return self.phrases_obj
 
+    def append_documentation(self, text_id: str, documentations: List[Tuple[str, str]]):
+        """
+        Append or replace documentation by key
+        :param text_id: key for documentation of an element
+        :param text: a list of one or more tuples, each containing a purpose string and documentation text
+        """
+        phrase = next((p for p in self.phrases_root() if isinstance(p, list) and len(p) >= 2
+                       and p[1].get('textId', None) == text_id), None)
+        if phrase:
+            text = filter(lambda l: isinstance(l, list) and l[0] == 'text', phrase)
+            paras = []
+            text[1] = paras
+            for documentation in documentations:
+                if documentation[0]:
+                    attr = {'purpose': documentation[0]}
+                else:
+                    attr = {}
+                paras.append((attr, ['para', documentation[1]]))
+        else:
+            phrase_attr = {'textId': text_id}
+            phrase = ['phrase', phrase_attr]
+            for documentation in documentations:
+                if documentation[0]:
+                    attr = {'purpose': documentation[0]}
+                else:
+                    attr = {}
+                text = ['text', attr, ['para', documentation[1]]]
+                phrase.append(text)
+            self.phrases_root().append(phrase)
+
+
     def text_id(self, text_id: str) -> List[Tuple[str, str]]:
+        """
+        Retrieve documentation by key
+        :param text_id: key for documentation of an element
+        :return: a list of one or more tuples, each containing a purpose string and documentation text, or an empty list
+        if the key is not found
+        """
         retv = []
-        phrase = next((p for p in self.phrases_obj if isinstance(p, list) and len(p) >= 2
+        phrase = next((p for p in self.phrases_root() if isinstance(p, list) and len(p) >= 2
                       and p[1].get('textId', None) == text_id), None)
         if phrase:
             text = filter(lambda l: isinstance(l, list) and l[0] == 'text', phrase)
@@ -152,11 +195,11 @@ class UnifiedInstanceWithPhrases(UnifiedMainInstance):
     """
 
     def __init__(self, unified: Optional[UnifiedMainInstance] = None, phrases: Optional[UnifiedPhrasesInstance] = None):
-        super().__init__(unified.root() if unified is not None else None)
+        super().__init__(unified.root() if unified is not None else UnifiedMainInstance().root())
         self.phrases = phrases if phrases is not None else UnifiedPhrasesInstance()
 
     def __str__(self):
-        return super.__str__(self) + str(self.phrases)
+        return pformat(self.obj, width=120) + str(self.phrases)
 
     def text_id(self, text_id: str) -> List[Tuple[str, str]]:
         """
@@ -166,6 +209,13 @@ class UnifiedInstanceWithPhrases(UnifiedMainInstance):
         """
         return self.phrases.text_id(text_id)
 
+    def append_documentation(self, text_id: str, text: List[Tuple[str, str]]):
+        """
+        Append or replace documentation by key
+        :param text_id: key for documentation of an element
+        :param text: a list of one or more tuples, each containing a purpose string and documentation text
+        """
+        self.phrases.append_documentation(text_id, text)
 
 UnifiedInstance = UnifiedInstanceWithPhrases
 """Default Unified Repository instance"""

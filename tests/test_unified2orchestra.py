@@ -11,7 +11,7 @@ def output_dir():
     return path
 
 
-def test_sbe2orchestra_xml():
+def test_unified2orchestra_xml():
     xml_path = os.path.join(XML_FILE_DIR, 'FixRepository.xml')
     phrases_xml_path = os.path.join(XML_FILE_DIR, 'FIX.Latest_EP269_en_phrases.xml')
     output_path = os.path.join(output_dir(), 'FixRepository2Orchestra.xml')
@@ -22,7 +22,7 @@ def test_sbe2orchestra_xml():
         assert not errors
 
 
-def test_sbe2orchestra_dict():
+def test_unified2orchestra_dict():
     xml_path = os.path.join(XML_FILE_DIR, 'FixRepository.xml')
     phrases_xml_path = os.path.join(XML_FILE_DIR, 'FIX.Latest_EP269_en_phrases.xml')
     output_path = os.path.join(output_dir(), 'FixRepository2Orchestra-dict.txt')

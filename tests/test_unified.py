@@ -56,10 +56,14 @@ def test_phrases_to_dict():
     output_path = os.path.join(output_dir(), 'FIX.Latest_EP269_en_phrases-dict.txt')
     with open(output_path, 'w') as f:
         (instance, errors) = unified.read_xml(xml_path)
+        instance.append_documentation('FIELD_9999', [('SYNOPSIS', 'Test documentation'),
+                                                     ('ELABORATION', 'Even more documentation')])
         print(str(instance), file=f)
         f.close()
         assert not errors
         assert instance.text_id('FIELD_2217') == [('SYNOPSIS', 'The fee amount due if different from MiscFeeAmt(137).')]
+        assert instance.text_id('FIELD_9999') == [('SYNOPSIS', 'Test documentation'),
+                                                  ('ELABORATION', 'Even more documentation')]
 
 
 def test_text_id():

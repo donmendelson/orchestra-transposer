@@ -169,7 +169,7 @@ class UnifiedWithPhrases:
         :param phrases_stream: a file like object for writing the phrases file
         :return: a list of errors, if any
         """
-        errors = self.unified.write_xml(instance.unified, unified_stream)
+        errors = self.unified.write_xml(instance, unified_stream)
         errors.extend(self.phrases.write_xml(instance.phrases, phrases_stream))
         return errors
 
