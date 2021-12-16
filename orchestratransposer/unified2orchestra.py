@@ -116,9 +116,8 @@ class Unified2Orchestra10:
             xml = next(filter(lambda l: isinstance(l, list) and l[0] == 'XML', unified_datatype), None)
             if xml:
                 xml_mapping = ['fixr:mappedDatatype',
-                               {k: xml[1][k] for k in set(list(xml[1].keys())) - set(exclude_keys)}]
-                xml_mapping[1]['standard'] = 'XML'
-                xml_mapping[1]['builtin'] = bool(int(xml[1].get('builtin', '0')))
+                               {k: xml[1][k] for k in set(list(xml[1].keys())) - set('textId')}]
+
                 datatype.append(xml_mapping)
             OrchestraInstance10.append_documentations(datatype, unified_documentation)
             datatypes.append(datatype)

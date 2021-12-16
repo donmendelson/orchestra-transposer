@@ -39,6 +39,13 @@ class OrchestraInstance10:
             self.root().append(metadata)
         return metadata
 
+    def metadata_term(self, term: str) -> Optional[str]:
+        """
+        :return: the value of a Dublin Core Term metadata
+        """
+        metadata = self.metadata()
+        return next((l[1] for l in metadata if isinstance(l, list) and l[0] == term), None)
+
     def __types(self, category: str) -> list:
         try:
             types = next(i for i in self.root() if isinstance(i, list) and i[0] == category)
@@ -229,6 +236,11 @@ class OrchestraInstance10:
     def group(self, group_id: int) -> Optional[list]:
         groups: list = self.groups()
         return next((group for group in groups if isinstance(group, list) and group[1]['id'] == group_id), None)
+
+    def codeset(self, codeset_name: str) -> Optional[list]:
+        codesets: list = self.codesets()
+        return next(
+            (codeset for codeset in codesets if isinstance(codeset, list) and codeset[1]['name'] == codeset_name), None)
 
     @staticmethod
     def append_field_ref(structure: list, field_ref):

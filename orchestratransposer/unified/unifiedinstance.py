@@ -8,7 +8,7 @@ class UnifiedMainInstance:
     """
 
     def __init__(self, obj: Optional[list] = None):
-        self.obj = obj if obj is not None else ['fixRepository', {}]
+        self.obj = obj if obj is not None else ['fixRepository', {'edition': 2010}]
 
     def __str__(self):
         return pformat(self.obj, width=120)
@@ -19,10 +19,12 @@ class UnifiedMainInstance:
         """
         return self.obj
 
-    def fix(self, version: Optional[str] = None) -> Optional[list]:
+    def fix(self, version: Optional[str] = None, has_components=True, has_fixml=True, ) -> Optional[list]:
         """
         Returns a dictionary representing a fix version
         :param version: a fix version to extract from a Unified Repository. If not provided, returns the first instance.
+        :param has_components: are components supported
+        :param has_fixml: is FIXML supported
         :return: a list describing one version of a protocol
         """
         try:
@@ -34,7 +36,8 @@ class UnifiedMainInstance:
                             v = i[1].get('version', None)
                             if version == v:
                                 return i
-                fix_attr = {'version': version}
+                fix_attr = {'version': version, 'components': 1 if has_components else 0,
+                            'fixml': 1 if has_fixml else 0}
                 fix = ['fix', fix_attr]
                 main_root.append(fix)
                 return fix
@@ -42,7 +45,8 @@ class UnifiedMainInstance:
                 for i in main_root:
                     if isinstance(i, list) and i[0] == 'fix':
                         return i
-                fix_attr = {}
+                fix_attr = {'version': version, 'components': 1 if has_components else 0,
+                            'fixml': 1 if has_fixml else 0}
                 fix = ['fix', fix_attr]
                 main_root.append(fix)
                 return fix
@@ -106,11 +110,6 @@ class UnifiedMainInstance:
         return UnifiedMainInstance.__types(fix, 'categories')
 
     @staticmethod
-    def field(fix: list, field_id: int) -> Optional[list]:
-        fields: list = UnifiedMainInstance.fields(fix)
-        return next((field for field in fields if isinstance(field, list) and field[1]['id'] == field_id), None)
-
-    @staticmethod
     def component(fix: list, component_id: int) -> Optional[list]:
         components: list = UnifiedMainInstance.components(fix)
         return next((component for component in components if
@@ -128,9 +127,9 @@ class UnifiedPhrasesInstance:
     def __str__(self):
         return pformat(self.phrases_obj, width=120)
 
-    def phrases_root(self) -> dict:
+    def phrases_root(self) -> list:
         """
-        :return: the root of an Orchestra instance represented as a Python dictionary
+        :return: the root of an Orchestra instance represented as a Python list
         """
         return self.phrases_obj
 
@@ -138,16 +137,18 @@ class UnifiedPhrasesInstance:
         """
         Append or replace documentation by key
         :param text_id: key for documentation of an element
-        :param text: a list of one or more tuples, each containing a purpose string and documentation text
+        :param documentations: a list of one or more tuples, each containing a purpose string and documentation text
         """
         phrase = next((p for p in self.phrases_root() if isinstance(p, list) and len(p) >= 2
                        and p[1].get('textId', None) == text_id), None)
         if phrase:
-            text = filter(lambda l: isinstance(l, list) and l[0] == 'text', phrase)
+            text = list(filter(lambda l: isinstance(l, list) and l[0] == 'text', phrase))
             paras = []
             text[1] = paras
             for documentation in documentations:
                 if documentation[0]:
+                    if not documentation[0] in ['SYNOPSIS', 'ELABORATION']:
+                        continue
                     attr = {'purpose': documentation[0]}
                 else:
                     attr = {}
@@ -157,13 +158,14 @@ class UnifiedPhrasesInstance:
             phrase = ['phrase', phrase_attr]
             for documentation in documentations:
                 if documentation[0]:
+                    if not documentation[0] in ['SYNOPSIS', 'ELABORATION']:
+                        continue
                     attr = {'purpose': documentation[0]}
                 else:
                     attr = {}
                 text = ['text', attr, ['para', documentation[1]]]
                 phrase.append(text)
             self.phrases_root().append(phrase)
-
 
     def text_id(self, text_id: str) -> List[Tuple[str, str]]:
         """
@@ -174,7 +176,7 @@ class UnifiedPhrasesInstance:
         """
         retv = []
         phrase = next((p for p in self.phrases_root() if isinstance(p, list) and len(p) >= 2
-                      and p[1].get('textId', None) == text_id), None)
+                       and p[1].get('textId', None) == text_id), None)
         if phrase:
             text = filter(lambda l: isinstance(l, list) and l[0] == 'text', phrase)
             for i in text:
@@ -209,13 +211,14 @@ class UnifiedInstanceWithPhrases(UnifiedMainInstance):
         """
         return self.phrases.text_id(text_id)
 
-    def append_documentation(self, text_id: str, text: List[Tuple[str, str]]):
+    def append_documentation(self, text_id: str, text: List[Tuple[str, str]]) -> None:
         """
         Append or replace documentation by key
         :param text_id: key for documentation of an element
         :param text: a list of one or more tuples, each containing a purpose string and documentation text
         """
         self.phrases.append_documentation(text_id, text)
+
 
 UnifiedInstance = UnifiedInstanceWithPhrases
 """Default Unified Repository instance"""
