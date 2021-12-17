@@ -101,7 +101,7 @@ class Orchestra10Unified:
             if xml:
                 unified_xml_mapping = ['XML',
                                        {k: xml[1][k] for k in
-                                        set(list(xml[1].keys())) - set(['textId', 'standard', 'builtin'])}]
+                                        set(list(xml[1].keys())) - set(['standard', 'builtin'])}]
                 unified_xml_mapping[1]['builtin'] = '1' if xml[1].get('builtin', False) else '0'
                 documentation: List[Tuple[str, str]] = OrchestraInstance10.documentation(xml)
                 if documentation:
@@ -126,15 +126,27 @@ class Orchestra10Unified:
             field_type = field[1]['type']
             codeset = orch.codeset(field_type)
             field_attr = {k: field[1][k] for k in
-                          set(list(field[1].keys())) - set(['textId', 'lengthId', 'discriminatorId'])}
+                          set(list(field[1].keys())) - set(['lengthId', 'discriminatorId'])}
+            unified_field = ['field', field_attr]
             if codeset:
                 field_attr['type'] = codeset[1]['type']
-            unified_field = ['field', field_attr]
+                code_lst = filter(lambda l: isinstance(l, list) and l[0] == 'fixr:code', codeset)
+                for code in code_lst:
+                    enum_attr = {k: code[1][k] for k in
+                                 set(list(code[1].keys())) - set(['name', 'id'])}
+                    enum_attr['symbolicName'] = code[1]['name']
+                    enum = ['enum', enum_attr]
+                    documentation: List[Tuple[str, str]] = OrchestraInstance10.documentation(code)
+                    if documentation:
+                        text_id = 'ENUM_' + str(field[1]['id']) + '_' + str(code[1]['value'])
+                        enum_attr['textId'] = text_id
+                        documentation_func(text_id, documentation)
+                    unified_field.append(enum)
             documentation: List[Tuple[str, str]] = OrchestraInstance10.documentation(field)
             if documentation:
                 text_id = 'FIELD_' + str(field[1]['id'])
                 field_attr['textId'] = text_id
-                # documentation_func(text_id, documentation)
+                documentation_func(text_id, documentation)
             unified_fields.append(unified_field)
 
 

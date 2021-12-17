@@ -66,11 +66,13 @@ class Unified2Orchestra10:
         Set Orchestra metadata from a Unified Repository
         """
         repository = orch.repository()
+        rights = fix[1]['copyright']
         version = fix[1]['version']
         (first, sep, last) = version.partition('_')
         repository['version'] = version
         repository['name'] = first
         metadata = orch.metadata()
+        metadata.append(['dc:rights', rights])
         metadata.append(['dcterms:title', first])
         my_date = datetime.now()
         metadata.append(['dcterms:date', my_date.isoformat()])

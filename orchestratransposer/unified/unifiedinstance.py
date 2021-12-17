@@ -147,7 +147,7 @@ class UnifiedPhrasesInstance:
             text[1] = paras
             for documentation in documentations:
                 if documentation[0]:
-                    if not documentation[0] in ['SYNOPSIS', 'ELABORATION']:
+                    if documentation[1] is None or not documentation[0] in ['SYNOPSIS', 'ELABORATION']:
                         continue
                     attr = {'purpose': documentation[0]}
                 else:
@@ -158,7 +158,7 @@ class UnifiedPhrasesInstance:
             phrase = ['phrase', phrase_attr]
             for documentation in documentations:
                 if documentation[0]:
-                    if not documentation[0] in ['SYNOPSIS', 'ELABORATION']:
+                    if documentation[1] is None or not documentation[0] in ['SYNOPSIS', 'ELABORATION']:
                         continue
                     attr = {'purpose': documentation[0]}
                 else:
