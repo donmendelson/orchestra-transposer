@@ -146,25 +146,23 @@ class UnifiedPhrasesInstance:
             paras = []
             text[1] = paras
             for documentation in documentations:
-                if documentation[0]:
-                    if documentation[1] is None or not documentation[0] in ['SYNOPSIS', 'ELABORATION']:
-                        continue
-                    attr = {'purpose': documentation[0]}
-                else:
-                    attr = {}
-                paras.append((attr, ['para', documentation[1]]))
+                if isinstance(documentation, tuple) and len(documentation) == 2 and not documentation[1] is None:
+                    if documentation[0] and documentation[0] in ['SYNOPSIS', 'ELABORATION']:
+                        attr = {'purpose': documentation[0]}
+                    else:
+                        attr = {}
+                    paras.append((attr, ['para', documentation[1]]))
         else:
             phrase_attr = {'textId': text_id}
             phrase = ['phrase', phrase_attr]
             for documentation in documentations:
-                if documentation[0]:
-                    if documentation[1] is None or not documentation[0] in ['SYNOPSIS', 'ELABORATION']:
-                        continue
-                    attr = {'purpose': documentation[0]}
-                else:
-                    attr = {}
-                text = ['text', attr, ['para', documentation[1]]]
-                phrase.append(text)
+                if isinstance(documentation, tuple) and len(documentation) == 2 and not documentation[1] is None:
+                    if documentation[0] and documentation[0] in ['SYNOPSIS', 'ELABORATION']:
+                        attr = {'purpose': documentation[0]}
+                    else:
+                        attr = {}
+                    text = ['text', attr, ['para', documentation[1]]]
+                    phrase.append(text)
             self.phrases_root().append(phrase)
 
     def text_id(self, text_id: str) -> List[Tuple[str, str]]:

@@ -66,6 +66,14 @@ class OrchestraInstance10:
         """
         return self.__types('fixr:categories')
 
+    def category(self, name: str) -> Optional[list]:
+        """
+        :return: a category by name
+        """
+        categories = self.categories()
+        return next((category for category in categories if isinstance(category, list) and category[1]['name'] == name),
+                    None)
+
     def datatypes(self) -> list:
         """
         :return: a list of  datatypes of an Orchestra instance
@@ -175,17 +183,17 @@ class OrchestraInstance10:
             return []
 
     @staticmethod
-    def __map_documentation(element: list) -> Tuple[str, str]:
+    def __map_documentation(element: list) -> Optional[Tuple[str, str]]:
         try:
             attr = next(i for i in element if isinstance(i, dict))
             purpose = attr['purpose']
         except StopIteration:
             purpose = None
-        try:
-            text = element[2]
-        except IndexError:
-            text = None
-        return purpose, text
+        text = element[-1] if len(element) > 1 else None
+        if text:
+            return purpose, text
+        else:
+            return None
 
     @staticmethod
     def append_documentation(element: list, documentation: str):

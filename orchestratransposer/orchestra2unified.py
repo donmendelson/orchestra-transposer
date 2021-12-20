@@ -21,9 +21,9 @@ class Orchestra10Unified:
         self.orch2unified_categories(orchestra, documentation_func, fix)
         self.orch2unified_sections(orchestra, documentation_func, fix)
         self.orch2unified_fields(orchestra, documentation_func, fix)
-        # self.orch2unified_components(orchestra, fix)
-        # self.orch2unified_groups(orchestra, fix)
-        # self.orch2unified_messages(orchestra, fix)
+        self.orch2unified_components(orchestra, documentation_func, fix)
+        self.orch2unified_groups(orchestra, documentation_func, fix)
+        self.orch2unified_messages(orchestra, documentation_func, fix)
         return unified
 
     def orch2unified_xml(self, orchestra_xml, unified_stream, phrases_stream) -> List[Exception]:
@@ -36,7 +36,10 @@ class Orchestra10Unified:
         else:
             unified_instance = self.orch2unified_dict(orch_instance)
             unified = UnifiedWithPhrases()
-            return unified.write_xml_all(unified_instance, unified_stream, phrases_stream)
+            errors = unified.write_xml_all(unified_instance, unified_stream, phrases_stream)
+            for error in errors:
+                self.logger.error(error)
+            return errors
 
     def orch2unified_metadata(self, orch: OrchestraInstance10, unified: UnifiedInstanceWithPhrases) -> list:
         """
@@ -78,7 +81,7 @@ class Orchestra10Unified:
         categories: list = orch.categories()
         lst = filter(lambda l: isinstance(l, list) and l[0] == 'fixr:category', categories)
         for category in lst:
-            category_attr = {k: category[1][k] for k in set(list(category[1].keys())) - set(['name'])}
+            category_attr = {k: category[1][k] for k in set(list(category[1].keys())) - {'name'}}
             category_attr['id'] = category[1]['name']
             unified_category = ['category', category_attr]
             documentation: List[Tuple[str, str]] = OrchestraInstance10.documentation(category)
@@ -101,7 +104,7 @@ class Orchestra10Unified:
             if xml:
                 unified_xml_mapping = ['XML',
                                        {k: xml[1][k] for k in
-                                        set(list(xml[1].keys())) - set(['standard', 'builtin'])}]
+                                        set(list(xml[1].keys())) - {'standard', 'builtin'}}]
                 unified_xml_mapping[1]['builtin'] = '1' if xml[1].get('builtin', False) else '0'
                 documentation: List[Tuple[str, str]] = OrchestraInstance10.documentation(xml)
                 if documentation:
@@ -117,8 +120,8 @@ class Orchestra10Unified:
             unified_datatypes.append(unified_datatype)
 
     def orch2unified_fields(self, orch: OrchestraInstance10,
-                           documentation_func: Callable[[str, List[Tuple[str, str]]], None],
-                           fix: list):
+                            documentation_func: Callable[[str, List[Tuple[str, str]]], None],
+                            fix: list):
         unified_fields = UnifiedMainInstance.fields(fix)
         fields: list = orch.fields()
         lst = filter(lambda l: isinstance(l, list) and l[0] == 'fixr:field', fields)
@@ -126,14 +129,14 @@ class Orchestra10Unified:
             field_type = field[1]['type']
             codeset = orch.codeset(field_type)
             field_attr = {k: field[1][k] for k in
-                          set(list(field[1].keys())) - set(['lengthId', 'discriminatorId'])}
+                          set(list(field[1].keys())) - {'lengthId', 'discriminatorId'}}
             unified_field = ['field', field_attr]
             if codeset:
                 field_attr['type'] = codeset[1]['type']
                 code_lst = filter(lambda l: isinstance(l, list) and l[0] == 'fixr:code', codeset)
                 for code in code_lst:
                     enum_attr = {k: code[1][k] for k in
-                                 set(list(code[1].keys())) - set(['name', 'id'])}
+                                 set(list(code[1].keys())) - {'name', 'id'}}
                     enum_attr['symbolicName'] = code[1]['name']
                     enum = ['enum', enum_attr]
                     documentation: List[Tuple[str, str]] = OrchestraInstance10.documentation(code)
@@ -148,6 +151,159 @@ class Orchestra10Unified:
                 field_attr['textId'] = text_id
                 documentation_func(text_id, documentation)
             unified_fields.append(unified_field)
+
+    def orch2unified_components(self, orch: OrchestraInstance10,
+                                documentation_func: Callable[[str, List[Tuple[str, str]]], None],
+                                fix: list):
+        unified_components = UnifiedMainInstance.components(fix)
+        components: list = orch.components()
+        lst = filter(lambda l: isinstance(l, list) and l[0] == 'fixr:component', components)
+        for component in lst:
+            component_attr = component[1].copy()
+            component_attr['type'] = 'Block'
+            component_attr['repeating'] = 0
+            unified_component = ['component', component_attr]
+            self.orch2unified_append_members(orch, component, documentation_func, 'CMP_' + str(component_attr['id']),
+                                             unified_component)
+            documentation: List[Tuple[str, str]] = OrchestraInstance10.documentation(component)
+            if documentation:
+                text_id = 'COMP_' + component[1]['name'] + '_TITLE'
+                component_attr['textId'] = text_id
+                documentation_func(text_id, documentation)
+            unified_components.append(unified_component)
+
+    def orch2unified_groups(self, orch: OrchestraInstance10,
+                            documentation_func: Callable[[str, List[Tuple[str, str]]], None],
+                            fix: list):
+        unified_components = UnifiedMainInstance.components(fix)
+        groups: list = orch.groups()
+        lst = filter(lambda l: isinstance(l, list) and l[0] == 'fixr:group', groups)
+        for group in lst:
+            component_attr = group[1].copy()
+            component_attr['type'] = 'BlockRepeating'
+            component_attr['repeating'] = 1
+            unified_component = ['component', component_attr]
+            repeating_attr = {'legacyIndent': 0,
+                              'legacyPosition': 0,
+                              'name': '',
+                              'required': 0}
+            repeating_group = ['repeatingGroup', repeating_attr]
+            unified_component.append(repeating_group)
+            self.orch2unified_append_members(orch, group, documentation_func, 'CMP_' + str(component_attr['id']),
+                                             repeating_group)
+            documentation: List[Tuple[str, str]] = OrchestraInstance10.documentation(group)
+            if documentation:
+                text_id = 'COMP_' + group[1]['name'] + '_TITLE'
+                component_attr['textId'] = text_id
+                documentation_func(text_id, documentation)
+            unified_components.append(unified_component)
+
+    def orch2unified_messages(self, orch: OrchestraInstance10,
+                              documentation_func: Callable[[str, List[Tuple[str, str]]], None],
+                              fix: list):
+        unified_messages = UnifiedMainInstance.messages(fix)
+        messages: list = orch.messages()
+        lst = filter(lambda l: isinstance(l, list) and l[0] == 'fixr:message', messages)
+        for message in lst:
+            message_attr = message[1].copy()
+            category = orch.category(message[1]['category'])
+            if category:
+                section = category[1]['section']
+                message_attr['notReqXML'] = 1 if not section == 'Session' else 0
+                message_attr['section'] = section
+            else:
+                message_attr['notReqXML'] = 1
+                message_attr['section'] = 'Unknown'
+                self.logger.error("Section not found for message %d", message_attr['id'])
+            structure = message[2]
+            unified_message = ['message', message_attr]
+            self.orch2unified_append_members(orch, structure, documentation_func, 'MSG_' + str(message_attr['id']),
+                                             unified_message)
+            documentation: List[Tuple[str, str]] = OrchestraInstance10.documentation(message)
+            if documentation:
+                text_id = 'MSG_' + message[1]['name'] + '_TITLE'
+                message_attr['textId'] = text_id
+                documentation_func(text_id, documentation)
+            unified_messages.append(unified_message)
+
+    def orch2unified_append_members(self, orch: OrchestraInstance10, structure: list,
+                                    documentation_func: Callable[[str, List[Tuple[str, str]]], None],
+                                    prefix: str,
+                                    unified_structure: list):
+        lst = filter(lambda l: isinstance(l, list) and l[0] in ['fixr:fieldRef', 'fixr:componentRef', 'fixr:groupRef',
+                                                                'fixr:numInGroup'],
+                     structure)
+        for member in lst:
+            documentation: List[Tuple[str, str]] = OrchestraInstance10.documentation(member)
+            unified_presence = Orchestra10Unified.orch2unified_presence(member[1].get('presence', 'optional'))
+            member_id = member[1]['id']
+            if member[0] == 'fixr:numInGroup':
+                field_attr = member[1]
+                # update parent repeatinggroup element
+                unified_structure[1]['id'] = field_attr['id']
+                if documentation:
+                    text_id = prefix + '_REF_' + str(id)
+                    unified_structure[1]['textId'] = text_id
+                    documentation_func(text_id, documentation)
+            elif member[0] == 'fixr:fieldRef':
+                field = orch.field(member_id)
+                unified_field_attr = {k: member[1][k] for k in
+                                      set(list(member[1].keys())) - {'presence'}}
+                unified_field_attr['required'] = unified_presence
+                unified_field_attr['legacyPosition'] = 0
+                unified_field_attr['legacyIndent'] = 0
+                if field:
+                    unified_field_attr['name'] = field[1]['name']
+                else:
+                    unified_field_attr['name'] = 'Unknown'
+                    self.logger.error("Field %d not found", member_id)
+                unified_field_ref = ['fieldRef', unified_field_attr]
+                if documentation:
+                    text_id = prefix + '_REF_' + str(member_id)
+                    unified_field_attr['textId'] = text_id
+                    documentation_func(text_id, documentation)
+                unified_structure.append(unified_field_ref)
+            elif member[0] == 'fixr:componentRef':
+                component = orch.component(member_id)
+                unified_component_attr = {k: member[1][k] for k in
+                                          set(list(member[1].keys())) - {'presence'}}
+                unified_component_attr['required'] = unified_presence
+                unified_component_attr['legacyPosition'] = 0
+                unified_component_attr['legacyIndent'] = 0
+                unified_component_ref = ['componentRef', unified_component_attr]
+                if component:
+                    unified_component_attr['name'] = component[1]['name']
+                    if documentation:
+                        text_id = prefix + '_REF_' + component[1]['name']
+                        unified_component_attr['textId'] = text_id
+                        documentation_func(text_id, documentation)
+                else:
+                    unified_component_attr['name'] = 'Unknown'
+                    self.logger.error("Component %d not found", member_id)
+                unified_structure.append(unified_component_ref)
+            elif member[0] == 'fixr:groupRef':
+                group = orch.group(member_id)
+                unified_component_attr = {k: member[1][k] for k in
+                                          set(list(member[1].keys())) - {'presence'}}
+
+                unified_component_attr['required'] = unified_presence
+                unified_component_attr['legacyPosition'] = 0
+                unified_component_attr['legacyIndent'] = 0
+                unified_component_ref = ['componentRef', unified_component_attr]
+                if group:
+                    unified_component_attr['name'] = group[1]['name']
+                    if documentation:
+                        text_id = prefix + '_REF_' + group[1]['name']
+                        unified_component_attr['textId'] = text_id
+                        documentation_func(text_id, documentation)
+                else:
+                    unified_component_attr['name'] = 'Unknown'
+                    self.logger.error("Group %d not found", member_id)
+                unified_structure.append(unified_component_ref)
+
+    @staticmethod
+    def orch2unified_presence(presence: str):
+        return 1 if presence == 'required' else 0
 
 
 Orchestra2Unified = Orchestra10Unified
