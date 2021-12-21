@@ -10,7 +10,6 @@ orchestratransposer.orchestra2sbe
    .. autosummary::
       :toctree:
    
-      TEXT_KEY
       Orchestra2SBE
    
    

@@ -2,26 +2,39 @@
 
 Converts between a FIX Orchestra file and other artifacts.
 
-Initial implementation converts between Orchestra version 1.0 and Simple Binary Encoding (SBE) version 1.0.
+The initial implementation converts between Orchestra version 1.0 and these other XML schemas:
+* Simple Binary Encoding (SBE) version 1.0
+* FIX Unified Repository 2010 Edition
 
 ### FIX standards and schemas
+References for these standards and their XML schemas are available in GitHub.
 
-[fix-orchestra](https://github.com/FIXTradingCommunity/fix-orchestra)
+[FIX Orchestra](https://github.com/FIXTradingCommunity/fix-orchestra)
+The XSD files for Orchestra are in module `repository` while the Unified Repository schema is in 
+module `repository2010`.
 
-[fix-simple-binary-encoding](https://github.com/FIXTradingCommunity/fix-simple-binary-encoding)
+[FIX Simple Binary Encoding (SBE)](https://github.com/FIXTradingCommunity/fix-simple-binary-encoding)
+Currently version 1.0 is supported.
+
 
 ## Features
 
 * Validate an Orchestra file against its XML schema.
-* Access elements of an Orchestra file in "pythonic" data structures that are aware of XML Schema datatypes.
+* Access elements of an Orchestra file in "pythonic" data structures that are aware of XML Schema 
+datatypes.
 * Validate an SBE message schema against its XML schema.
-* Access elements of an SBE message schema in "pythonic" data structures that are aware of XML Schema datatypes.
+* Access elements of an SBE message schema in "pythonic" data structures that are aware of XML 
+Schema datatypes.
 * Convert an Orchestra file to an SBE message schema. Support datatype customization.
 * Convert an SBE message schema to an Orchestra file.
+* Validate a Unified Repository file against its schema.
+* Convert an Orchestra file to a Unified Repository.
+* Convert a Unified Repository to an Orchestra file.
 
 ## Prerequisites
 
-Requires [Python 3.9](https://www.python.org/downloads/release/python-390/) or later. (Earlier versions may work but have not been tested.)
+Requires [Python 3.9](https://www.python.org/downloads/release/python-390/) or later. (Earlier 
+versions have not been tested.)
 
 Unit tests use the [pytest](https://docs.pytest.org/en/6.2.x/) framework.
 
@@ -29,7 +42,15 @@ Assuming that Python and pip are already installed, get started as follows:
 1. Clone this Git repository
 2. In the working directory, create a Python virtual environment, e.g. `python -m venv .venv`
 3. Install required dependencies: `pip install -r requirements.txt`
+4. For development of this project, also install dependencies from `requirements-dev.txt`. This is required for 
+documentation generation and possibly other tasks.
 
+### Documentation
+To generate documentation, invoke the make utility in the `docs` directory.
+
+## Usage
+
+See the pytest test cases in the `tests` directory for examples of usage.
 
 ## License
 

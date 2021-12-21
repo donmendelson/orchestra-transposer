@@ -1,4 +1,4 @@
-﻿orchestratransposer.orchestra2sbe.Orchestra2SBE
+orchestratransposer.orchestra2sbe.Orchestra2SBE
 ===============================================
 
 .. currentmodule:: orchestratransposer.orchestra2sbe

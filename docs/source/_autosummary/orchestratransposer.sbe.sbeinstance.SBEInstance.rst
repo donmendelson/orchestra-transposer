@@ -19,7 +19,6 @@
       ~SBEInstance.__init__
       ~SBEInstance.all_data
       ~SBEInstance.all_fields
-      ~SBEInstance.all_types
       ~SBEInstance.append_composite
       ~SBEInstance.append_data_field
       ~SBEInstance.append_encoding_type
@@ -27,7 +26,6 @@
       ~SBEInstance.append_field
       ~SBEInstance.append_group
       ~SBEInstance.append_message
-      ~SBEInstance.composite
       ~SBEInstance.composites
       ~SBEInstance.data
       ~SBEInstance.encoding_types
@@ -36,11 +34,18 @@
       ~SBEInstance.first_types
       ~SBEInstance.groups
       ~SBEInstance.id
+      ~SBEInstance.message_schema
       ~SBEInstance.messages
       ~SBEInstance.root
    
    
 
    
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~SBEInstance.all_types
    
    

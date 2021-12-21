@@ -1,4 +1,4 @@
-orchestratransposer.orchestra.orchestrainstance
+﻿orchestratransposer.orchestra.orchestrainstance
 ===============================================
 
 .. automodule:: orchestratransposer.orchestra.orchestrainstance
@@ -10,7 +10,6 @@ orchestratransposer.orchestra.orchestrainstance
    .. autosummary::
       :toctree:
    
-      TEXT_KEY
       OrchestraInstance
    
    

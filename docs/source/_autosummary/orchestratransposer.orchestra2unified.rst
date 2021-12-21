@@ -1,7 +1,7 @@
-orchestratransposer.sbe2orchestra
-=================================
+orchestratransposer.orchestra2unified
+=====================================
 
-.. automodule:: orchestratransposer.sbe2orchestra
+.. automodule:: orchestratransposer.orchestra2unified
   
    
    
@@ -10,7 +10,7 @@ orchestratransposer.sbe2orchestra
    .. autosummary::
       :toctree:
    
-      SBE2Orchestra
+      Orchestra2Unified
    
    
 
@@ -26,8 +26,8 @@ orchestratransposer.sbe2orchestra
       :toctree:
       :template: class.rst
    
-      SBE2Orchestra
-      SBE2Orchestra10_10
+      Orchestra10Unified
+      Orchestra2Unified
    
    
 
