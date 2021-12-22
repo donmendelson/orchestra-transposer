@@ -66,13 +66,11 @@ class Unified2Orchestra10:
         Set Orchestra metadata from a Unified Repository
         """
         repository = orch.repository()
-        rights = fix[1]['copyright']
         version = fix[1]['version']
         (first, sep, last) = version.partition('_')
         repository['version'] = version
         repository['name'] = first
         metadata = orch.metadata()
-        metadata.append(['dc:rights', rights])
         metadata.append(['dcterms:title', first])
         my_date = datetime.now()
         metadata.append(['dcterms:date', my_date.isoformat()])
@@ -82,11 +80,14 @@ class Unified2Orchestra10:
         unified_sections = UnifiedMainInstance.sections(fix)
         lst = filter(lambda l: isinstance(l, list) and l[0] == 'section', unified_sections)
         for unified_section in lst:
-            exclude_keys = ['textId', 'volume', 'id', 'notReqXML']
-            section_attr = {k: unified_section[1][k] for k in set(list(unified_section[1].keys())) - set(exclude_keys)}
+            exclude_keys = {'textId', 'volume', 'id', 'notReqXML'}
+            section_attr = {k: unified_section[1][k] for k in set(list(unified_section[1].keys())) - exclude_keys}
             section_attr['name'] = unified_section[1]['id']
             section = ['fixr:section', section_attr]
             unified_documentation: List[Tuple[str, str]] = documentation_func(unified_section[1].get('textId', None))
+            not_req_xml = unified_section[1].get('notReqXML', 0)
+            if not_req_xml == 1:
+                OrchestraInstance10.append_appinfo(section, [({'purpose': 'FIXML'}, 'notReqXML')])
             OrchestraInstance10.append_documentations(section, unified_documentation)
             sections.append(section)
 
@@ -102,6 +103,9 @@ class Unified2Orchestra10:
             category = ['fixr:category', category_attr]
             unified_documentation: List[Tuple[str, str]] = documentation_func(unified_category[1].get('textId', None))
             OrchestraInstance10.append_documentations(category, unified_documentation)
+            not_req_xml = unified_category[1].get('notReqXML', 0)
+            if not_req_xml == 1:
+                OrchestraInstance10.append_appinfo(category, [({'purpose': 'FIXML'}, 'notReqXML')])
             categories.append(category)
 
     def unified2orch_datatypes(self, fix: list, documentation_func: Callable[[str], List[Tuple[str, str]]],
@@ -115,11 +119,15 @@ class Unified2Orchestra10:
             datatype = ['fixr:datatype', datatype_attr]
             unified_documentation: List[Tuple[str, str]] = documentation_func(unified_datatype[1].get('textId', None))
             """ TODO annotations with example"""
-            xml = next(filter(lambda l: isinstance(l, list) and l[0] == 'XML', unified_datatype), None)
-            if xml:
+            unified_xml = next(filter(lambda l: isinstance(l, list) and l[0] == 'XML', unified_datatype), None)
+            if unified_xml:
                 xml_mapping = ['fixr:mappedDatatype',
-                               {k: xml[1][k] for k in set(list(xml[1].keys())) - set('textId')}]
-
+                               {k: unified_xml[1][k] for k in set(list(unified_xml[1].keys())) - {'textId'}}]
+                xml_mapping[1]['standard'] = 'XML'
+                xml_mapping[1]['builtin'] = bool(int(unified_xml[1].get('builtin', '0')))
+                unified_xml_documentation: List[Tuple[str, str]] = documentation_func(
+                    unified_xml[1].get('textId', None))
+                OrchestraInstance10.append_documentations(xml_mapping, unified_xml_documentation)
                 datatype.append(xml_mapping)
             OrchestraInstance10.append_documentations(datatype, unified_documentation)
             datatypes.append(datatype)
@@ -133,6 +141,9 @@ class Unified2Orchestra10:
             field = ['fixr:field', field_attr]
             unified_documentation: List[Tuple[str, str]] = documentation_func(unified_field[1].get('textId', None))
             OrchestraInstance10.append_documentations(field, unified_documentation)
+            not_req_xml = unified_field[1].get('notReqXML', 0)
+            if not_req_xml == 1:
+                OrchestraInstance10.append_appinfo(field, [({'purpose': 'FIXML'}, 'notReqXML')])
             enum = next(filter(lambda l: isinstance(l, list) and l[0] == 'enum', unified_field), None)
             if enum:
                 codeset_name = unified_field[1]['name']
@@ -193,6 +204,9 @@ class Unified2Orchestra10:
             component = ['fixr:component', component_attr]
             self.unified2orch_append_members(fix, documentation_func, component, unified_component)
             unified_documentation: List[Tuple[str, str]] = documentation_func(unified_component[1].get('textId', None))
+            not_req_xml = unified_component[1].get('notReqXML', 0)
+            if not_req_xml == 1:
+                OrchestraInstance10.append_appinfo(component, [({'purpose': 'FIXML'}, 'notReqXML')])
             OrchestraInstance10.append_documentations(component, unified_documentation)
             components.append(component)
 
@@ -212,6 +226,9 @@ class Unified2Orchestra10:
             self.unified2orch_append_members(fix, documentation_func, group, unified_repeating_group)
             unified_documentation: List[Tuple[str, str]] = documentation_func(unified_component[1].get('textId', None))
             OrchestraInstance10.append_documentations(group, unified_documentation)
+            not_req_xml = unified_component[1].get('notReqXML', 0)
+            if not_req_xml == 1:
+                OrchestraInstance10.append_appinfo(group, [({'purpose': 'FIXML'}, 'notReqXML')])
             groups.append(group)
 
     def unified2orch_messages(self, fix: list, documentation_func: Callable[[str], List[Tuple[str, str]]],
@@ -227,9 +244,12 @@ class Unified2Orchestra10:
             self.unified2orch_append_members(fix, documentation_func, structure, unified_message)
             unified_documentation: List[Tuple[str, str]] = documentation_func(unified_message[1].get('textId', None))
             OrchestraInstance10.append_documentations(message, unified_documentation)
+            not_req_xml = unified_message[1].get('notReqXML', 0)
+            if not_req_xml == 1:
+                OrchestraInstance10.append_appinfo(message, [({'purpose': 'FIXML'}, 'notReqXML')])
             messages.append(message)
 
-    def unified2orch_append_members(self, fix: list,  documentation_func: Callable[[str], List[Tuple[str, str]]],
+    def unified2orch_append_members(self, fix: list, documentation_func: Callable[[str], List[Tuple[str, str]]],
                                     structure: list, unified_structure: list):
         lst = filter(lambda l: isinstance(l, list), unified_structure)
         for unified_member in lst:
@@ -263,6 +283,9 @@ class Unified2Orchestra10:
                     if not presence == 'optional':
                         component_attr['presence'] = presence
                     component_ref = ['fixr:componentRef', component_attr]
+                    inlined = unified_member[1].get('inlined', 0)
+                    if inlined == 1:
+                        OrchestraInstance10.append_appinfo(component_ref, [({'purpose': 'FIXML'}, 'inlined')])
                     OrchestraInstance10.append_documentations(component_ref, unified_documentation)
                     structure.append(component_ref)
 

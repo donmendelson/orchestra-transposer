@@ -1,5 +1,5 @@
 from pprint import pformat
-from typing import List, Optional, Tuple
+from typing import List, Optional, Tuple, Union
 
 
 class OrchestraInstance10:
@@ -206,8 +206,16 @@ class OrchestraInstance10:
             annotation.append(['fixr:documentation', {}, documentation])
 
     @staticmethod
-    def append_documentations(element: list, documentations: List[Tuple[str, str]]):
-        """ Appends an annotation with one or more documentations, each with optional Purpose and text """
+    def append_documentations(element: list, documentations: List[Tuple[Union[str, dict, type(None)], str]]):
+        """
+        Appends an annotation with one or more two-element tuples.
+
+        The first element is one of the following:
+        * A string for the value of purpose attribute
+        * A dictionary. The acceptable keys are purpose, lang, and contentType.
+        * None
+        The second element is text.
+        """
         if len(documentations) > 0:
             annotation = next((i for i in element if isinstance(i, list) and i[0] == 'fixr:annotation'), None)
             if not annotation:
@@ -215,10 +223,45 @@ class OrchestraInstance10:
                 element.append(annotation)
             for documentation in documentations:
                 if documentation[0]:
-                    attr = {'purpose': documentation[0]}
+                    if isinstance(documentation[0], dict):
+                        attr = documentation[0]
+                    elif isinstance(documentation[0], str):
+                        attr = {'purpose': documentation[0]}
                 else:
                     attr = {}
                 annotation.append(['fixr:documentation', attr, documentation[1]])
+
+    @staticmethod
+    def append_appinfo(element: list, appinfos: List[Tuple[dict, str]]):
+        """
+        Appends an annotation with one or more appinfo, each with a dictionary and text
+
+        Standard dictionary keys are 'lang', 'purpose'.
+        """
+        if len(appinfos) > 0:
+            annotation = next((i for i in element if isinstance(i, list) and i[0] == 'fixr:annotation'), None)
+            if not annotation:
+                annotation = ['fixr:annotation']
+                element.append(annotation)
+            for appinfo in appinfos:
+                annotation.append(['fixr:appinfo', appinfo[0], appinfo[1]])
+
+    @staticmethod
+    def appinfo(element: list, purpose: str) -> List[str]:
+        """
+        Returns a list of appinfo text for a given purpose
+
+        :param element: the element with which the appinfo is associated
+        :param purpose: typically an application name
+        :return: a list of text, may be empty
+        """
+        try:
+            annotation = next(i for i in element if isinstance(i, list) and i[0] == 'fixr:annotation')
+            return [x[1] for x in filter(
+                lambda l: isinstance(l, list) and l[0] == 'fixr:appinfo' and l[1].get('purpose', None) == purpose,
+                annotation)]
+        except StopIteration:
+            return []
 
     @staticmethod
     def field_refs(structure: list) -> list:
