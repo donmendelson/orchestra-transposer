@@ -69,7 +69,7 @@ class Orchestra10:
             'fixr', 'http://fixprotocol.io/2020/orchestra/repository')
         ElementTree.register_namespace('dcterms', 'http://purl.org/dc/terms/')
         ElementTree.register_namespace('dc', 'http://purl.org/dc/elements/1.1/')
-        stream.write(ElementTree.tostring(data, encoding='utf8', method='xml'))
+        stream.write(ElementTree.tostring(data, encoding='utf-8', method='xml'))
         return errors
 
 
@@ -102,7 +102,7 @@ class Orchestra10WithSBETypes(Orchestra10):
         ElementTree.register_namespace('dcterms', 'http://purl.org/dc/terms/')
         ElementTree.register_namespace('dc', 'http://purl.org/dc/elements/1.1/')
         ElementTree.register_namespace('sbe', "http://fixprotocol.io/2016/sbe")
-        stream.write(ElementTree.tostring(data, encoding='utf8', method='xml'))
+        stream.write(ElementTree.tostring(data, encoding='utf-8', method='xml'))
         return errors
 
 

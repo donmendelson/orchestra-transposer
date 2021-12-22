@@ -257,9 +257,10 @@ class OrchestraInstance10:
         """
         try:
             annotation = next(i for i in element if isinstance(i, list) and i[0] == 'fixr:annotation')
-            return [x[1] for x in filter(
+            lst = filter(
                 lambda l: isinstance(l, list) and l[0] == 'fixr:appinfo' and l[1].get('purpose', None) == purpose,
-                annotation)]
+                annotation)
+            return [a[2] for a in lst]
         except StopIteration:
             return []
 

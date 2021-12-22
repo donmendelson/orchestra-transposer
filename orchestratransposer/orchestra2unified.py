@@ -49,6 +49,8 @@ class Orchestra10Unified:
         generated = datetime.now().isoformat()
         unified.root()[1]['generated'] = generated
         rights = orch.metadata_term('dc:rights')
+        if not rights:
+            rights = 'Rights unknown'  # not the same as no copyright
         if rights:
             unified.root()[1]['copyright'] = rights
         unified.phrases.phrases_root()[1]['generated'] = generated
@@ -64,13 +66,16 @@ class Orchestra10Unified:
         sections: list = orch.sections()
         lst = filter(lambda l: isinstance(l, list) and l[0] == 'fixr:section', sections)
         for section in lst:
-            section_attr = section[1]
-            section_attr['id'] = section[1]['name']
-            unified_section = ['section', section_attr]
+            unified_section_attr = section[1].copy()
+            unified_section_attr['id'] = section[1]['name']
+            unified_section = ['section', unified_section_attr]
+            appinfo = OrchestraInstance10.appinfo(section, 'FIXML')
+            if 'notReqXML' in appinfo:
+                unified_section_attr['notReqXML'] = 1
             documentation: List[Tuple[str, str]] = OrchestraInstance10.documentation(section)
             if documentation:
                 text_id = 'SCT_' + section[1]['name']
-                section_attr['textId'] = text_id
+                unified_section_attr['textId'] = text_id
                 documentation_func(text_id, documentation)
             unified_sections.append(unified_section)
 
@@ -81,13 +86,16 @@ class Orchestra10Unified:
         categories: list = orch.categories()
         lst = filter(lambda l: isinstance(l, list) and l[0] == 'fixr:category', categories)
         for category in lst:
-            category_attr = {k: category[1][k] for k in set(list(category[1].keys())) - {'name'}}
-            category_attr['id'] = category[1]['name']
-            unified_category = ['category', category_attr]
+            unified_category_attr = {k: category[1][k] for k in set(list(category[1].keys())) - {'name'}}
+            unified_category_attr['id'] = category[1]['name']
+            unified_category = ['category', unified_category_attr]
+            appinfo = OrchestraInstance10.appinfo(category, 'FIXML')
+            if 'notReqXML' in appinfo:
+                unified_category_attr['notReqXML'] = 1
             documentation: List[Tuple[str, str]] = OrchestraInstance10.documentation(category)
             if documentation:
                 text_id = 'CAT_' + category[1]['name']
-                category_attr['textId'] = text_id
+                unified_category_attr['textId'] = text_id
                 documentation_func(text_id, documentation)
             unified_categories.append(unified_category)
 
@@ -128,11 +136,14 @@ class Orchestra10Unified:
         for field in lst:
             field_type = field[1]['type']
             codeset = orch.codeset(field_type)
-            field_attr = {k: field[1][k] for k in
-                          set(list(field[1].keys())) - {'lengthId', 'discriminatorId'}}
-            unified_field = ['field', field_attr]
+            unified_field_attr = {k: field[1][k] for k in
+                                  set(list(field[1].keys())) - {'lengthId', 'discriminatorId'}}
+            appinfo = OrchestraInstance10.appinfo(field, 'FIXML')
+            if 'notReqXML' in appinfo:
+                unified_field_attr['notReqXML'] = 1
+            unified_field = ['field', unified_field_attr]
             if codeset:
-                field_attr['type'] = codeset[1]['type']
+                unified_field_attr['type'] = codeset[1]['type']
                 code_lst = filter(lambda l: isinstance(l, list) and l[0] == 'fixr:code', codeset)
                 for code in code_lst:
                     enum_attr = {k: code[1][k] for k in
@@ -148,7 +159,7 @@ class Orchestra10Unified:
             documentation: List[Tuple[str, str]] = OrchestraInstance10.documentation(field)
             if documentation:
                 text_id = 'FIELD_' + str(field[1]['id'])
-                field_attr['textId'] = text_id
+                unified_field_attr['textId'] = text_id
                 documentation_func(text_id, documentation)
             unified_fields.append(unified_field)
 
@@ -159,16 +170,20 @@ class Orchestra10Unified:
         components: list = orch.components()
         lst = filter(lambda l: isinstance(l, list) and l[0] == 'fixr:component', components)
         for component in lst:
-            component_attr = component[1].copy()
-            component_attr['type'] = 'Block'
-            component_attr['repeating'] = 0
-            unified_component = ['component', component_attr]
-            self.orch2unified_append_members(orch, component, documentation_func, 'CMP_' + str(component_attr['id']),
+            unified_component_attr = component[1].copy()
+            unified_component_attr['type'] = 'Block'
+            unified_component_attr['repeating'] = 0
+            appinfo = OrchestraInstance10.appinfo(component, 'FIXML')
+            if 'notReqXML' in appinfo:
+                unified_component_attr['notReqXML'] = 1
+            unified_component = ['component', unified_component_attr]
+            self.orch2unified_append_members(orch, component, documentation_func,
+                                             'CMP_' + str(unified_component_attr['id']),
                                              unified_component)
             documentation: List[Tuple[str, str]] = OrchestraInstance10.documentation(component)
             if documentation:
                 text_id = 'COMP_' + component[1]['name'] + '_TITLE'
-                component_attr['textId'] = text_id
+                unified_component_attr['textId'] = text_id
                 documentation_func(text_id, documentation)
             unified_components.append(unified_component)
 
@@ -179,22 +194,26 @@ class Orchestra10Unified:
         groups: list = orch.groups()
         lst = filter(lambda l: isinstance(l, list) and l[0] == 'fixr:group', groups)
         for group in lst:
-            component_attr = group[1].copy()
-            component_attr['type'] = 'BlockRepeating'
-            component_attr['repeating'] = 1
-            unified_component = ['component', component_attr]
+            unified_component_attr = group[1].copy()
+            unified_component_attr['type'] = 'BlockRepeating'
+            unified_component_attr['repeating'] = 1
+            appinfo = OrchestraInstance10.appinfo(group, 'FIXML')
+            if 'notReqXML' in appinfo:
+                unified_component_attr['notReqXML'] = 1
+            unified_component = ['component', unified_component_attr]
             repeating_attr = {'legacyIndent': 0,
                               'legacyPosition': 0,
                               'name': '',
                               'required': 0}
             repeating_group = ['repeatingGroup', repeating_attr]
             unified_component.append(repeating_group)
-            self.orch2unified_append_members(orch, group, documentation_func, 'CMP_' + str(component_attr['id']),
+            self.orch2unified_append_members(orch, group, documentation_func,
+                                             'CMP_' + str(unified_component_attr['id']),
                                              repeating_group)
             documentation: List[Tuple[str, str]] = OrchestraInstance10.documentation(group)
             if documentation:
                 text_id = 'COMP_' + group[1]['name'] + '_TITLE'
-                component_attr['textId'] = text_id
+                unified_component_attr['textId'] = text_id
                 documentation_func(text_id, documentation)
             unified_components.append(unified_component)
 
@@ -205,24 +224,25 @@ class Orchestra10Unified:
         messages: list = orch.messages()
         lst = filter(lambda l: isinstance(l, list) and l[0] == 'fixr:message', messages)
         for message in lst:
-            message_attr = message[1].copy()
+            unified_message_attr = message[1].copy()
             category = orch.category(message[1]['category'])
             if category:
                 section = category[1]['section']
-                message_attr['notReqXML'] = 1 if not section == 'Session' else 0
-                message_attr['section'] = section
+                unified_message_attr['section'] = section
             else:
-                message_attr['notReqXML'] = 1
-                message_attr['section'] = 'Unknown'
-                self.logger.error("Section not found for message %d", message_attr['id'])
+                unified_message_attr['section'] = 'Unknown'
+                self.logger.error("Section not found for message %d", unified_message_attr['id'])
+            appinfo = OrchestraInstance10.appinfo(message, 'FIXML')
+            unified_message_attr['notReqXML'] = 1 if 'notReqXML' in appinfo else 0
             structure = message[2]
-            unified_message = ['message', message_attr]
-            self.orch2unified_append_members(orch, structure, documentation_func, 'MSG_' + str(message_attr['id']),
+            unified_message = ['message', unified_message_attr]
+            self.orch2unified_append_members(orch, structure, documentation_func,
+                                             'MSG_' + str(unified_message_attr['id']),
                                              unified_message)
             documentation: List[Tuple[str, str]] = OrchestraInstance10.documentation(message)
             if documentation:
                 text_id = 'MSG_' + message[1]['name'] + '_TITLE'
-                message_attr['textId'] = text_id
+                unified_message_attr['textId'] = text_id
                 documentation_func(text_id, documentation)
             unified_messages.append(unified_message)
 
@@ -270,6 +290,9 @@ class Orchestra10Unified:
                 unified_component_attr['required'] = unified_presence
                 unified_component_attr['legacyPosition'] = 0
                 unified_component_attr['legacyIndent'] = 0
+                appinfo = OrchestraInstance10.appinfo(member, 'FIXML')
+                if 'inlined' in appinfo:
+                    unified_component_attr['inlined'] = True
                 unified_component_ref = ['componentRef', unified_component_attr]
                 if component:
                     unified_component_attr['name'] = component[1]['name']

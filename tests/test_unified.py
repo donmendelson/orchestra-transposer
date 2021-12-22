@@ -28,7 +28,6 @@ def test_to_fix_version_dict():
         assert not errors
         fix = instance.fix("FIX.Latest_EP269")
         print(str(fix), file=f)
-        f.close()
 
 
 def test_to_fix_no_version_dict():
@@ -40,7 +39,6 @@ def test_to_fix_no_version_dict():
         assert not errors
         fix = instance.fix()
         print(str(fix), file=f)
-        f.close()
 
 
 def test_phrases_valid():
@@ -59,7 +57,6 @@ def test_phrases_to_dict():
         instance.append_documentation('FIELD_9999', [('SYNOPSIS', 'Test documentation'),
                                                      ('ELABORATION', 'Even more documentation')])
         print(str(instance), file=f)
-        f.close()
         assert not errors
         assert instance.text_id('FIELD_2217') == [('SYNOPSIS', 'The fee amount due if different from MiscFeeAmt(137).')]
         assert instance.text_id('FIELD_9999') == [('SYNOPSIS', 'Test documentation'),
@@ -85,7 +82,6 @@ def test_to_dict():
     with open(output_path, 'w') as f:
         (instance, errors) = unified.read_xml(xml_path)
         print(str(instance), file=f)
-        f.close()
         assert not errors
 
 
@@ -96,7 +92,6 @@ def test_to_from_dict():
     with open(output_path, 'wb') as f:
         (instance, errors) = unified.read_xml(xml_path)
         unified.write_xml(instance, f)
-        f.close()
         assert not errors
 
 
@@ -108,5 +103,4 @@ def test_unified_to_dict():
     with open(output_path, 'w') as f:
         (instance, errors) = unified.read_xml_all(xml_path, phrases_xml_path)
         print(str(instance), file=f)
-        f.close()
         assert not errors

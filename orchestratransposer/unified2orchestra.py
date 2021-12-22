@@ -184,6 +184,11 @@ class Unified2Orchestra10:
                 group = enum[1].get('group', None)
                 if group:
                     code_attr['group'] = group
+                d = {k: enum[1].get(k, None) for k in
+                     ['added', 'addedEP', 'updated, updatedEP', 'deprecated',
+                      'deprecatedEP']}
+                pedigree = dict(filter(lambda item: not item[1] is None, d.items()))
+                code_attr.update(pedigree)
                 code = ['fixr:code', code_attr]
                 unified_documentation: List[Tuple[str, str]] = documentation_func(enum[1].get('textId', None))
                 OrchestraInstance10.append_documentations(code, unified_documentation)

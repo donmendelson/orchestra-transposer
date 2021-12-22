@@ -17,7 +17,6 @@ def test_sbe2orchestra_xml():
     translator = SBE2Orchestra()
     with open(output_path, 'wb') as f:
         errors = translator.sbe2orch_xml(xml_path, f)
-        f.close()
         assert not errors
 
 
@@ -30,4 +29,3 @@ def test_sbe2orchestra_dict():
     orch_instance = translator.sbe2orch_dict(sbe_instance)
     with open(output_path, 'w') as f:
         print(str(orch_instance), file=f)
-        f.close()

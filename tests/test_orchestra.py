@@ -32,7 +32,6 @@ def test_to_dict():
     with open(output_path, 'w') as f:
         (instance, errors) = orchestra.read_xml(xml_path)
         print(str(instance), file=f)
-        f.close()
         assert not errors
 
 
@@ -43,7 +42,6 @@ def test_invalid_to_dict():
     with open(output_path, 'w') as f:
         (instance, errors) = orchestra.read_xml(xml_path)
         print(str(instance), file=f)
-        f.close()
         assert errors
 
 
@@ -54,5 +52,4 @@ def test_to_from_dict():
     with open(output_path, 'wb') as f:
         (instance, errors) = orchestra.read_xml(xml_path)
         orchestra.write_xml(instance, f)
-        f.close()
         assert not errors

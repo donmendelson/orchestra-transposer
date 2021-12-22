@@ -18,7 +18,6 @@ def test_unified2orchestra_xml():
     translator = Unified2Orchestra()
     with open(output_path, 'wb') as f:
         errors = translator.unified2orch_xml(xml_path, phrases_xml_path, f)
-        f.close()
         assert not errors
 
 
@@ -33,4 +32,3 @@ def test_unified2orchestra_dict():
     orch_instance = translator.unified2orch_dict(unified_instance, "FIX.Latest_EP269")
     with open(output_path, 'w') as f:
         print(str(orch_instance), file=f)
-        f.close()

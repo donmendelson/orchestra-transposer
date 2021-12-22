@@ -60,7 +60,7 @@ class UnifiedMain:
         data, errors = self.xsd.encode(
             instance.root(), validation='lax', use_defaults=False, path="fixRepository",
             **{'converter': JsonMLConverter})
-        stream.write(ElementTree.tostring(data, encoding='utf8', method='xml'))
+        stream.write(ElementTree.tostring(data, encoding='utf-8', method='xml'))
         return errors
 
 
@@ -116,7 +116,7 @@ class UnifiedPhrases:
         data, errors = self.xsd.encode(
             instance.phrases_root(), validation='lax', use_defaults=False,
             **{'converter': JsonMLConverter})
-        stream.write(ElementTree.tostring(data, encoding='utf8', method='xml'))
+        stream.write(ElementTree.tostring(data, encoding='utf-8', method='xml'))
         return errors
 
 

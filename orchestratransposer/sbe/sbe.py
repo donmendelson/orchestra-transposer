@@ -67,7 +67,7 @@ class SBE10:
                                        namespaces={'sbe': 'http://fixprotocol.io/2016/sbe'},
                                        **{'converter': JsonMLConverter})
         ET.register_namespace('sbe', "http://fixprotocol.io/2016/sbe")
-        stream.write(ET.tostring(data, encoding='utf8', method='xml'))
+        stream.write(ET.tostring(data, encoding='utf-8', method='xml'))
         return errors
 
 
