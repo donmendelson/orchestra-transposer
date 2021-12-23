@@ -177,7 +177,8 @@ class OrchestraInstance10:
         """ Returns a list of documentation elements, each a tuple of purpose (possibly None) and text """
         try:
             annotation = next(i for i in element if isinstance(i, list) and i[0] == 'fixr:annotation')
-            documentation = filter(lambda l: isinstance(l, list) and l[0] == 'fixr:documentation', annotation)
+            documentation = filter(lambda l: isinstance(l, list) and l[0] == 'fixr:documentation' and len(l) > 1,
+                                   annotation)
             return list(map(OrchestraInstance10.__map_documentation, documentation))
         except StopIteration:
             return []
