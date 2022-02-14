@@ -281,6 +281,16 @@ class OrchestraInstance10:
         fields: list = self.fields()
         return next((field for field in fields if isinstance(field, list) and field[1]['id'] == field_id), None)
 
+    def field_data_field(self, length_id: int) -> Optional[list]:
+        """
+        Finds a data field associated to a Length field
+        :param length_id: tag of a length field
+        :return: a data field if found, or None
+        """
+        fields: list = self.fields()
+        return next((field for field in fields if isinstance(field, list) and field[1].get('lengthId', None) ==
+                     length_id), None)
+
     def component(self, component_id: int) -> Optional[list]:
         components: list = self.components()
         return next((component for component in components if

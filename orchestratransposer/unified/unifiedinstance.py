@@ -82,6 +82,18 @@ class UnifiedMainInstance:
         return next((field for field in fields if isinstance(field, list) and field[1]['id'] == field_id), None)
 
     @staticmethod
+    def field_length_field(fix: list, field_id: int) -> Optional[list]:
+        """
+        Finds a Length field associated to a data field
+        :param fix: a FIX version in a Unified Repository
+        :param field_id: tag of an associated data field
+        :return: a Length field if found, or None
+        """
+        fields = UnifiedMainInstance.fields(fix)
+        return next((field for field in fields if isinstance(field, list) and field[1].get('associatedDataTag', None) ==
+                     field_id), None)
+
+    @staticmethod
     def components(fix: list) -> list:
         """
         :return: a list of components and repeating groups of a fix version of UnifiedInstance

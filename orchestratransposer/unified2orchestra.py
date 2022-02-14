@@ -153,11 +153,11 @@ class Unified2Orchestra10:
                     if enum_field:
                         codeset_name = enum_field[1]['name']
                 field_attr['type'] = codeset_name + 'CodeSet'
-            assoc_id = unified_field[1].get('associatedDataTag', None)
-            if assoc_id:
-                assoc_field = UnifiedMainInstance.field(fix, assoc_id)
-                if assoc_field:
-                    field_attr['lengthId'] = assoc_field[1]['id']
+            else:
+                # is this field the associated data field of a Length field? If so, set lengthId.
+                unified_length_field = UnifiedMainInstance.field_length_field(fix, unified_field[1]['id'])
+                if unified_length_field:
+                    field_attr['lengthId'] = unified_length_field[1]['id']
             fields.append(field)
 
     def unified2orch_codesets(self, fix: list, documentation_func: Callable[[str], List[Tuple[str, str]]],

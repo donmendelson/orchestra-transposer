@@ -143,7 +143,6 @@ class Orchestra10Unified:
                 unified_field_attr['notReqXML'] = 1
             unified_field = ['field', unified_field_attr]
             if codeset:
-                # Deduplicate enums
                 if field[1]['id'] == codeset[1]['id']:
                     unified_field_attr['type'] = codeset[1]['type']
                     code_lst = filter(lambda l: isinstance(l, list) and l[0] == 'fixr:code', codeset)
@@ -159,7 +158,13 @@ class Orchestra10Unified:
                             documentation_func(text_id, documentation)
                         unified_field.append(enum)
                 else:
+                    # Deduplicate enums
                     unified_field_attr['enumDatatype'] = codeset[1]['id']
+            else:
+                # is this field the length field of a data field? If so, set associatedDataTag.
+                orch_data_field = orch.field_data_field(field[1]['id'])
+                if orch_data_field:
+                    unified_field_attr['associatedDataTag'] = orch_data_field[1]['id']
             documentation: List[Tuple[str, str]] = OrchestraInstance10.documentation(field)
             if documentation:
                 text_id = 'FIELD_' + str(field[1]['id'])
