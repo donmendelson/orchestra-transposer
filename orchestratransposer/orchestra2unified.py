@@ -262,7 +262,7 @@ class Orchestra10Unified:
                 # update parent repeatinggroup element
                 unified_structure[1]['id'] = field_attr['id']
                 if documentation:
-                    text_id = prefix + '_REF_' + str(id)
+                    text_id = prefix + '_REF_' + str(member_id)
                     unified_structure[1]['textId'] = text_id
                     documentation_func(text_id, documentation)
             elif member[0] == 'fixr:fieldRef':
