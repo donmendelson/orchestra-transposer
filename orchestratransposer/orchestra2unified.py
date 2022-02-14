@@ -143,19 +143,23 @@ class Orchestra10Unified:
                 unified_field_attr['notReqXML'] = 1
             unified_field = ['field', unified_field_attr]
             if codeset:
-                unified_field_attr['type'] = codeset[1]['type']
-                code_lst = filter(lambda l: isinstance(l, list) and l[0] == 'fixr:code', codeset)
-                for code in code_lst:
-                    enum_attr = {k: code[1][k] for k in
-                                 set(list(code[1].keys())) - {'name', 'id'}}
-                    enum_attr['symbolicName'] = code[1]['name']
-                    enum = ['enum', enum_attr]
-                    documentation: List[Tuple[str, str]] = OrchestraInstance10.documentation(code)
-                    if documentation:
-                        text_id = 'ENUM_' + str(field[1]['id']) + '_' + str(code[1]['value'])
-                        enum_attr['textId'] = text_id
-                        documentation_func(text_id, documentation)
-                    unified_field.append(enum)
+                # Deduplicate enums
+                if field[1]['id'] == codeset[1]['id']:
+                    unified_field_attr['type'] = codeset[1]['type']
+                    code_lst = filter(lambda l: isinstance(l, list) and l[0] == 'fixr:code', codeset)
+                    for code in code_lst:
+                        enum_attr = {k: code[1][k] for k in
+                                     set(list(code[1].keys())) - {'name', 'id'}}
+                        enum_attr['symbolicName'] = code[1]['name']
+                        enum = ['enum', enum_attr]
+                        documentation: List[Tuple[str, str]] = OrchestraInstance10.documentation(code)
+                        if documentation:
+                            text_id = 'ENUM_' + str(field[1]['id']) + '_' + str(code[1]['value'])
+                            enum_attr['textId'] = text_id
+                            documentation_func(text_id, documentation)
+                        unified_field.append(enum)
+                else:
+                    unified_field_attr['enumDatatype'] = codeset[1]['id']
             documentation: List[Tuple[str, str]] = OrchestraInstance10.documentation(field)
             if documentation:
                 text_id = 'FIELD_' + str(field[1]['id'])
