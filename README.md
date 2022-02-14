@@ -40,8 +40,8 @@ Unit tests use the [pytest](https://docs.pytest.org/en/6.2.x/) framework.
 
 Assuming that Python and pip are already installed, get started as follows:
 1. Clone this Git repository
-2. In the working directory, create a Python virtual environment, e.g. `python -m venv .venv`
-3. Install required dependencies: `pip install -r requirements.txt`
+2. In the working directory, create a Python virtual environment, e.g. `python3 -m venv .venv`
+3. Install required dependencies: `python3 -m pip install -r requirements.txt`
 4. For development of this project, also install dependencies from `requirements-dev.txt`. This is required for
 documentation generation and possibly other tasks.
 
@@ -78,14 +78,20 @@ optional arguments:
                         format of output file: Orchestra 1.0, Unified Repository, or SBE 1.0
 ```
 
-Example translates an Orchestra file to SBE.
+First example translates an Orchestra file to SBE.
 ```
-python orchestratransposer.py tests/xml/OrchestraFIXLatest.xml --to sbe -o sbe_test.xml
+python3 orchestratransposer.py tests/xml/OrchestraFIXLatest.xml --to sbe -o sbe_test.xml
+```
+
+Second example translates an Orchestra file to a Unified Repository
+Two file names needed, starting with the name of the repository file.
+```
+python3 orchestratransposer.py tests/xml/OrchestraFIXLatest.xml --to unif -o Repository.xml Phrases.xml
 ```
 
 ## License
 
-© Copyright 2021 FIX Protocol Limited
+© Copyright 2022 FIX Protocol Limited
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
