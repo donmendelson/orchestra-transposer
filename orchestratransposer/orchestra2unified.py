@@ -241,7 +241,7 @@ class Orchestra10Unified:
                                              unified_message)
             documentation: List[Tuple[str, str]] = OrchestraInstance10.documentation(message)
             if documentation:
-                text_id = 'MSG_' + message[1]['name'] + '_TITLE'
+                text_id = 'MSG_' + str(message[1]['id']) + '_TITLE'
                 unified_message_attr['textId'] = text_id
                 documentation_func(text_id, documentation)
             unified_messages.append(unified_message)
