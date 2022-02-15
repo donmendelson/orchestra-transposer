@@ -210,20 +210,26 @@ class Orchestra10Unified:
             if 'notReqXML' in appinfo:
                 unified_component_attr['notReqXML'] = 1
             unified_component = ['component', unified_component_attr]
-            repeating_attr = {'legacyIndent': 0,
-                              'legacyPosition': 0,
-                              'name': '',
-                              'required': 0}
+            # repeatingGroup attributes derived from Orchestra numInGroup attributes
+            repeating_attr = group[2][1].copy()
+            repeating_attr['name'] = ""
+            repeating_attr['legacyPosition'] = 0
+            repeating_attr['legacyIndent'] = 0
             repeating_group = ['repeatingGroup', repeating_attr]
+            documentation: List[Tuple[str, str]] = OrchestraInstance10.documentation(group[2])
+            if documentation:
+                text_id = 'CMP_' + str(unified_component_attr['id']) + 'REF_' + str(repeating_attr['id'])
+                repeating_attr['textId'] = text_id
+                documentation_func(text_id, documentation)
             unified_component.append(repeating_group)
             self.orch2unified_append_members(orch, group, documentation_func,
                                              'CMP_' + str(unified_component_attr['id']),
                                              repeating_group)
-            documentation: List[Tuple[str, str]] = OrchestraInstance10.documentation(group)
-            if documentation:
+            group_documentation: List[Tuple[str, str]] = OrchestraInstance10.documentation(group)
+            if group_documentation:
                 text_id = 'COMP_' + group[1]['name'] + '_TITLE'
                 unified_component_attr['textId'] = text_id
-                documentation_func(text_id, documentation)
+                documentation_func(text_id, group_documentation)
             unified_components.append(unified_component)
 
     def orch2unified_messages(self, orch: OrchestraInstance10,

@@ -229,6 +229,9 @@ class Unified2Orchestra10:
                  ['id','added', 'addedEP', 'updated, updatedEP', 'deprecated', 'deprecatedEP']}
             num_in_group_attr = dict(filter(lambda item: not item[1] is None, d.items()))
             num_in_group = ['fixr:numInGroup', num_in_group_attr]
+            unified_numingroup_documentation: List[Tuple[str, str]] = documentation_func(unified_repeating_group[1].get('textId',
+                                                                                                             None))
+            OrchestraInstance10.append_documentations(num_in_group, unified_numingroup_documentation)
             group.append(num_in_group)
             self.unified2orch_append_members(fix, documentation_func, group, unified_repeating_group)
             unified_documentation: List[Tuple[str, str]] = documentation_func(unified_component[1].get('textId', None))
