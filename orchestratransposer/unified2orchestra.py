@@ -225,7 +225,9 @@ class Unified2Orchestra10:
                           set(list(unified_component[1].keys())) - set(exclude_keys)}
             group = ['fixr:group', group_attr]
             unified_repeating_group = unified_component[2]
-            num_in_group_attr = {'id': unified_repeating_group[1]['id']}
+            d = {k: unified_repeating_group[1].get(k, None) for k in
+                 ['id','added', 'addedEP', 'updated, updatedEP', 'deprecated', 'deprecatedEP']}
+            num_in_group_attr = dict(filter(lambda item: not item[1] is None, d.items()))
             num_in_group = ['fixr:numInGroup', num_in_group_attr]
             group.append(num_in_group)
             self.unified2orch_append_members(fix, documentation_func, group, unified_repeating_group)
