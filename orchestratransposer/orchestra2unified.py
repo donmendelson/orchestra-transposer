@@ -143,8 +143,8 @@ class Orchestra10Unified:
                 unified_field_attr['notReqXML'] = 1
             unified_field = ['field', unified_field_attr]
             if codeset:
+                unified_field_attr['type'] = codeset[1]['type']
                 if field[1]['id'] == codeset[1]['id']:
-                    unified_field_attr['type'] = codeset[1]['type']
                     code_lst = filter(lambda l: isinstance(l, list) and l[0] == 'fixr:code', codeset)
                     for code in code_lst:
                         enum_attr = {k: code[1][k] for k in

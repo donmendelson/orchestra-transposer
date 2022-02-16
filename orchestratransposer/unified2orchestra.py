@@ -145,14 +145,15 @@ class Unified2Orchestra10:
             if not_req_xml == 1:
                 OrchestraInstance10.append_appinfo(field, [({'purpose': 'FIXML'}, 'notReqXML')])
             enum = next(filter(lambda l: isinstance(l, list) and l[0] == 'enum', unified_field), None)
-            if enum:
-                codeset_name = unified_field[1]['name']
-                enum_id = unified_field[1].get('enumDatatype', None)
-                if enum_id:
-                    enum_field = UnifiedMainInstance.field(fix, enum_id)
-                    if enum_field:
-                        codeset_name = enum_field[1]['name']
-                field_attr['type'] = codeset_name + 'CodeSet'
+            enum_id = unified_field[1].get('enumDatatype', None)
+            if enum_id:
+                enum_field = UnifiedMainInstance.field(fix, enum_id)
+                if enum_field:
+                    codeset_name = enum_field[1]['name'] + 'CodeSet'
+                    field_attr['type'] = codeset_name
+            elif enum:
+                codeset_name = unified_field[1]['name'] + 'CodeSet'
+                field_attr['type'] = codeset_name
             else:
                 # is this field the associated data field of a Length field? If so, set lengthId.
                 unified_length_field = UnifiedMainInstance.field_length_field(fix, unified_field[1]['id'])
