@@ -207,7 +207,7 @@ class OrchestraInstance10:
             annotation.append(['fixr:documentation', {}, documentation])
 
     @staticmethod
-    def append_documentations(element: list, documentations: List[Tuple[Union[str, dict, type(None)], str]]):
+    def append_documentations(element: list, documentations: List[Tuple[Union[str, dict, type(None)], List[str]]]):
         """
         Appends an annotation with one or more two-element tuples.
 
@@ -215,7 +215,7 @@ class OrchestraInstance10:
         * A string for the value of purpose attribute
         * A dictionary. The acceptable keys are purpose, lang, and contentType.
         * None
-        The second element is text.
+        The second element is a list of text.
         """
         if len(documentations) > 0:
             annotation = next((i for i in element if isinstance(i, list) and i[0] == 'fixr:annotation'), None)
@@ -230,7 +230,11 @@ class OrchestraInstance10:
                         attr = {'purpose': documentation[0]}
                 else:
                     attr = {}
-                annotation.append(['fixr:documentation', attr, documentation[1]])
+                if len(documentation[1]) == 0:
+                    # add at least one documentation because annotation cannot be empty
+                    annotation.append(['fixr:documentation', attr, ""])
+                for text in documentation[1]:
+                    annotation.append(['fixr:documentation', attr, text])
 
     @staticmethod
     def append_appinfo(element: list, appinfos: List[Tuple[dict, str]]):

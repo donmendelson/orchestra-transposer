@@ -177,12 +177,12 @@ class UnifiedPhrasesInstance:
                     phrase.append(text)
             self.phrases_root().append(phrase)
 
-    def text_id(self, text_id: str) -> List[Tuple[str, str]]:
+    def text_id(self, text_id: str) -> List[Tuple[str, List[str]]]:
         """
         Retrieve documentation by key
         :param text_id: key for documentation of an element
-        :return: a list of one or more tuples, each containing a purpose string and documentation text, or an empty list
-        if the key is not found
+        :return: a list of one or more tuples, each containing a purpose string and list of documentation paragraphs, or
+        an empty list if the key is not found
         """
         retv = []
         phrase = next((p for p in self.phrases_root() if isinstance(p, list) and len(p) >= 2
@@ -195,9 +195,8 @@ class UnifiedPhrasesInstance:
                     purpose = pd.get('purpose', None)
                 else:
                     purpose = None
-                para = filter(lambda l: isinstance(l, list) and l[0] == 'para', i)
-                paras = [p[1] for p in para]
-                retv.append((purpose, ' '.join(paras)))
+                paras = list(filter(lambda l: isinstance(l, list) and l[0] == 'para', i))
+                retv.append((purpose, list(map(lambda p: p[1], paras))))
         return retv
 
 
@@ -213,11 +212,11 @@ class UnifiedInstanceWithPhrases(UnifiedMainInstance):
     def __str__(self):
         return pformat(self.obj, width=120) + str(self.phrases)
 
-    def text_id(self, text_id: str) -> List[Tuple[str, str]]:
+    def text_id(self, text_id: str) -> List[Tuple[str, List[str]]]:
         """
         Returns a list of documentation for an element, given a unique key
 
-        Each element of the returned list is a tuple of purpose and documentation text. Purpose may be None.
+        Each element of the returned list is a tuple of purpose and list of documentation text. Purpose may be None.
         """
         return self.phrases.text_id(text_id)
 

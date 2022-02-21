@@ -24,7 +24,7 @@ class Unified2Orchestra10:
         """
         orch = OrchestraInstance10()
         fix = unified.fix(version)
-        documentation_func: Callable[[str], List[Tuple[str, str]]] = unified.text_id
+        documentation_func: Callable[[str], List[Tuple[str, List[str]]]] = unified.text_id
         self.unified2orch_metadata(fix, orch)
         sections = orch.sections()
         self.unified2orch_sections(fix, documentation_func, sections)
@@ -75,7 +75,7 @@ class Unified2Orchestra10:
         my_date = datetime.now()
         metadata.append(['dcterms:date', my_date.isoformat()])
 
-    def unified2orch_sections(self, fix: list, documentation_func: Callable[[str], List[Tuple[str, str]]],
+    def unified2orch_sections(self, fix: list, documentation_func: Callable[[str], List[Tuple[str, List[str]]]],
                               sections: list):
         unified_sections = UnifiedMainInstance.sections(fix)
         lst = filter(lambda l: isinstance(l, list) and l[0] == 'section', unified_sections)
@@ -84,14 +84,15 @@ class Unified2Orchestra10:
             section_attr = {k: unified_section[1][k] for k in set(list(unified_section[1].keys())) - exclude_keys}
             section_attr['name'] = unified_section[1]['id']
             section = ['fixr:section', section_attr]
-            unified_documentation: List[Tuple[str, str]] = documentation_func(unified_section[1].get('textId', None))
+            unified_documentation: List[Tuple[str, List[str]]] = documentation_func(unified_section[1].get('textId',
+                                                                                                           None))
             not_req_xml = unified_section[1].get('notReqXML', 0)
             if not_req_xml == 1:
                 OrchestraInstance10.append_appinfo(section, [({'purpose': 'FIXML'}, 'notReqXML')])
             OrchestraInstance10.append_documentations(section, unified_documentation)
             sections.append(section)
 
-    def unified2orch_categories(self, fix: list, documentation_func: Callable[[str], List[Tuple[str, str]]],
+    def unified2orch_categories(self, fix: list, documentation_func: Callable[[str], List[Tuple[str, List[str]]]],
                                 categories: list):
         unified_categories = UnifiedMainInstance.categories(fix)
         lst = filter(lambda l: isinstance(l, list) and l[0] == 'category', unified_categories)
@@ -101,14 +102,15 @@ class Unified2Orchestra10:
                              set(list(unified_category[1].keys())) - set(exclude_keys)}
             category_attr['name'] = unified_category[1]['id']
             category = ['fixr:category', category_attr]
-            unified_documentation: List[Tuple[str, str]] = documentation_func(unified_category[1].get('textId', None))
+            unified_documentation: List[Tuple[str, List[str]]] = documentation_func(
+                unified_category[1].get('textId', None))
             OrchestraInstance10.append_documentations(category, unified_documentation)
             not_req_xml = unified_category[1].get('notReqXML', 0)
             if not_req_xml == 1:
                 OrchestraInstance10.append_appinfo(category, [({'purpose': 'FIXML'}, 'notReqXML')])
             categories.append(category)
 
-    def unified2orch_datatypes(self, fix: list, documentation_func: Callable[[str], List[Tuple[str, str]]],
+    def unified2orch_datatypes(self, fix: list, documentation_func: Callable[[str], List[Tuple[str, List[str]]]],
                                datatypes: list):
         unified_datatypes = UnifiedMainInstance.datatypes(fix)
         lst = filter(lambda l: isinstance(l, list) and l[0] == 'datatype', unified_datatypes)
@@ -117,7 +119,8 @@ class Unified2Orchestra10:
             datatype_attr = {k: unified_datatype[1][k] for k in
                              set(list(unified_datatype[1].keys())) - set(exclude_keys)}
             datatype = ['fixr:datatype', datatype_attr]
-            unified_documentation: List[Tuple[str, str]] = documentation_func(unified_datatype[1].get('textId', None))
+            unified_documentation: List[Tuple[str, List[str]]] = documentation_func(unified_datatype[1].get('textId',
+                                                                                                            None))
             """ TODO annotations with example"""
             unified_xml = next(filter(lambda l: isinstance(l, list) and l[0] == 'XML', unified_datatype), None)
             if unified_xml:
@@ -125,21 +128,23 @@ class Unified2Orchestra10:
                                {k: unified_xml[1][k] for k in set(list(unified_xml[1].keys())) - {'textId'}}]
                 xml_mapping[1]['standard'] = 'XML'
                 xml_mapping[1]['builtin'] = bool(int(unified_xml[1].get('builtin', '0')))
-                unified_xml_documentation: List[Tuple[str, str]] = documentation_func(
+                unified_xml_documentation: List[Tuple[str, List[str]]] = documentation_func(
                     unified_xml[1].get('textId', None))
                 OrchestraInstance10.append_documentations(xml_mapping, unified_xml_documentation)
                 datatype.append(xml_mapping)
             OrchestraInstance10.append_documentations(datatype, unified_documentation)
             datatypes.append(datatype)
 
-    def unified2orch_fields(self, fix: list, documentation_func: Callable[[str], List[Tuple[str, str]]], fields: list):
+    def unified2orch_fields(self, fix: list, documentation_func: Callable[[str], List[Tuple[str, List[str]]]],
+                            fields: list):
         unified_fields = UnifiedMainInstance.fields(fix)
         lst = filter(lambda l: isinstance(l, list) and l[0] == 'field', unified_fields)
         for unified_field in lst:
             exclude_keys = ['textId', 'notReqXML', 'enum', 'associatedDataTag', 'enumDatatype']
             field_attr = {k: unified_field[1][k] for k in set(list(unified_field[1].keys())) - set(exclude_keys)}
             field = ['fixr:field', field_attr]
-            unified_documentation: List[Tuple[str, str]] = documentation_func(unified_field[1].get('textId', None))
+            unified_documentation: List[Tuple[str, List[str]]] = documentation_func(
+                unified_field[1].get('textId', None))
             OrchestraInstance10.append_documentations(field, unified_documentation)
             not_req_xml = unified_field[1].get('notReqXML', 0)
             if not_req_xml == 1:
@@ -161,7 +166,7 @@ class Unified2Orchestra10:
                     field_attr['lengthId'] = unified_length_field[1]['id']
             fields.append(field)
 
-    def unified2orch_codesets(self, fix: list, documentation_func: Callable[[str], List[Tuple[str, str]]],
+    def unified2orch_codesets(self, fix: list, documentation_func: Callable[[str], List[Tuple[str, List[str]]]],
                               codesets: list):
         unified_fields = UnifiedMainInstance.fields(fix)
         lst = filter(lambda f: isinstance(f, list) and f[0] == 'field' and len(f) > 2 and f[2][0] == 'enum',
@@ -191,14 +196,15 @@ class Unified2Orchestra10:
                 pedigree = dict(filter(lambda item: not item[1] is None, d.items()))
                 code_attr.update(pedigree)
                 code = ['fixr:code', code_attr]
-                unified_documentation: List[Tuple[str, str]] = documentation_func(enum[1].get('textId', None))
+                unified_documentation: List[Tuple[str, List[str]]] = documentation_func(enum[1].get('textId', None))
                 OrchestraInstance10.append_documentations(code, unified_documentation)
                 codeset.append(code)
-            unified_documentation: List[Tuple[str, str]] = documentation_func(unified_field[1].get('textId', None))
+            unified_documentation: List[Tuple[str, List[str]]] = documentation_func(
+                unified_field[1].get('textId', None))
             OrchestraInstance10.append_documentations(codeset, unified_documentation)
             codesets.append(codeset)
 
-    def unified2orch_components(self, fix: list, documentation_func: Callable[[str], List[Tuple[str, str]]],
+    def unified2orch_components(self, fix: list, documentation_func: Callable[[str], List[Tuple[str, List[str]]]],
                                 components: list):
         unified_components = UnifiedMainInstance.components(fix)
         lst = filter(lambda l: isinstance(l, list) and l[0] == 'component' and l[1].get('repeating', 0) == 0,
@@ -209,14 +215,16 @@ class Unified2Orchestra10:
                               set(list(unified_component[1].keys())) - set(exclude_keys)}
             component = ['fixr:component', component_attr]
             self.unified2orch_append_members(fix, documentation_func, component, unified_component)
-            unified_documentation: List[Tuple[str, str]] = documentation_func(unified_component[1].get('textId', None))
+            unified_documentation: List[Tuple[str, List[str]]] = documentation_func(unified_component[1].get('textId',
+                                                                                                             None))
             not_req_xml = unified_component[1].get('notReqXML', 0)
             if not_req_xml == 1:
                 OrchestraInstance10.append_appinfo(component, [({'purpose': 'FIXML'}, 'notReqXML')])
             OrchestraInstance10.append_documentations(component, unified_documentation)
             components.append(component)
 
-    def unified2orch_groups(self, fix: list, documentation_func: Callable[[str], List[Tuple[str, str]]], groups: list):
+    def unified2orch_groups(self, fix: list, documentation_func: Callable[[str], List[Tuple[str, List[str]]]],
+                            groups: list):
         unified_components = UnifiedMainInstance.components(fix)
         lst = filter(lambda l: isinstance(l, list) and l[0] == 'component' and l[1].get('repeating', 0) == 1,
                      unified_components)
@@ -227,22 +235,24 @@ class Unified2Orchestra10:
             group = ['fixr:group', group_attr]
             unified_repeating_group = unified_component[2]
             d = {k: unified_repeating_group[1].get(k, None) for k in
-                 ['id','added', 'addedEP', 'updated, updatedEP', 'deprecated', 'deprecatedEP']}
+                 ['id', 'added', 'addedEP', 'updated, updatedEP', 'deprecated', 'deprecatedEP']}
             num_in_group_attr = dict(filter(lambda item: not item[1] is None, d.items()))
             num_in_group = ['fixr:numInGroup', num_in_group_attr]
-            unified_numingroup_documentation: List[Tuple[str, str]] = documentation_func(unified_repeating_group[1].get('textId',
-                                                                                                             None))
+            unified_numingroup_documentation: List[Tuple[str, List[str]]] = documentation_func(
+                unified_repeating_group[1].get('textId',
+                                               None))
             OrchestraInstance10.append_documentations(num_in_group, unified_numingroup_documentation)
             group.append(num_in_group)
             self.unified2orch_append_members(fix, documentation_func, group, unified_repeating_group)
-            unified_documentation: List[Tuple[str, str]] = documentation_func(unified_component[1].get('textId', None))
+            unified_documentation: List[Tuple[str, List[str]]] = documentation_func(
+                unified_component[1].get('textId', None))
             OrchestraInstance10.append_documentations(group, unified_documentation)
             not_req_xml = unified_component[1].get('notReqXML', 0)
             if not_req_xml == 1:
                 OrchestraInstance10.append_appinfo(group, [({'purpose': 'FIXML'}, 'notReqXML')])
             groups.append(group)
 
-    def unified2orch_messages(self, fix: list, documentation_func: Callable[[str], List[Tuple[str, str]]],
+    def unified2orch_messages(self, fix: list, documentation_func: Callable[[str], List[Tuple[str, List[str]]]],
                               messages: list):
         unified_messages = UnifiedMainInstance.messages(fix)
         lst = filter(lambda l: isinstance(l, list) and l[0] == 'message', unified_messages)
@@ -253,18 +263,20 @@ class Unified2Orchestra10:
             message = ['fixr:message', message_attr]
             structure = OrchestraInstance10.structure(message)
             self.unified2orch_append_members(fix, documentation_func, structure, unified_message)
-            unified_documentation: List[Tuple[str, str]] = documentation_func(unified_message[1].get('textId', None))
+            unified_documentation: List[Tuple[str, List[str]]] = documentation_func(
+                unified_message[1].get('textId', None))
             OrchestraInstance10.append_documentations(message, unified_documentation)
             not_req_xml = unified_message[1].get('notReqXML', 0)
             if not_req_xml == 1:
                 OrchestraInstance10.append_appinfo(message, [({'purpose': 'FIXML'}, 'notReqXML')])
             messages.append(message)
 
-    def unified2orch_append_members(self, fix: list, documentation_func: Callable[[str], List[Tuple[str, str]]],
+    def unified2orch_append_members(self, fix: list, documentation_func: Callable[[str], List[Tuple[str, List[str]]]],
                                     structure: list, unified_structure: list):
         lst = filter(lambda l: isinstance(l, list), unified_structure)
         for unified_member in lst:
-            unified_documentation: List[Tuple[str, str]] = documentation_func(unified_member[1].get('textId', None))
+            unified_documentation: List[Tuple[str, List[str]]] = documentation_func(
+                unified_member[1].get('textId', None))
             presence = Unified2Orchestra10.unified2orch_presence(unified_member[1].get('required', 0))
             if unified_member[0] == 'fieldRef':
                 exclude_keys = ['textId', 'inlined', 'legacyIndent', 'legacyPosition', 'name', 'required']

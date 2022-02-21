@@ -58,9 +58,9 @@ def test_phrases_to_dict():
                                                      ('ELABORATION', 'Even more documentation')])
         print(str(instance), file=f)
         assert not errors
-        assert instance.text_id('FIELD_2217') == [('SYNOPSIS', 'The fee amount due if different from MiscFeeAmt(137).')]
-        assert instance.text_id('FIELD_9999') == [('SYNOPSIS', 'Test documentation'),
-                                                  ('ELABORATION', 'Even more documentation')]
+        assert instance.text_id('FIELD_2217') == [('SYNOPSIS', ['The fee amount due if different from MiscFeeAmt(137).'])]
+        assert instance.text_id('FIELD_9999') == [('SYNOPSIS', ['Test documentation']),
+                                                  ('ELABORATION', ['Even more documentation'])]
 
 
 def test_text_id():
@@ -70,9 +70,9 @@ def test_text_id():
     assert not errors
     t = instance.text_id('FIELD_41163')
     assert t == [
-        ('SYNOPSIS', 'The occurrence of the day of week on which fixing takes place.'),
-        ('ELABORATION', 'For example, a fixing of the 3rd Friday would be DayOfWk=5 DayNum=3. If omitted every '
-                        'day of the week is a fixing day.')]
+        ('SYNOPSIS', ['The occurrence of the day of week on which fixing takes place.']),
+        ('ELABORATION',
+         ['For example, a fixing of the 3rd Friday would be DayOfWk=5 DayNum=3. If omitted every day of the week is a fixing day.'])]
 
 
 def test_to_dict():
