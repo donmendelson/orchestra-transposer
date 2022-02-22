@@ -151,31 +151,29 @@ class UnifiedPhrasesInstance:
         :param text_id: key for documentation of an element
         :param documentations: a list of one or more tuples, each containing a purpose string and documentation text
         """
-        phrase = next((p for p in self.phrases_root() if isinstance(p, list) and len(p) >= 2
+        phrase_attr = {'textId': text_id}
+        phrase = ['phrase', phrase_attr]
+        # sort by purpose
+        documentations.sort(key=lambda d: d[0] or "")
+        last_purpose = "X"
+        for documentation in documentations:
+            purpose = documentation[0] or ""
+            if not purpose == last_purpose:
+                if documentation[0]:
+                    attr = {'purpose': documentation[0]}
+                else:
+                    attr = {}
+                text = ['text', attr]
+                phrase.append(text)
+                last_purpose = purpose
+            text.append(['para', documentation[1]])
+
+        # if already exists, remove old values
+        old_phrase = next((p for p in self.phrases_root() if isinstance(p, list) and len(p) >= 2
                        and p[1].get('textId', None) == text_id), None)
-        if phrase:
-            text = list(filter(lambda l: isinstance(l, list) and l[0] == 'text', phrase))
-            paras = []
-            text[1] = paras
-            for documentation in documentations:
-                if isinstance(documentation, tuple) and len(documentation) == 2 and not documentation[1] is None:
-                    if documentation[0] and documentation[0] in ['SYNOPSIS', 'ELABORATION']:
-                        attr = {'purpose': documentation[0]}
-                    else:
-                        attr = {}
-                    paras.append((attr, ['para', documentation[1]]))
-        else:
-            phrase_attr = {'textId': text_id}
-            phrase = ['phrase', phrase_attr]
-            for documentation in documentations:
-                if isinstance(documentation, tuple) and len(documentation) == 2 and not documentation[1] is None:
-                    if documentation[0] and documentation[0] in ['SYNOPSIS', 'ELABORATION']:
-                        attr = {'purpose': documentation[0]}
-                    else:
-                        attr = {}
-                    text = ['text', attr, ['para', documentation[1]]]
-                    phrase.append(text)
-            self.phrases_root().append(phrase)
+        if old_phrase:
+            self.phrases_root().remove(old_phrase)
+        self.phrases_root().append(phrase)
 
     def text_id(self, text_id: str) -> List[Tuple[str, List[str]]]:
         """
