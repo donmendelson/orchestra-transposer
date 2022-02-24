@@ -2,7 +2,7 @@
 # Intended differences and those caused by bugs are then being removed
 # The resulting diff file should be empty
 
-CLASSPATH="/Users/hanno/GitHub/xml-diff-merge/target/diff-merge-1.5.1-SNAPSHOT-jar-with-dependencies.jar"
+CLASSPATH="diff-merge-1.5.1-SNAPSHOT-jar-with-dependencies.jar"
 
 SOURCE="Phrases"
 OLD="Fix$SOURCE.xml"
