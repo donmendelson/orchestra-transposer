@@ -21,4 +21,4 @@ Unified no longer has empty `group` attributes.
 [Seems to be a bug in Basic as it is not consistent within a single field -> enter SPEC issue]
 
 ## Default Presence Attribute
-The attribute `required`defaults to zero. Unified no longer provides this value explicitly.
+The attributes `notReqXML` and `required` default to zero. Unified no longer provides this value explicitly.
