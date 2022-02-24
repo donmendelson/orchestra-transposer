@@ -13,9 +13,12 @@ Orchestra does not have component types. There is no longer a distinction betwee
 ## NumInGroup Fields
 see GitHub issue #13
 
-## Examples in datatypes
-Examples have been removed from the definition of datatypes. They are available in the Orchestra XML file and in FIXimate.
+## Examples in Datatypes
+Examples have been removed from the definition of datatypes into the phrases file.
 
 ## Enum Groups
 Unified no longer has empty `group` attributes.
 [Seems to be a bug in Basic as it is not consistent within a single field -> enter SPEC issue]
+
+## Default Presence Attribute
+The attributes `notReqXML` and `required` default to zero. Unified no longer provides this value explicitly.
