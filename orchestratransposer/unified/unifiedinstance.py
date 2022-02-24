@@ -154,7 +154,7 @@ class UnifiedPhrasesInstance:
         phrase_attr = {'textId': text_id}
         phrase = ['phrase', phrase_attr]
         # sort by purpose
-        documentations.sort(key=lambda d: d[0] or "")
+        documentations.sort(key=lambda d: self._purpose_sort(d))
         last_purpose = "X"
         for documentation in documentations:
             purpose = documentation[0] or ""
@@ -166,14 +166,26 @@ class UnifiedPhrasesInstance:
                 text = ['text', attr]
                 phrase.append(text)
                 last_purpose = purpose
-            text.append(['para', documentation[1]])
+            if documentation[1]:
+                text.append(['para', documentation[1]])
 
         # if already exists, remove old values
         old_phrase = next((p for p in self.phrases_root() if isinstance(p, list) and len(p) >= 2
-                       and p[1].get('textId', None) == text_id), None)
+                           and p[1].get('textId', None) == text_id), None)
         if old_phrase:
             self.phrases_root().remove(old_phrase)
         self.phrases_root().append(phrase)
+
+    @staticmethod
+    def _purpose_sort(d):
+        if not d:
+            return 2
+        if not d[0]:
+            return 2
+        elif 'SYNOPSIS' == d[0]:
+            return 0
+        else:
+            return 1;
 
     def text_id(self, text_id: str) -> List[Tuple[str, List[str]]]:
         """

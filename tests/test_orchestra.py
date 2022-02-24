@@ -1,6 +1,8 @@
 import os
+from typing import List, Tuple
 
 from orchestratransposer import Orchestra
+from orchestratransposer.orchestra.orchestrainstance import OrchestraInstance10
 
 XML_FILE_DIR = os.path.join(os.path.dirname(__file__), 'xml/')
 
@@ -53,3 +55,14 @@ def test_to_from_dict():
         (instance, errors) = orchestra.read_xml(xml_path)
         orchestra.write_xml(instance, f)
         assert not errors
+
+
+def test_documentation():
+    code = ['fixr:code',
+            {'id': 3547, 'name': 'XMLnonFIX', 'sort': '47', 'value': 'n'},
+            ['fixr:annotation',
+             ['fixr:documentation', {'purpose': 'SYNOPSIS'}, 'XMLnonFIX'],
+             ['fixr:documentation', {'purpose': 'ELABORATION'}]]]
+    documentation: List[Tuple[str, str]] = OrchestraInstance10.documentation(code)
+    assert documentation
+

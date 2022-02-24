@@ -152,7 +152,7 @@ class Orchestra10Unified:
                         enum_attr['symbolicName'] = code[1]['name']
                         enum = ['enum', enum_attr]
                         documentation: List[Tuple[str, str]] = OrchestraInstance10.documentation(code)
-                        if documentation:
+                        if len(documentation):
                             text_id = 'ENUM_' + str(field[1]['id']) + '_' + str(code[1]['value'])
                             enum_attr['textId'] = text_id
                             documentation_func(text_id, documentation)

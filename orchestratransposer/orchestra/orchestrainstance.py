@@ -190,11 +190,8 @@ class OrchestraInstance10:
             purpose = attr['purpose']
         except StopIteration:
             purpose = None
-        text = element[-1] if len(element) > 1 else None
-        if text:
-            return purpose, text
-        else:
-            return None
+        text = element[-1] if len(element) > 2 else None
+        return purpose, text
 
     @staticmethod
     def append_documentation(element: list, documentation: str):
