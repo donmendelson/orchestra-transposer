@@ -37,7 +37,8 @@ class UnifiedMainInstance:
                             if version == v:
                                 return i
                 fix_attr = {'version': version, 'components': 1 if has_components else 0,
-                            'fixml': 1 if has_fixml else 0}
+                            'fixml': 1 if has_fixml else 0,
+                            'specUrl': 'https://www.fixtrading.org/online-specification/'}
                 fix = ['fix', fix_attr]
                 main_root.append(fix)
                 return fix
