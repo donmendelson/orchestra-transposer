@@ -177,7 +177,7 @@ class Unified2Orchestra10:
             codeset = ['fixr:codeSet', codeset_attr]
             d = {k: unified_field[1].get(k, None) for k in
                  ['added', 'addedEP', 'updated, updatedEP', 'deprecated',
-                  'deprecatedEP']}
+                  'deprecatedEP', 'issue']}
             pedigree = dict(filter(lambda item: not item[1] is None, d.items()))
             codeset_attr.update(pedigree)
             enums = filter(lambda e: isinstance(e, list) and e[0] == 'enum', unified_field)
@@ -192,7 +192,7 @@ class Unified2Orchestra10:
                     code_attr['group'] = group
                 d = {k: enum[1].get(k, None) for k in
                      ['added', 'addedEP', 'updated, updatedEP', 'deprecated',
-                      'deprecatedEP']}
+                      'deprecatedEP', 'issue']}
                 pedigree = dict(filter(lambda item: not item[1] is None, d.items()))
                 code_attr.update(pedigree)
                 code = ['fixr:code', code_attr]
@@ -235,7 +235,7 @@ class Unified2Orchestra10:
             group = ['fixr:group', group_attr]
             unified_repeating_group = unified_component[2]
             d = {k: unified_repeating_group[1].get(k, None) for k in
-                 ['id', 'added', 'addedEP', 'updated, updatedEP', 'deprecated', 'deprecatedEP']}
+                 ['id', 'added', 'addedEP', 'updated, updatedEP', 'deprecated', 'deprecatedEP', 'issue']}
             num_in_group_attr = dict(filter(lambda item: not item[1] is None, d.items()))
             num_in_group = ['fixr:numInGroup', num_in_group_attr]
             unified_numingroup_documentation: List[Tuple[str, List[str]]] = documentation_func(
