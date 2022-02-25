@@ -2,7 +2,6 @@
 PHRASETYPE=$1
 SOURCE=$2
 TARGET=$3
-CLASSPATH="diff-merge-1.5.1-SNAPSHOT-jar-with-dependencies.jar"
 
 cd phrases/$PHRASETYPE
 echo "Comparing phrases for $PHRASETYPE..."
@@ -47,6 +46,7 @@ if [ -f x.txt ]; then rm x.txt; fi
 
 # Compare the new file against the old one to see if and how the new one has to change
 DIFF="DIFF_$PHRASETYPE.xml"
+CLASSPATH="../../diff-merge-1.5.1-SNAPSHOT-jar-with-dependencies.jar"
 java io.fixprotocol.xml.XmlDiff $FILE2 $FILE1 $DIFF -u
 
 # Remove namespace declaration and diff-element(s) to have achieve an empty file if there are no differences

@@ -2,8 +2,6 @@
 # Intended differences and those caused by bugs are then being removed
 # The resulting diff file should be empty
 
-CLASSPATH="diff-merge-1.5.1-SNAPSHOT-jar-with-dependencies.jar"
-
 SOURCE="Phrases"
 OLD="Fix$SOURCE.xml"
 NEW="$SOURCE.xml"
