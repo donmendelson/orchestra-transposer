@@ -211,10 +211,11 @@ class Orchestra10Unified:
                 unified_component_attr['notReqXML'] = 1
             unified_component = ['component', unified_component_attr]
             # repeatingGroup attributes derived from Orchestra numInGroup attributes
-            repeating_attr = group[2][1].copy()
+            repeating_attr = {k: group[2][1][k] for k in set(list(group[2][1].keys())) - {'presence'}}
             repeating_attr['name'] = ""
             repeating_attr['legacyPosition'] = 0
             repeating_attr['legacyIndent'] = 0
+            repeating_attr['required'] = 1 if group[2][1].get("presence", "") == 'required' else 0
             repeating_group = ['repeatingGroup', repeating_attr]
             documentation: List[Tuple[str, str]] = OrchestraInstance10.documentation(group[2])
             if documentation:
