@@ -190,7 +190,7 @@ class OrchestraInstance10:
             purpose = attr['purpose']
         except StopIteration:
             purpose = None
-        text = element[-1] if len(element) > 2 else None
+        text = element[-1] if len(element) > 1 and isinstance(element[-1], str) else None
         return purpose, text
 
     @staticmethod
