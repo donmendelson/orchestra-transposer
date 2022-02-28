@@ -235,7 +235,7 @@ class Unified2Orchestra10:
             group = ['fixr:group', group_attr]
             unified_repeating_group = unified_component[2]
             d = {k: unified_repeating_group[1].get(k, None) for k in
-                 ['id', 'added', 'addedEP', 'updated, updatedEP', 'deprecated', 'deprecatedEP', 'issue']}
+                 ['id', 'added', 'addedEP', 'updated', 'updatedEP', 'deprecated', 'deprecatedEP', 'issue']}
             num_in_group_attr = dict(filter(lambda item: not item[1] is None, d.items()))
             presence = Unified2Orchestra10.unified2orch_presence(unified_repeating_group[1].get('required', 0))
             if not presence == 'optional':
