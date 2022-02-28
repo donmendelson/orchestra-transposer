@@ -65,17 +65,7 @@ cp temp.xml $DIFF
 tail -r $DIFF | sed -e '/^.[ ]*type="@added/{N;d;}' -e '/^.[ ]*type="@updated/{N;d;}' -e '/^.[ ]*type="@deprecated/{N;d;}' | tail -r > temp.xml
 cp temp.xml $DIFF
 
-# Remove difference for the setting of "required" (issue #13)
-#sed -i "" '/<replace sel=.*@required/d' $DIFF
-tail -r $DIFF | sed -e '/^.[ ]*type="@required">1</{N;d;}' | tail -r > temp.xml
-cp temp.xml $DIFF
-
-# Remove difference for the missing SPEC issue references (issue #23)
-tail -r $DIFF | sed -e '/^.[ ]*type="@issue">SPEC-/{N;d;}' | tail -r > temp.xml
-cp temp.xml $DIFF
-
 # Remaining errors:
-# Missing specURL attribute captired by issue #15
 # - Missing enums for RiskLimitStatus and ProtectionTermEventDayType are due to an error in Basic that will be corrected with EP271
 
 rm temp.xml
