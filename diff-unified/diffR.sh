@@ -58,11 +58,8 @@ cp temp.xml $DIFF
 #-----------------------------------------------------------------------------------------------------
 # BUGS REPORTED IN GITHUB
 
-# Remove single line differences due to issue #7 (pedigree missing and phrase reference incorrect)
-#sed -i "" -e '/<replace sel=.*@updated/d' -e '/<remove sel=.*@updated/d' -e '/<replace sel=.*repeatingGroup.*@textId/d' $DIFF
-
-# Remove 2-line pedigree differences due to issues #7 and #18
-tail -r $DIFF | sed -e '/^.[ ]*type="@added/{N;d;}' -e '/^.[ ]*type="@updated/{N;d;}' -e '/^.[ ]*type="@deprecated/{N;d;}' | tail -r > temp.xml
+# Remove 2-line pedigree differences due to issues #25
+tail -r $DIFF | sed '/^.[ ]*type="@updated/{N;d;}' | tail -r > temp.xml
 cp temp.xml $DIFF
 
 # Remaining errors:
