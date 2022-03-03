@@ -176,7 +176,7 @@ class Unified2Orchestra10:
             codeset_attr = {'name': codeset_name, 'id': unified_field[1]['id'], 'type': unified_field[1]['type']}
             codeset = ['fixr:codeSet', codeset_attr]
             d = {k: unified_field[1].get(k, None) for k in
-                 ['added', 'addedEP', 'updated, updatedEP', 'deprecated',
+                 ['added', 'addedEP', 'updated', 'updatedEP', 'deprecated',
                   'deprecatedEP', 'issue']}
             pedigree = dict(filter(lambda item: not item[1] is None, d.items()))
             codeset_attr.update(pedigree)
@@ -191,7 +191,7 @@ class Unified2Orchestra10:
                 if group:
                     code_attr['group'] = group
                 d = {k: enum[1].get(k, None) for k in
-                     ['added', 'addedEP', 'updated, updatedEP', 'deprecated',
+                     ['added', 'addedEP', 'updated', 'updatedEP', 'deprecated',
                       'deprecatedEP', 'issue']}
                 pedigree = dict(filter(lambda item: not item[1] is None, d.items()))
                 code_attr.update(pedigree)
