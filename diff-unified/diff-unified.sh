@@ -1,6 +1,6 @@
-# Create unified repository and phrases file from an Orchestra file (runs several minutes without any output)
-#echo "Converting FIX Latest to Unified repository and phrases files..."
-python3 ../orchestratransposer.py ../tests/xml/OrchestraFIXLatest.xml --to unif -o Repository.xml Phrases.xml
+# Create unified repository and phrases file from the Orchestra file created by unified2orchestra (runs several minutes without any output)
+echo "Converting FIX Latest to Unified repository and phrases files..."
+python3 ../orchestratransposer.py ../tests/out/FixRepository2Orchestra.xml --to unif -o Repository.xml Phrases.xml
 
 # Compare old and new repository file
 ./diffR.sh

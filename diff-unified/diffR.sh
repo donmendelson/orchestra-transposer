@@ -37,7 +37,7 @@ sed -i "" '/<replace sel=.*@inlined/d' $DIFF
 tail -r $DIFF | sed -e '/^.[ ]*type="@generateImplFile"/{N;d;}' -e '/^.[ ]*type="@inlined"/{N;d;}' -e '/^.[ ]*type="@volume"/{N;d;}' | tail -r > temp.xml
 cp temp.xml $DIFF
 
-# Remove entries for textId differences as empty phrases are no longer explicit provided (see also GitHub issue #9)
+# Remove entries for textId differences as empty phrases are no longer explicitly provided (see also GitHub issue #9)
 # Remove entries for missing elaborationTextId references (they are basically obsolete as the phrases file only has textId with elaboration purpose)
 tail -r $DIFF | sed -e '/^.[ ]*type="@textId"/{N;d;}' -e '/^.[ ]*type="@elaborationTextId"/{N;d;}' | tail -r > temp.xml
 cp temp.xml $DIFF
@@ -56,13 +56,10 @@ tail -r $DIFF | sed -e '/^.[ ]*type="@notReqXML">0</{N;d;}' -e '/^.[ ]*type="@re
 cp temp.xml $DIFF
 
 #-----------------------------------------------------------------------------------------------------
-# BUGS REPORTED IN GITHUB
-
-# Remove 2-line pedigree differences due to issues #25
-tail -r $DIFF | sed '/^.[ ]*type="@updated/{N;d;}' | tail -r > temp.xml
-cp temp.xml $DIFF
+# BUGS REPORTED IN GITHUB - NONE
 
 # Remaining errors:
 # - Missing enums for RiskLimitStatus and ProtectionTermEventDayType are due to an error in Basic that will be corrected with EP271
+#-----------------------------------------------------------------------------------------------------
 
 rm temp.xml
