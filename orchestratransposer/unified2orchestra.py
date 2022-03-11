@@ -2,7 +2,7 @@ import logging
 from datetime import datetime
 from typing import Callable, List, Optional, Tuple
 
-from orchestratransposer.orchestra.orchestra import Orchestra10
+from orchestratransposer.orchestra.orchestra import Orchestra10, Orchestra10WithAppinfo
 from orchestratransposer.orchestra.orchestrainstance import OrchestraInstance10
 from orchestratransposer.unified.unified import UnifiedWithPhrases
 from orchestratransposer.unified.unifiedinstance import UnifiedInstanceWithPhrases, UnifiedMainInstance
@@ -16,7 +16,7 @@ class Unified2Orchestra10:
     def unified2orch_dict(self, unified: UnifiedInstanceWithPhrases,
                           version: Optional[str] = None) -> OrchestraInstance10:
         """
-        Translate an SBE message schema dictionary to an Orchestra dictionary
+        Translate a Unified Repository to an Orchestra dictionary
         :param unified: a Unified Repository instance
         :param version: a version of fix in Unified Repository to convert. If not provided, it converts the first
         instance found.
@@ -54,7 +54,7 @@ class Unified2Orchestra10:
             return errors
         else:
             orch_instance = self.unified2orch_dict(unified_instance, version)
-            orchestra = Orchestra10()
+            orchestra = Orchestra10WithAppinfo()
             errors = orchestra.write_xml(orch_instance, orch_stream)
             if errors:
                 for error in errors:
@@ -88,7 +88,7 @@ class Unified2Orchestra10:
                                                                                                            None))
             not_req_xml = unified_section[1].get('notReqXML', 0)
             if not_req_xml == 1:
-                OrchestraInstance10.append_appinfo(section, [({'purpose': 'FIXML'}, 'notReqXML')])
+                 OrchestraInstance10.append_fixml_appinfo(section, {'notReqXML': 1})
             OrchestraInstance10.append_documentations(section, unified_documentation)
             sections.append(section)
 
@@ -107,7 +107,7 @@ class Unified2Orchestra10:
             OrchestraInstance10.append_documentations(category, unified_documentation)
             not_req_xml = unified_category[1].get('notReqXML', 0)
             if not_req_xml == 1:
-                OrchestraInstance10.append_appinfo(category, [({'purpose': 'FIXML'}, 'notReqXML')])
+                OrchestraInstance10.append_fixml_appinfo(category, {'notReqXML': 1})
             categories.append(category)
 
     def unified2orch_datatypes(self, fix: list, documentation_func: Callable[[str], List[Tuple[str, List[str]]]],
@@ -148,7 +148,7 @@ class Unified2Orchestra10:
             OrchestraInstance10.append_documentations(field, unified_documentation)
             not_req_xml = unified_field[1].get('notReqXML', 0)
             if not_req_xml == 1:
-                OrchestraInstance10.append_appinfo(field, [({'purpose': 'FIXML'}, 'notReqXML')])
+                OrchestraInstance10.append_fixml_appinfo(field, {'notReqXML': 1})
             enum = next(filter(lambda l: isinstance(l, list) and l[0] == 'enum', unified_field), None)
             enum_id = unified_field[1].get('enumDatatype', None)
             if enum_id:
@@ -219,7 +219,7 @@ class Unified2Orchestra10:
                                                                                                              None))
             not_req_xml = unified_component[1].get('notReqXML', 0)
             if not_req_xml == 1:
-                OrchestraInstance10.append_appinfo(component, [({'purpose': 'FIXML'}, 'notReqXML')])
+                OrchestraInstance10.append_fixml_appinfo(component, {'notReqXML': 1})
             OrchestraInstance10.append_documentations(component, unified_documentation)
             components.append(component)
 
@@ -252,7 +252,7 @@ class Unified2Orchestra10:
             OrchestraInstance10.append_documentations(group, unified_documentation)
             not_req_xml = unified_component[1].get('notReqXML', 0)
             if not_req_xml == 1:
-                OrchestraInstance10.append_appinfo(group, [({'purpose': 'FIXML'}, 'notReqXML')])
+                OrchestraInstance10.append_fixml_appinfo(group, {'notReqXML': 1})
             groups.append(group)
 
     def unified2orch_messages(self, fix: list, documentation_func: Callable[[str], List[Tuple[str, List[str]]]],
@@ -271,7 +271,7 @@ class Unified2Orchestra10:
             OrchestraInstance10.append_documentations(message, unified_documentation)
             not_req_xml = unified_message[1].get('notReqXML', 0)
             if not_req_xml == 1:
-                OrchestraInstance10.append_appinfo(message, [({'purpose': 'FIXML'}, 'notReqXML')])
+                OrchestraInstance10.append_fixml_appinfo(message, {'notReqXML': 1})
             messages.append(message)
 
     def unified2orch_append_members(self, fix: list, documentation_func: Callable[[str], List[Tuple[str, List[str]]]],
@@ -311,7 +311,7 @@ class Unified2Orchestra10:
                     component_ref = ['fixr:componentRef', component_attr]
                     inlined = unified_member[1].get('inlined', 0)
                     if inlined == 1:
-                        OrchestraInstance10.append_appinfo(component_ref, [({'purpose': 'FIXML'}, 'inlined')])
+                        OrchestraInstance10.append_fixml_appinfo(component_ref, {'inlined': 1})
                     OrchestraInstance10.append_documentations(component_ref, unified_documentation)
                     structure.append(component_ref)
 

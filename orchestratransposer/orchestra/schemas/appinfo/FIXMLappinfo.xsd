@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:fixml="http://fixprotocol.io/2022/orchestra/appinfo/fixml" targetNamespace="http://fixprotocol.io/2022/orchestra/appinfo/fixml" elementFormDefault="qualified" attributeFormDefault="unqualified">
+	<xs:element name="FIXMLencoding" type="fixml:FIXMLencodingType">
+		<xs:annotation>
+			<xs:documentation>Attributes for FIXML generator</xs:documentation>
+		</xs:annotation>
+	</xs:element>
+	<xs:complexType name="FIXMLencodingType">
+		<xs:attribute name="inlined" type="xs:boolean" default="0">
+			<xs:annotation>
+				<xs:documentation>If true, a component is inlined in a containing message or component</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>
+		<xs:attribute name="notReqXML" type="xs:boolean" default="0">
+			<xs:annotation>
+				<xs:documentation>If true, an element is ignored by FIXML generator</xs:documentation>
+			</xs:annotation>
+		</xs:attribute>
+	</xs:complexType>
+</xs:schema>

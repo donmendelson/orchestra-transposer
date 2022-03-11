@@ -2,7 +2,7 @@ import logging
 from datetime import datetime
 from typing import Callable, List, Tuple
 
-from orchestratransposer.orchestra.orchestra import Orchestra10
+from orchestratransposer.orchestra.orchestra import Orchestra10, Orchestra10WithAppinfo
 from orchestratransposer.orchestra.orchestrainstance import OrchestraInstance10
 from orchestratransposer.unified.unified import UnifiedWithPhrases
 from orchestratransposer.unified.unifiedinstance import UnifiedInstanceWithPhrases, UnifiedMainInstance
@@ -21,13 +21,13 @@ class Orchestra10Unified:
         self.orch2unified_categories(orchestra, documentation_func, fix)
         self.orch2unified_sections(orchestra, documentation_func, fix)
         self.orch2unified_fields(orchestra, documentation_func, fix)
-        self.orch2unified_components(orchestra, documentation_func, fix)
+        self.orch2unified_components(orchestra, documentation_func, fix )
         self.orch2unified_groups(orchestra, documentation_func, fix)
         self.orch2unified_messages(orchestra, documentation_func, fix)
         return unified
 
     def orch2unified_xml(self, orchestra_xml, unified_stream, phrases_stream) -> List[Exception]:
-        orchestra = Orchestra10()
+        orchestra = Orchestra10WithAppinfo()
         (orch_instance, errors) = orchestra.read_xml(orchestra_xml)
         if errors:
             for error in errors:

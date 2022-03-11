@@ -4,7 +4,8 @@ from typing import List, Optional, Tuple, Union
 
 class OrchestraInstance10:
     """
-    An instance of Orchestra version 1.0
+    An instance of Orchestra version 1.0.
+    Supports Dublin Core Terms metadata and appinfo elements for certain tools.
     """
 
     def __init__(self, obj=None):
@@ -246,7 +247,23 @@ class OrchestraInstance10:
                 annotation = ['fixr:annotation']
                 element.append(annotation)
             for appinfo in appinfos:
-                annotation.append(['fixr:appinfo', appinfo[0], appinfo[1]])
+                l = ['fixr:appinfo']
+                if appinfo[0]:
+                    l.append(appinfo[0])
+                if appinfo[1]:
+                    l.append(appinfo[1])
+                annotation.append(l)
+
+    @staticmethod
+    def append_fixml_appinfo(element: list, attributes: dict):
+        """ Append appinfo for FIXML generator """
+        if len(attributes) > 0:
+            annotation = next((i for i in element if isinstance(i, list) and i[0] == 'fixr:annotation'), None)
+            if not annotation:
+                annotation = ['fixr:annotation']
+                element.append(annotation)
+            l = ['fixr:appinfo', {'purpose': 'FIXML'}, ['fixml:FIXMLencodingType', attributes]]
+            annotation.append(l)
 
     @staticmethod
     def appinfo(element: list, purpose: str) -> List[str]:
