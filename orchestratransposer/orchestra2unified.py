@@ -70,7 +70,7 @@ class Orchestra10Unified:
             unified_section_attr['id'] = section[1]['name']
             unified_section = ['section', unified_section_attr]
             appinfo = OrchestraInstance10.appinfo(section, 'FIXML')
-            if 'notReqXML' in appinfo:
+            if appinfo and appinfo[0][1].get('notReqXML', 0) == '1':
                 unified_section_attr['notReqXML'] = 1
             documentation: List[Tuple[str, str]] = OrchestraInstance10.documentation(section)
             if documentation:
@@ -90,7 +90,7 @@ class Orchestra10Unified:
             unified_category_attr['id'] = category[1]['name']
             unified_category = ['category', unified_category_attr]
             appinfo = OrchestraInstance10.appinfo(category, 'FIXML')
-            if 'notReqXML' in appinfo:
+            if appinfo and appinfo[0][1].get('notReqXML', 0) == '1':
                 unified_category_attr['notReqXML'] = 1
             documentation: List[Tuple[str, str]] = OrchestraInstance10.documentation(category)
             if documentation:
@@ -139,7 +139,7 @@ class Orchestra10Unified:
             unified_field_attr = {k: field[1][k] for k in
                                   set(list(field[1].keys())) - {'lengthId', 'discriminatorId'}}
             appinfo = OrchestraInstance10.appinfo(field, 'FIXML')
-            if 'notReqXML' in appinfo:
+            if appinfo and appinfo[0][1].get('notReqXML', 0) == '1':
                 unified_field_attr['notReqXML'] = 1
             unified_field = ['field', unified_field_attr]
             if codeset:
@@ -183,7 +183,7 @@ class Orchestra10Unified:
             unified_component_attr['type'] = 'Block'
             unified_component_attr['repeating'] = 0
             appinfo = OrchestraInstance10.appinfo(component, 'FIXML')
-            if 'notReqXML' in appinfo:
+            if appinfo and appinfo[0][1].get('notReqXML', 0) == '1':
                 unified_component_attr['notReqXML'] = 1
             unified_component = ['component', unified_component_attr]
             documentation: List[Tuple[str, str]] = OrchestraInstance10.documentation(component)
@@ -207,7 +207,7 @@ class Orchestra10Unified:
             unified_component_attr['type'] = 'BlockRepeating'
             unified_component_attr['repeating'] = 1
             appinfo = OrchestraInstance10.appinfo(group, 'FIXML')
-            if 'notReqXML' in appinfo:
+            if appinfo and appinfo[0][1].get('notReqXML', 0) == '1':
                 unified_component_attr['notReqXML'] = 1
             unified_component = ['component', unified_component_attr]
             # repeatingGroup attributes derived from Orchestra numInGroup attributes
@@ -249,7 +249,10 @@ class Orchestra10Unified:
                 unified_message_attr['section'] = 'Unknown'
                 self.logger.error("Section not found for message %d", unified_message_attr['id'])
             appinfo = OrchestraInstance10.appinfo(message, 'FIXML')
-            unified_message_attr['notReqXML'] = 1 if 'notReqXML' in appinfo else 0
+            if appinfo and appinfo[0][1].get('notReqXML', 0) == '1':
+                unified_message_attr['notReqXML'] = 1
+            else:
+                unified_message_attr['notReqXML'] = 0
             structure = message[2]
             unified_message = ['message', unified_message_attr]
             documentation: List[Tuple[str, str]] = OrchestraInstance10.documentation(message)
@@ -307,7 +310,7 @@ class Orchestra10Unified:
                 unified_component_attr['legacyPosition'] = 0
                 unified_component_attr['legacyIndent'] = 0
                 appinfo = OrchestraInstance10.appinfo(member, 'FIXML')
-                if 'inlined' in appinfo:
+                if appinfo and appinfo[0][1].get('inlined', 0) == '1':
                     unified_component_attr['inlined'] = True
                 unified_component_ref = ['componentRef', unified_component_attr]
                 if component:
