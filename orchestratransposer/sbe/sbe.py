@@ -52,7 +52,7 @@ class SBE10:
                 data.append(result)
             else:
                 errors.append(result)
-        return SBEInstance10(data[0]), errors
+        return SBEInstance10(data[0] if len(data) > 0 else None, errors)
 
     def write_xml(self, sbe_instance: SBEInstance10, stream) -> List[Exception]:
         """
