@@ -1,7 +1,7 @@
 import logging
 from typing import List, Optional
 
-from orchestratransposer.orchestra.orchestra import Orchestra10WithSBETypes
+from orchestratransposer.orchestra.orchestra import Orchestra10WithSBE10Types
 from orchestratransposer.orchestra.orchestrainstance import OrchestraInstance10
 from orchestratransposer.sbe.sbe import SBE10
 from orchestratransposer.sbe.sbeinstance import SBEInstance10
@@ -35,7 +35,7 @@ class Orchestra2SBE10_10:
         :return: a list of errors, if any
         """
         # Supports embedded SBE encoding types in Orchestra datatypes
-        orchestra = Orchestra10WithSBETypes()
+        orchestra = Orchestra10WithSBE10Types()
         (orch_instance, errors) = orchestra.read_xml(orchestra_xml)
         if errors:
             for error in errors:

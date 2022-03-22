@@ -1,21 +1,20 @@
 import logging
 from typing import List
 
-from orchestratransposer.orchestra.orchestra import Orchestra10WithSBETypes
+from orchestratransposer.orchestra.orchestra import Orchestra10WithSBE10Types, Orchestra10WithSBE20Types
 from orchestratransposer.orchestra.orchestrainstance import OrchestraInstance10
-from orchestratransposer.sbe.sbe import SBE10
-from orchestratransposer.sbe.sbeinstance import SBEInstance10
+from orchestratransposer.sbe.sbe import SBE10, SBE20
+from orchestratransposer.sbe.sbeinstance import SBEInstance10, SBEInstance20
 
 
 class SBE2Orchestra10_10:
+    """
+    Translates between a Simple Binary Encoding message schema version 1.0 and
+    an FIX Orchestra file version 1.0. Supports embedded SBE datatypes.
+    """
 
     def __init__(self):
         self.logger = logging.getLogger('sbe2orchestra')
-
-    """
-    Translates between a Simple Binary Encoding message schema version 1.0 and 
-    an FIX Orchestra file version 1.0. Supports embedded SBE datatypes.
-    """
 
     def sbe2orch_dict(self, sbe: SBEInstance10) -> OrchestraInstance10:
         """
@@ -49,7 +48,7 @@ class SBE2Orchestra10_10:
             return errors
         else:
             orch_instance = self.sbe2orch_dict(sbe_instance)
-            orchestra = Orchestra10WithSBETypes()
+            orchestra = Orchestra10WithSBE10Types()
             errors = orchestra.write_xml(orch_instance, orch_stream)
             if errors:
                 for error in errors:
@@ -80,19 +79,50 @@ class SBE2Orchestra10_10:
         self.sbe2orch_composite_types(orch_datatypes, sbe)
 
     def sbe2orch_composite_types(self, orch_datatypes, sbe):
+        """
+        Adds SBE composite encoding types to Orchestra as datatypes with mapping
+        :param orch_datatypes: datatypes section of an Orchestra file
+        :param sbe: an SBE message schema
+
+        Note: Composite types are added as an SBE schema snippet to the Orchestra file under extension element.
+        The XML processor requires the child element of the extension to be the root element of the SBE schema,
+        messageSchema. Also, since the extension element is of a different XML namespace, each of its child elements
+        must be prefixed.
+        """
         sbe_composites = sbe.composites()
         for sbe_composite in sbe_composites:
-            sbe_snippet = ['sbe:messageSchema', {'version': 0}, ['types', sbe_composite],
+            sbe_prefixed_composite = self._prefix_element('sbe', sbe_composite)
+            sbe_snippet = ['sbe:messageSchema', {'version': 0}, ['sbe:types', sbe_prefixed_composite],
                            ['sbe:message', {'id': 1, 'name': 'Dummy'}]]
             extension = ['fixr:extension', sbe_snippet]
             orch2sbe_mapping = ['fixr:mappedDatatype', {'standard': 'SBE'}, extension]
             orch_datatype = ['fixr:datatype', {'name': sbe_composite[1]['name']}, orch2sbe_mapping]
             orch_datatypes.append(orch_datatype)
 
+    def _prefix_element(self, prefix: str, elem: list) -> List:
+        for count, value in enumerate(elem):
+            if isinstance(value, str):
+                elem[count] = prefix + ":" + value
+            elif isinstance(value, list):
+                self._prefix_element(prefix, value)
+        return elem
+
     def sbe2orch_simple_types(self, orch_datatypes, sbe):
+        """
+        Adds SBE simple encoding types to Orchestra as datatypes with mapping
+        :param orch_datatypes: datatypes section of an Orchestra file
+        :param sbe: an SBE message schema
+
+        Workaround: since Orchestra mappedDatatype elements lacks a length attribute, parameter attribute is used to
+        hold length. However, the datatype of parameter is string rather than numeric.
+        """
         sbe_types = sbe.encoding_types()
         for sbe_type in sbe_types:
-            orch2sbe_mapping = ['fixr:mappedDatatype', {'standard': 'SBE', 'base': sbe_type[1]['primitiveType']}]
+            mapping_attr = {'standard': 'SBE', 'base': sbe_type[1]['primitiveType']}
+            length = sbe_type[1].get('length', 0)
+            if length > 0:
+                mapping_attr['parameter'] = str(length)
+            orch2sbe_mapping = ['fixr:mappedDatatype', mapping_attr]
             orch_datatype = ['fixr:datatype', {'name': sbe_type[1]['name']}, orch2sbe_mapping]
             orch_datatypes.append(orch_datatype)
 
@@ -211,3 +241,46 @@ class SBE2Orchestra10_10:
 
 SBE2Orchestra = SBE2Orchestra10_10
 """Translates Orchestra version 1.0 to SBE version 1.0"""
+
+
+class SBE2Orchestra20_10(SBE2Orchestra10_10):
+
+    def sbe2orch_dict(self, sbe: SBEInstance20) -> OrchestraInstance10:
+        """
+        Translate an SBE message schema dictionary to an Orchestra dictionary
+        :param sbe: an SBE version 2.0 data dictionary
+        :return: an Orchestra version 1.0 data dictionary
+        """
+        orch = OrchestraInstance10()
+        self.sbe2orch_metadata(sbe, orch)
+        datatypes = orch.datatypes()
+        self.sbe2orch_datatypes(sbe, datatypes)
+        codesets = orch.codesets()
+        self.sbe2orch_codesets(sbe, codesets)
+        fields = orch.fields()
+        self.sbe2orch_fields(sbe, fields)
+        self.sbe2orch_messages_and_groups(sbe, orch)
+        return orch
+
+    def sbe2orch_xml(self, sbe_xml, orch_stream) -> List[Exception]:
+        """
+        Translate an SBE message schema into an Orchestra file
+        :param sbe_xml: an XML file-like object in SBE schema
+        :param orch_stream: an output stream to write an Orchestra file
+        :return: a list of errors, if any
+        """
+        sbe = SBE20()
+        (sbe_instance, errors) = sbe.read_xml(sbe_xml)
+        if errors:
+            for error in errors:
+                self.logger.error(error)
+            return errors
+        else:
+            orch_instance = self.sbe2orch_dict(sbe_instance)
+            orchestra = Orchestra10WithSBE20Types()
+            errors = orchestra.write_xml(orch_instance, orch_stream)
+            if errors:
+                for error in errors:
+                    self.logger.error(error)
+            return errors
+

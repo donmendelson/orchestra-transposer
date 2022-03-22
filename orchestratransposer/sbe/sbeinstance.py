@@ -1,4 +1,4 @@
-import itertools
+from itertools import chain
 from pprint import pformat
 
 
@@ -9,7 +9,7 @@ class SBEInstance10:
 
     def __init__(self, obj=None):
         self.obj = obj if obj is not None else ['sbe:messageSchema', {}]
-        self._all_data = None
+        self._all_encoding_types = None
 
     def __str__(self):
         return pformat(self.obj, width=120)
@@ -27,15 +27,16 @@ class SBEInstance10:
             self.obj.append(d)
             return d
 
-    @property
     def all_types(self) -> list:
         """
         Returns a List of all types lists
         """
-        if self._all_data is None:
-            self._all_data = list(
-                itertools.chain(filter(lambda l: isinstance(l, list) and l[0] == 'types', self.root())))
-        return self._all_data
+        if self._all_encoding_types is None:
+            self._all_encoding_types = []
+            for i in filter(lambda l: isinstance(l, list) and l[0] == 'types', self.root()):
+                for j in filter (lambda l: isinstance(l, list), i):
+                    self._all_encoding_types.append(list(j))
+        return self._all_encoding_types
 
     def first_types(self) -> list:
         """ Returns the first instance of types list, suitable for appending new encoding types """
@@ -92,17 +93,17 @@ class SBEInstance10:
 
     def encoding_types(self):
         """ Access simple encoding types """
-        types_l = self.first_types()
+        types_l = self.all_types()
         return list(filter(lambda l: isinstance(l, list) and l[0] == 'type', types_l))
 
     def composites(self):
         """ Access composite types """
-        types_l = self.first_types()
+        types_l = self.all_types()
         return list(filter(lambda l: isinstance(l, list) and l[0] == 'composite', types_l))
 
     def enums(self):
         """ Access enums """
-        types_l = self.first_types()
+        types_l = self.all_types()
         return list(filter(lambda l: isinstance(l, list) and l[0] == 'enum', types_l))
 
     def messages(self) -> list:
@@ -233,3 +234,37 @@ class SBEInstance10:
 
 SBEInstance = SBEInstance10
 """Default SBE instance"""
+
+
+class SBEInstance20(SBEInstance10):
+    """
+    Represents a message schema as defined by Simple Binary Encoding (SBE) version 2.0 release candidate
+    """
+    def __init__(self, obj=None):
+        self.obj = obj if obj is not None else ['messageSchema', {}]
+        self._all_encoding_types = None
+        self._all_messages = None
+
+    def first_messages(self) -> list:
+        """ Returns the first instance of message list, suitable for appending new messages """
+        try:
+            return next(l for l in self.root() if isinstance(l, list) and l[0] == 'messages')
+        except StopIteration:
+            messages = ['messages']
+            self.root().append(messages)
+            return messages
+
+    def messages(self) -> list:
+        """ Accesses a combined List of messages"""
+        if self._all_messages is None:
+            self._all_messages = []
+            for i in filter(lambda l: isinstance(l, list) and l[0] == 'messages', self.root()):
+                for j in filter (lambda l: isinstance(l, list), i):
+                    self._all_messages.append(list(j))
+        return self._all_messages
+
+    def append_message(self, message):
+        """
+        Appends a message
+        """
+        self.first_messages().append(message)

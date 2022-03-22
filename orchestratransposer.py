@@ -4,6 +4,9 @@ import argparse
 import sys
 
 from orchestratransposer import Orchestra2SBE, Orchestra2Unified, SBE2Orchestra, Unified2Orchestra
+from orchestratransposer.sbe2orchestra import SBE2Orchestra20_10
+
+FORMATS = ['orch', 'unif', 'sbe', 'sbe2']
 
 
 def init_argparse() -> argparse.ArgumentParser:
@@ -18,9 +21,9 @@ def init_argparse() -> argparse.ArgumentParser:
     parser.add_argument(dest="input", nargs="+", help="Name of input file(s)")
     parser.add_argument('-o', '--output', nargs="+",
                         help='name of output file(s)')
-    parser.add_argument('-f', '--from', choices=['orch', 'unif', 'sbe'], default='orch', dest='input_format',
+    parser.add_argument('-f', '--from', choices=FORMATS, default='orch', dest='input_format',
                         help='format of source file: Orchestra 1.0, Unified Repository, or SBE 1.0')
-    parser.add_argument('-t', '--to', choices=['orch', 'unif', 'sbe'], default='orch', dest='output_format',
+    parser.add_argument('-t', '--to', choices=FORMATS, default='orch', dest='output_format',
                         help='format of output file: Orchestra 1.0, Unified Repository, or SBE 1.0')
 
     return parser
@@ -89,8 +92,12 @@ optional arguments:
                 translator = Unified2Orchestra()
                 with open(output_files[0], 'wb') as f:
                     errors = translator.unified2orch_xml(input_files[0], input_files[1], f)
-            if input_format == 'sbe':
+            elif input_format == 'sbe':
                 translator = SBE2Orchestra()
+                with open(output_files[0], 'wb') as f:
+                    errors = translator.sbe2orch_xml(input_files[0], f)
+            elif input_format == 'sbe2':
+                translator = SBE2Orchestra20_10()
                 with open(output_files[0], 'wb') as f:
                     errors = translator.sbe2orch_xml(input_files[0], f)
         print(f'{len(errors)} errors')

@@ -1,6 +1,7 @@
 import os
 
 from orchestratransposer import SBE
+from orchestratransposer.sbe.sbe import SBE20
 
 XML_FILE_DIR = os.path.join(os.path.dirname(__file__), 'xml/')
 
@@ -53,3 +54,10 @@ def test_to_from_xml():
         (instance, errors) = sbe.read_xml(xml_path)
         sbe.write_xml(instance, f)
         assert not errors
+
+
+def test_valid20():
+    sbe = SBE20()
+    xml_path = os.path.join(XML_FILE_DIR, 'Examples20.xml')
+    errors = sbe.validate(xml_path)
+    assert not errors
