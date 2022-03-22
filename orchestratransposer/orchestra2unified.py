@@ -135,7 +135,7 @@ class Orchestra10Unified:
         lst = filter(lambda l: isinstance(l, list) and l[0] == 'fixr:field', fields)
         for field in lst:
             field_type = field[1]['type']
-            codeset = orch.codeset(field_type)
+            codeset = orch.codeset_by_name(field_type)
             unified_field_attr = {k: field[1][k] for k in
                                   set(list(field[1].keys())) - {'lengthId', 'discriminatorId'}}
             appinfo = OrchestraInstance10.appinfo(field, 'FIXML')

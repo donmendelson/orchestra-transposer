@@ -1,5 +1,5 @@
-from itertools import chain
 from pprint import pformat
+from typing import Optional
 
 
 class SBEInstance10:
@@ -34,7 +34,7 @@ class SBEInstance10:
         if self._all_encoding_types is None:
             self._all_encoding_types = []
             for i in filter(lambda l: isinstance(l, list) and l[0] == 'types', self.root()):
-                for j in filter (lambda l: isinstance(l, list), i):
+                for j in filter(lambda l: isinstance(l, list), i):
                     self._all_encoding_types.append(list(j))
         return self._all_encoding_types
 
@@ -73,7 +73,7 @@ class SBEInstance10:
            ['type', {'name': 'week', 'primitiveType': 'uint8'}]]
         """
         types_l = self.first_types()
-        types_l.append( composite)
+        types_l.append(composite)
 
     def append_enum(self, enum):
         """
@@ -91,17 +91,23 @@ class SBEInstance10:
         types_l = self.first_types()
         types_l.append(enum)
 
-    def encoding_types(self):
+    def encoding_types(self) -> list:
         """ Access simple encoding types """
         types_l = self.all_types()
         return list(filter(lambda l: isinstance(l, list) and l[0] == 'type', types_l))
 
-    def composites(self):
+    def composites(self) -> list:
         """ Access composite types """
         types_l = self.all_types()
         return list(filter(lambda l: isinstance(l, list) and l[0] == 'composite', types_l))
 
-    def enums(self):
+    def composite_by_name(self, composite_name: str) -> Optional[list]:
+        composites = self.composites()
+        return next((composite for composite in composites if
+                     isinstance(composite, list) and composite[1]['name'].casefold() == composite_name.casefold()),
+                    None)
+
+    def enums(self) -> list:
         """ Access enums """
         types_l = self.all_types()
         return list(filter(lambda l: isinstance(l, list) and l[0] == 'enum', types_l))
@@ -176,6 +182,45 @@ class SBEInstance10:
         """
         return list(filter(lambda l: isinstance(l, list) and l[0] == 'field', structure))
 
+    def field_by_name(self, structure: dict, field_name: str) -> Optional[list]:
+        """
+        Find a field by name in a message structure
+        :param structure: a message
+        :param field_name: name of field to find
+        :return: a field, or None if not found
+        """
+        all_sbe_fields: list = []
+        self.all_fields(structure, all_sbe_fields)
+        return next((field for field in all_sbe_fields if
+                     isinstance(field, list) and field[1]['name'].casefold() == field_name.casefold()),
+                    None)
+
+    def field_by_type(self, structure: dict, field_type: str) -> Optional[list]:
+        """
+        Find a field by type in a message structure
+        :param structure: a message
+        :param field_type: type of field to find
+        :return: a field, or None if not found
+        """
+        all_sbe_fields: list = []
+        self.all_fields(structure, all_sbe_fields)
+        return next((field for field in all_sbe_fields if
+                     isinstance(field, list) and field[1]['type'].casefold() == field_type.casefold()),
+                    None)
+
+    def first_field_by_type(self, field_name: str) -> Optional[list]:
+        """
+        Returns the first field of any message that has the given type
+        :param field_name: name to match
+        :return: a field, or None if no match
+        """
+        messages = self.messages()
+        for message in messages:
+            field = self.field_by_type(message, field_name)
+            if field:
+                return field
+        return None
+
     @staticmethod
     def all_fields(structure: dict, all_sbe_fields: list):
         """
@@ -240,6 +285,7 @@ class SBEInstance20(SBEInstance10):
     """
     Represents a message schema as defined by Simple Binary Encoding (SBE) version 2.0 release candidate
     """
+
     def __init__(self, obj=None):
         self.obj = obj if obj is not None else ['messageSchema', {}]
         self._all_encoding_types = None
@@ -259,7 +305,7 @@ class SBEInstance20(SBEInstance10):
         if self._all_messages is None:
             self._all_messages = []
             for i in filter(lambda l: isinstance(l, list) and l[0] == 'messages', self.root()):
-                for j in filter (lambda l: isinstance(l, list), i):
+                for j in filter(lambda l: isinstance(l, list), i):
                     self._all_messages.append(list(j))
         return self._all_messages
 

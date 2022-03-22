@@ -25,7 +25,7 @@ orchestratransposer.orchestra.orchestrainstance.OrchestraInstance
       ~OrchestraInstance.append_message
       ~OrchestraInstance.categories
       ~OrchestraInstance.category
-      ~OrchestraInstance.codeset
+      ~OrchestraInstance.codeset_by_name
       ~OrchestraInstance.codesets
       ~OrchestraInstance.component
       ~OrchestraInstance.component_refs
@@ -48,6 +48,5 @@ orchestratransposer.orchestra.orchestrainstance.OrchestraInstance
    
    
 
-   
    
    

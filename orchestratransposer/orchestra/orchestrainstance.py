@@ -111,7 +111,7 @@ class OrchestraInstance10:
         """
         return self.__types('fixr:messages')
 
-    def append_message(self, message: dict):
+    def append_message(self, message: list):
         """
         Add a message to this Orchestra instance
 
@@ -141,7 +141,11 @@ class OrchestraInstance10:
         messages = self.messages()
         messages.append(message)
 
-    def append_group(self, group: dict):
+    def append_component(self, component: list):
+        components = self.components()
+        components.append(component)
+
+    def append_group(self, group: list):
         """
         Add a repeating group to this Orchestra instance
 
@@ -299,6 +303,11 @@ class OrchestraInstance10:
         fields: list = self.fields()
         return next((field for field in fields if isinstance(field, list) and field[1]['id'] == field_id), None)
 
+    def field_by_name(self, field_name: str) -> Optional[list]:
+        fields: list = self.fields()
+        return next((field for field in fields if isinstance(field, list) and field[1]['name'].casefold() ==
+                     field_name.casefold()), None)
+
     def field_data_field(self, length_id: int) -> Optional[list]:
         """
         Finds a data field associated to a Length field
@@ -318,10 +327,16 @@ class OrchestraInstance10:
         groups: list = self.groups()
         return next((group for group in groups if isinstance(group, list) and group[1]['id'] == group_id), None)
 
-    def codeset(self, codeset_name: str) -> Optional[list]:
+    def group_by_name(self, group_name: str) -> Optional[list]:
+        groups: list = self.groups()
+        return next((group for group in groups if
+                     isinstance(group, list) and group[1]['name'].casefold() == group_name.casefold()), None)
+
+    def codeset_by_name(self, codeset_name: str) -> Optional[list]:
         codesets: list = self.codesets()
         return next(
-            (codeset for codeset in codesets if isinstance(codeset, list) and codeset[1]['name'] == codeset_name), None)
+            (codeset for codeset in codesets if
+             isinstance(codeset, list) and codeset[1]['name'].casefold() == codeset_name.casefold()), None)
 
     @staticmethod
     def append_field_ref(structure: list, field_ref):

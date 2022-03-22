@@ -15,6 +15,7 @@ class SBE2Orchestra10_10:
 
     def __init__(self):
         self.logger = logging.getLogger('sbe2orchestra')
+        self.max_id = 5000
 
     def sbe2orch_dict(self, sbe: SBEInstance10) -> OrchestraInstance10:
         """
@@ -24,12 +25,12 @@ class SBE2Orchestra10_10:
         """
         orch = OrchestraInstance10()
         self.sbe2orch_metadata(sbe, orch)
-        datatypes = orch.datatypes()
-        self.sbe2orch_datatypes(sbe, datatypes)
-        codesets = orch.codesets()
-        self.sbe2orch_codesets(sbe, codesets)
         fields = orch.fields()
         self.sbe2orch_fields(sbe, fields)
+        # add fields before composite datatypes because some composite members may become fields, but avoid dups
+        self.sbe2orch_datatypes(sbe, orch)
+        codesets = orch.codesets()
+        self.sbe2orch_codesets(sbe, codesets)
         self.sbe2orch_messages_and_groups(sbe, orch)
         return orch
 
@@ -66,7 +67,7 @@ class SBE2Orchestra10_10:
         # a simple integer is not accepted as version in Orchestra 1.0
         repository['version'] = str(ms['version']) + ".0"
 
-    def sbe2orch_datatypes(self, sbe: SBEInstance10, orch_datatypes: list):
+    def sbe2orch_datatypes(self, sbe: SBEInstance10, orch: OrchestraInstance10):
         """
         Append Orchestra datatypes from SBE simple and composite types
 
@@ -75,56 +76,87 @@ class SBE2Orchestra10_10:
         integers both map to 'int' FIX type. The Orchestra v1.0 schema does not handle this case. Therefore, each SBE
         type will be mapped to its own Orchestra datatype.
         """
+        orch_datatypes = orch.datatypes()
         self.sbe2orch_simple_types(orch_datatypes, sbe)
-        self.sbe2orch_composite_types(orch_datatypes, sbe)
+        self.sbe2orch_composite_types(orch, sbe)
 
-    def sbe2orch_composite_types(self, orch_datatypes, sbe):
+    def sbe2orch_composite_types(self, orch: OrchestraInstance10, sbe: SBEInstance10):
         """
-        Adds SBE composite encoding types to Orchestra as datatypes with mapping
-        :param orch_datatypes: datatypes section of an Orchestra file
+        Adds SBE composite encoding types to Orchestra as components
+        :param orchs: an Orchestra file
         :param sbe: an SBE message schema
-
-        Note: Composite types are added as an SBE schema snippet to the Orchestra file under extension element.
-        The XML processor requires the child element of the extension to be the root element of the SBE schema,
-        messageSchema. Also, since the extension element is of a different XML namespace, each of its child elements
-        must be prefixed.
         """
         sbe_composites = sbe.composites()
+        fields = orch.fields()
         for sbe_composite in sbe_composites:
-            sbe_prefixed_composite = self._prefix_element('sbe', sbe_composite)
-            sbe_snippet = ['sbe:messageSchema', {'version': 0}, ['sbe:types', sbe_prefixed_composite],
-                           ['sbe:message', {'id': 1, 'name': 'Dummy'}]]
-            extension = ['fixr:extension', sbe_snippet]
-            orch2sbe_mapping = ['fixr:mappedDatatype', {'standard': 'SBE'}, extension]
-            orch_datatype = ['fixr:datatype', {'name': sbe_composite[1]['name']}, orch2sbe_mapping]
-            orch_datatypes.append(orch_datatype)
+            sbe_name = sbe_composite[1]['name']
+            sbe_field = sbe.first_field_by_type(sbe_name)
+            if sbe_field:
+                sbe_field_id = sbe_field[1]['id']
+            else:
+                self.max_id += 1
+                sbe_field_id = self.max_id
+            component_attr = {'name': sbe_name, 'id': sbe_field_id}
+            component = ['fixr:component', component_attr]
+            orch.append_component(component)
+            # convert composite members to fields if they do not already exist from messages or groups
+            sbe_types = filter(lambda t: isinstance(t, list), sbe_composite)
+            for sbe_type in sbe_types:
+                documentation = sbe_type[1].get('description', None)
+                # Add as a field if it does not already exist
+                field = orch.field_by_name(sbe_type[1]['name'])
+                if field:
+                    field_id = field[1]['id']
+                else:
+                    field_type = sbe_type[1].get('type', None)
+                    if not field_type:
+                        field_type = sbe_type[1].get('primitiveType', None)
+                    self.max_id += 1
+                    field_id = self.max_id
+                    field_attr = {'id': field_id,
+                                  'name': sbe_type[1]['name'],
+                                  'type': field_type}
+                    field = ['fixr:field', field_attr]
+                    if documentation:
+                        OrchestraInstance10.append_documentation(field, documentation)
+                    fields.append(field)
+                field_ref_attr = {'id': field_id}
+                field_ref = ['fixr:fieldRef', field_ref_attr]
+                if documentation:
+                    OrchestraInstance10.append_documentation(field_ref, documentation)
+                OrchestraInstance10.append_field_ref(component, field_ref)
 
-    def _prefix_element(self, prefix: str, elem: list) -> List:
-        for count, value in enumerate(elem):
-            if isinstance(value, str):
-                elem[count] = prefix + ":" + value
-            elif isinstance(value, list):
-                self._prefix_element(prefix, value)
-        return elem
-
-    def sbe2orch_simple_types(self, orch_datatypes, sbe):
+    def sbe2orch_simple_types(self, orch_datatypes, sbe: SBEInstance10):
         """
-        Adds SBE simple encoding types to Orchestra as datatypes with mapping
+        Adds all SBE simple encoding types to Orchestra as datatypes with mapping
         :param orch_datatypes: datatypes section of an Orchestra file
         :param sbe: an SBE message schema
 
         Workaround: since Orchestra mappedDatatype elements lacks a length attribute, parameter attribute is used to
         hold length. However, the datatype of parameter is string rather than numeric.
         """
+        # add built-in primitive types
+        for t in ['char', 'int8', 'int16', 'int32', 'int64',
+                  'uint8', 'uint16', 'uint32', 'uint64', 'float', 'double']:
+            sbe_type = ['type', {'name': t, 'primitiveType': t}]
+            self.sbe2orch_simple_type(orch_datatypes, sbe_type)
         sbe_types = sbe.encoding_types()
         for sbe_type in sbe_types:
-            mapping_attr = {'standard': 'SBE', 'base': sbe_type[1]['primitiveType']}
-            length = sbe_type[1].get('length', 0)
-            if length > 0:
-                mapping_attr['parameter'] = str(length)
-            orch2sbe_mapping = ['fixr:mappedDatatype', mapping_attr]
-            orch_datatype = ['fixr:datatype', {'name': sbe_type[1]['name']}, orch2sbe_mapping]
-            orch_datatypes.append(orch_datatype)
+            self.sbe2orch_simple_type(orch_datatypes, sbe_type)
+
+    def sbe2orch_simple_type(self, orch_datatypes, sbe_type):
+        """
+        Adds one SBE simple encoding types to Orchestra as datatypes with mapping
+        :param orch_datatypes:
+        :param sbe_type: an SBE simple type to transform and append to Orchestra datatypes
+        """
+        mapping_attr = {'standard': 'SBE', 'base': sbe_type[1]['primitiveType']}
+        length = sbe_type[1].get('length', 0)
+        if length > 0:
+            mapping_attr['parameter'] = str(length)
+        orch2sbe_mapping = ['fixr:mappedDatatype', mapping_attr]
+        orch_datatype = ['fixr:datatype', {'name': sbe_type[1]['name']}, orch2sbe_mapping]
+        orch_datatypes.append(orch_datatype)
 
     def sbe2orch_codesets(self, sbe: SBEInstance10, codesets: list):
         sbe_enums: list = sbe.enums()
@@ -157,7 +189,7 @@ class SBE2Orchestra10_10:
             sbe_grp_fields = sbe.fields(sbe_message)
             sbe_groups = sbe.groups(sbe_message)
             sbe_data_fields = sbe.data(sbe_message)
-            self.sbe2orch_append_members(structure, sbe_grp_fields, sbe_groups, sbe_data_fields)
+            self.sbe2orch_append_members(structure, sbe_grp_fields, sbe_groups, sbe_data_fields, sbe)
             if documentation:
                 OrchestraInstance10.append_documentation(msg, documentation)
             orch.append_message(msg)
@@ -169,18 +201,32 @@ class SBE2Orchestra10_10:
                     sbe_grp_fields = sbe.fields(sbe_group)
                     sbe_grp_groups = sbe.groups(sbe_group)
                     sbe_grp_data_fields = sbe.data(sbe_group)
-                    self.sbe2orch_append_members(group, sbe_grp_fields, sbe_grp_groups, sbe_grp_data_fields)
+                    self.sbe2orch_append_members(group, sbe_grp_fields, sbe_grp_groups, sbe_grp_data_fields, sbe)
                     orch.append_group(group)
 
-    def sbe2orch_append_members(self, structure, sbe_fields, sbe_groups, sbe_data_fields):
+    def sbe2orch_append_members(self, structure, sbe_fields, sbe_groups, sbe_data_fields, sbe: SBEInstance10, ):
         for sbe_field in sbe_fields:
-            field_ref_attr = {'id': sbe_field[1]['id'],
-                              'presence': self.sbe2orch_presence(sbe_field[1].get('presence', 'required'))}
-            field_ref = ['fixr:fieldRef', field_ref_attr]
-            documentation = sbe_field[1].get('description', None)
-            if documentation:
-                OrchestraInstance10.append_documentation(field_ref, documentation)
-            OrchestraInstance10.append_field_ref(structure, field_ref)
+            # could be a fieldRef or componentRef
+            member_id = sbe_field[1]['id']
+            member_name = sbe_field[1]['name']
+            member_type = sbe_field[1]['type']
+            sbe_composite = sbe.composite_by_name(member_type)
+            if sbe_composite:
+                composite_ref_attr = {'id': member_id,
+                                      'presence': self.sbe2orch_presence(sbe_field[1].get('presence', 'required'))}
+                composite_ref = ['fixr:componentRef', composite_ref_attr]
+                documentation = sbe_field[1].get('description', None)
+                if documentation:
+                    OrchestraInstance10.append_documentation(composite_ref, documentation)
+                OrchestraInstance10.append_field_ref(structure, composite_ref)
+            else:
+                field_ref_attr = {'id': member_id,
+                                  'presence': self.sbe2orch_presence(sbe_field[1].get('presence', 'required'))}
+                field_ref = ['fixr:fieldRef', field_ref_attr]
+                documentation = sbe_field[1].get('description', None)
+                if documentation:
+                    OrchestraInstance10.append_documentation(field_ref, documentation)
+                OrchestraInstance10.append_field_ref(structure, field_ref)
         if sbe_groups:
             for sbe_group in sbe_groups:
                 group_ref_attr = {'id': sbe_group[1]['id']}
@@ -253,13 +299,13 @@ class SBE2Orchestra20_10(SBE2Orchestra10_10):
         """
         orch = OrchestraInstance10()
         self.sbe2orch_metadata(sbe, orch)
-        datatypes = orch.datatypes()
-        self.sbe2orch_datatypes(sbe, datatypes)
         codesets = orch.codesets()
         self.sbe2orch_codesets(sbe, codesets)
         fields = orch.fields()
         self.sbe2orch_fields(sbe, fields)
         self.sbe2orch_messages_and_groups(sbe, orch)
+        # do last because some datatypes are converted to fields that may have already been defined in messages
+        self.sbe2orch_datatypes(sbe, orch)
         return orch
 
     def sbe2orch_xml(self, sbe_xml, orch_stream) -> List[Exception]:
@@ -283,4 +329,3 @@ class SBE2Orchestra20_10(SBE2Orchestra10_10):
                 for error in errors:
                     self.logger.error(error)
             return errors
-
