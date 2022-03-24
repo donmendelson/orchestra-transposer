@@ -1,7 +1,7 @@
 import logging
 from typing import List
 
-from orchestratransposer.orchestra.orchestra import Orchestra10WithSBE10Types, Orchestra10WithSBE20Types
+from orchestratransposer.orchestra.orchestra import Orchestra10
 from orchestratransposer.orchestra.orchestrainstance import OrchestraInstance10
 from orchestratransposer.sbe.sbe import SBE10, SBE20
 from orchestratransposer.sbe.sbeinstance import SBEInstance10, SBEInstance20
@@ -49,7 +49,7 @@ class SBE2Orchestra10_10:
             return errors
         else:
             orch_instance = self.sbe2orch_dict(sbe_instance)
-            orchestra = Orchestra10WithSBE10Types()
+            orchestra = Orchestra10()
             errors = orchestra.write_xml(orch_instance, orch_stream)
             if errors:
                 for error in errors:
@@ -83,7 +83,7 @@ class SBE2Orchestra10_10:
     def sbe2orch_composite_types(self, orch: OrchestraInstance10, sbe: SBEInstance10):
         """
         Adds SBE composite encoding types to Orchestra as components
-        :param orchs: an Orchestra file
+        :param orch: an Orchestra file
         :param sbe: an SBE message schema
         """
         sbe_composites = sbe.composites()
@@ -290,6 +290,8 @@ SBE2Orchestra = SBE2Orchestra10_10
 
 
 class SBE2Orchestra20_10(SBE2Orchestra10_10):
+    def __init__(self):
+        super().__init__()
 
     def sbe2orch_dict(self, sbe: SBEInstance20) -> OrchestraInstance10:
         """
@@ -323,7 +325,7 @@ class SBE2Orchestra20_10(SBE2Orchestra10_10):
             return errors
         else:
             orch_instance = self.sbe2orch_dict(sbe_instance)
-            orchestra = Orchestra10WithSBE20Types()
+            orchestra = Orchestra10()
             errors = orchestra.write_xml(orch_instance, orch_stream)
             if errors:
                 for error in errors:

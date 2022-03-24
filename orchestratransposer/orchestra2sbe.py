@@ -1,10 +1,10 @@
 import logging
 from typing import List, Optional
 
-from orchestratransposer.orchestra.orchestra import Orchestra10WithSBE10Types
+from orchestratransposer.orchestra.orchestra import Orchestra10
 from orchestratransposer.orchestra.orchestrainstance import OrchestraInstance10
-from orchestratransposer.sbe.sbe import SBE10
-from orchestratransposer.sbe.sbeinstance import SBEInstance10
+from orchestratransposer.sbe.sbe import SBE10, SBE20
+from orchestratransposer.sbe.sbeinstance import SBEInstance10, SBEInstance20
 
 
 class Orchestra2SBE10_10:
@@ -35,7 +35,7 @@ class Orchestra2SBE10_10:
         :return: a list of errors, if any
         """
         # Supports embedded SBE encoding types in Orchestra datatypes
-        orchestra = Orchestra10WithSBE10Types()
+        orchestra = Orchestra10()
         (orch_instance, errors) = orchestra.read_xml(orchestra_xml)
         if errors:
             for error in errors:
@@ -291,3 +291,46 @@ class Orchestra2SBE10_10:
 
 Orchestra2SBE = Orchestra2SBE10_10
 """Translates Orchestra version 1.0 to SBE version 1.0"""
+
+
+class Orchestra2SBE10_20(Orchestra2SBE10_10):
+    def __init__(self):
+        super().__init__()
+
+    def orch2sbe_dict(self, orch: OrchestraInstance10) -> SBEInstance20:
+        """
+        Translate an Orchestra dictionary to an SBE message schema dictionary
+        :param orch: an Orchestra version 1.0 data dictionary
+        :return: an SBE version 1.0 data dictionary
+        """
+        sbe = SBEInstance20()
+        self.orch2sbe_metadata(orch, sbe)
+        datatypes = orch.datatypes()
+        self.orch2sbe_datatypes(datatypes, sbe)
+        codesets = orch.codesets()
+        self.orch2sbe_codesets(codesets, sbe)
+        messages = orch.messages()
+        self.orch2sbe_messages(messages, sbe, orch)
+        return sbe
+
+    def orch2sbe_xml(self, orchestra_xml, sbe_stream) -> List[Exception]:
+        """
+        Translate an Orchestra file to an SBE message schema file
+        :param orchestra_xml: an XML file-like object in Orchestra schema
+        :param sbe_stream: an output stream to write an SBE file
+        :return: a list of errors, if any
+        """
+        # Supports embedded SBE encoding types in Orchestra datatypes
+        orchestra = Orchestra10()
+        (orch_instance, errors) = orchestra.read_xml(orchestra_xml)
+        if errors:
+            for error in errors:
+                self.logger.error(error)
+            return errors
+        else:
+            sbe_instance = self.orch2sbe_dict(orch_instance)
+            sbe = SBE20()
+            errors = sbe.write_xml(sbe_instance, sbe_stream)
+            for error in errors:
+                self.logger.error(error)
+            return errors

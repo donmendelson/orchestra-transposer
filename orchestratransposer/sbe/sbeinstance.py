@@ -18,7 +18,7 @@ class SBEInstance10:
         """ Returns the data dictionary of this SBE instance """
         return self.obj
 
-    def message_schema(self) -> list:
+    def message_schema(self) -> dict:
         """ Returns attributes of a message schema """
         try:
             return next(i for i in self.root() if isinstance(i, dict))
