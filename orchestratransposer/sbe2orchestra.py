@@ -29,7 +29,6 @@ class SBE2Orchestra10_10:
         self.sbe2orch_metadata(sbe, orch)
         fields = orch.fields()
         self.sbe2orch_fields(sbe, fields)
-        # add fields before composite datatypes because some composite members may become fields, but avoid dups
         self.sbe2orch_datatypes(sbe, orch)
         codesets = orch.codesets()
         self.sbe2orch_codesets(sbe, codesets)
@@ -205,7 +204,7 @@ class SBE2Orchestra10_10:
             sbe_grp_fields = sbe.fields(sbe_message)
             sbe_groups = sbe.groups(sbe_message)
             sbe_data_fields = sbe.data(sbe_message)
-            self.sbe2orch_append_members(structure, sbe_grp_fields, sbe_groups, sbe_data_fields, sbe)
+            self.sbe2orch_append_members(structure, sbe_grp_fields, sbe_groups, sbe_data_fields, sbe, orch)
             if documentation:
                 OrchestraInstance10.append_documentation(msg, documentation)
             orch.append_message(msg)
@@ -217,10 +216,11 @@ class SBE2Orchestra10_10:
                     sbe_grp_fields = sbe.fields(sbe_group)
                     sbe_grp_groups = sbe.groups(sbe_group)
                     sbe_grp_data_fields = sbe.data(sbe_group)
-                    self.sbe2orch_append_members(group, sbe_grp_fields, sbe_grp_groups, sbe_grp_data_fields, sbe)
+                    self.sbe2orch_append_members(group, sbe_grp_fields, sbe_grp_groups, sbe_grp_data_fields, sbe, orch)
                     orch.append_group(group)
 
-    def sbe2orch_append_members(self, structure, sbe_fields, sbe_groups, sbe_data_fields, sbe: SBEInstance10, ):
+    def sbe2orch_append_members(self, structure, sbe_fields, sbe_groups, sbe_data_fields, sbe: SBEInstance10,
+                                orch: OrchestraInstance10):
         for sbe_field in sbe_fields:
             # could be a fieldRef or componentRef
             member_id = sbe_field[1]['id']
@@ -256,13 +256,24 @@ class SBE2Orchestra10_10:
                 OrchestraInstance10.append_group_ref(structure, group_ref)
         if sbe_data_fields:
             for sbe_field in sbe_data_fields:
-                field_ref_attr = {'id': sbe_field[1]['id'],
-                                  'presence': self.sbe2orch_presence(sbe_field[1].get('presence', None))}
-                field_ref = ['fixr:fieldRef', field_ref_attr]
-                documentation = sbe_field[1].get('description', None)
-                if documentation:
-                    OrchestraInstance10.append_documentation(field_ref, documentation)
-                OrchestraInstance10.append_field_ref(structure, field_ref)
+                member_type = sbe_field[1]['type']
+                component = orch.component_by_name(member_type)
+                if component:
+                    composite_ref_attr = {'id': component[1]["id"],
+                                          'presence': self.sbe2orch_presence(sbe_field[1].get('presence', 'required'))}
+                    composite_ref = ['fixr:componentRef', composite_ref_attr]
+                    documentation = sbe_field[1].get('description', None)
+                    if documentation:
+                        OrchestraInstance10.append_documentation(composite_ref, documentation)
+                    OrchestraInstance10.append_field_ref(structure, composite_ref)
+                else:
+                    field_ref_attr = {'id': sbe_field[1]['id'],
+                                      'presence': self.sbe2orch_presence(sbe_field[1].get('presence', None))}
+                    field_ref = ['fixr:fieldRef', field_ref_attr]
+                    documentation = sbe_field[1].get('description', None)
+                    if documentation:
+                        OrchestraInstance10.append_documentation(field_ref, documentation)
+                    OrchestraInstance10.append_field_ref(structure, field_ref)
 
     def sbe2orch_fields(self, sbe: SBEInstance10, fields: list):
         """
@@ -327,10 +338,9 @@ class SBE2Orchestra20_10(SBE2Orchestra10_10):
         codesets = orch.codesets()
         self.sbe2orch_codesets(sbe, codesets)
         fields = orch.fields()
+        self.sbe2orch_datatypes(sbe, orch)
         self.sbe2orch_fields(sbe, fields)
         self.sbe2orch_messages_and_groups(sbe, orch)
-        # do last because some datatypes are converted to fields that may have already been defined in messages
-        self.sbe2orch_datatypes(sbe, orch)
         return orch
 
     def sbe2orch_xml(self, sbe_xml, orch_stream) -> List[Exception]:

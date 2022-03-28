@@ -338,6 +338,12 @@ class OrchestraInstance10:
         return next((component for component in components if
                      isinstance(component, list) and component[1]['id'] == component_id), None)
 
+    def component_by_name(self, component_name: str) -> Optional[list]:
+        components: list = self.components()
+        return next((component for component in components if
+                     isinstance(component, list) and component[1]['name'].casefold() == component_name.casefold()),
+                    None)
+
     def group(self, group_id: int) -> Optional[list]:
         groups: list = self.groups()
         return next((group for group in groups if isinstance(group, list) and group[1]['id'] == group_id), None)

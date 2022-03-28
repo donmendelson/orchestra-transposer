@@ -51,3 +51,12 @@ def test_sbe202orchestra_dict():
     orch_instance = translator.sbe2orch_dict(sbe_instance)
     with open(output_path, 'w') as f:
         print(str(orch_instance), file=f)
+
+
+def test_external():
+    xml_path = os.path.join(XML_FILE_DIR, 'om-combined.xml')
+    output_path = os.path.join(output_dir(), 'om-combined-orch.xml')
+    translator = SBE2Orchestra20_10()
+    with open(output_path, 'wb') as f:
+        errors = translator.sbe2orch_xml(xml_path, f)
+        assert not errors
