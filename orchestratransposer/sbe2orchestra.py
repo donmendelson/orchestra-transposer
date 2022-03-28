@@ -7,6 +7,8 @@ from orchestratransposer.sbe.sbe import SBE10, SBE20
 from orchestratransposer.sbe.sbeinstance import SBEInstance10, SBEInstance20
 
 
+
+
 class SBE2Orchestra10_10:
     """
     Translates between a Simple Binary Encoding message schema version 1.0 and
@@ -117,6 +119,21 @@ class SBE2Orchestra10_10:
                                   'name': sbe_type[1]['name'],
                                   'type': field_type}
                     field = ['fixr:field', field_attr]
+                    presence = self.sbe2orch_presence(sbe_type[1].get('presence', None))
+                    if presence in ['required', 'constant']:
+                        field_attr['presence'] = presence
+                    if presence == 'constant':
+                        value_ref = sbe_type[1].get('valueRef', None)
+                        if value_ref:
+                            # reference like TimeUnit.nanosecond
+                            parts = value_ref.split('.')
+                            if parts[0]:
+                                enum = sbe.enum_by_name(parts[0])
+                                if enum and parts[1]:
+                                    valid_value = SBEInstance10.enum_value_by_name(enum, parts[1])
+                                    field_attr['value'] = valid_value[2]
+                        else:
+                            field_attr['value'] = sbe_type[2]
                     if documentation:
                         OrchestraInstance10.append_documentation(field, documentation)
                     fields.append(field)
@@ -136,8 +153,7 @@ class SBE2Orchestra10_10:
         hold length. However, the datatype of parameter is string rather than numeric.
         """
         # add built-in primitive types
-        for t in ['char', 'int8', 'int16', 'int32', 'int64',
-                  'uint8', 'uint16', 'uint32', 'uint64', 'float', 'double']:
+        for t in SBE10.SBE_PRIMITIVE_TYPES:
             sbe_type = ['type', {'name': t, 'primitiveType': t}]
             self.sbe2orch_simple_type(orch_datatypes, sbe_type)
         sbe_types = sbe.encoding_types()
@@ -220,8 +236,11 @@ class SBE2Orchestra10_10:
                     OrchestraInstance10.append_documentation(composite_ref, documentation)
                 OrchestraInstance10.append_field_ref(structure, composite_ref)
             else:
+                presence = self.sbe2orch_presence(sbe_field[1].get('presence', 'required'))
                 field_ref_attr = {'id': member_id,
-                                  'presence': self.sbe2orch_presence(sbe_field[1].get('presence', 'required'))}
+                                  'presence': presence}
+                if presence == 'constant':
+                    field_ref_attr['value'] = sbe_field[2]
                 field_ref = ['fixr:fieldRef', field_ref_attr]
                 documentation = sbe_field[1].get('description', None)
                 if documentation:
@@ -265,14 +284,18 @@ class SBE2Orchestra10_10:
                 field_d[sbe_field[1]['id']] = sbe_field
         field_l = sorted(field_d.values(), key=SBEInstance10.id)
         for sbe_field in field_l:
-            field_attr = {'id': sbe_field[1]['id'],
-                          'name': sbe_field[1]['name'],
-                          'type': sbe_field[1]['type']}
-            field = ['fixr:field', field_attr]
-            documentation = sbe_field[1].get('description', None)
-            if documentation:
-                OrchestraInstance10.append_documentation(field, documentation)
-            fields.append(field)
+            # do not add if sbe field has a composite type, which is translated to component
+            sbe_type = sbe_field[1]['type']
+            sbe_composite = sbe.composite_by_name(sbe_type)
+            if not sbe_composite:
+                field_attr = {'id': sbe_field[1]['id'],
+                              'name': sbe_field[1]['name'],
+                              'type': sbe_type}
+                field = ['fixr:field', field_attr]
+                documentation = sbe_field[1].get('description', None)
+                if documentation:
+                    OrchestraInstance10.append_documentation(field, documentation)
+                fields.append(field)
 
     @staticmethod
     def sbe2orch_presence(sbe_presence: str) -> str:

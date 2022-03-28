@@ -41,7 +41,8 @@ def test_sbe202orchestra_xml():
         errors = translator.sbe2orch_xml(xml_path, f)
         assert not errors
 
-def test_sbe2orchestra_dict():
+
+def test_sbe202orchestra_dict():
     xml_path = os.path.join(XML_FILE_DIR, 'Examples20.xml')
     output_path = os.path.join(output_dir(), 'Examples202Orchestra-dict.txt')
     sbe = SBE20()

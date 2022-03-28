@@ -1,0 +1,201 @@
+<fixr:repository xmlns:dcterms="http://purl.org/dc/terms/" xmlns:fixr="http://fixprotocol.io/2020/orchestra/repository" name="Examples" version="0.0">
+    <fixr:metadata>
+        <dcterms:identifier>
+            91</dcterms:identifier>
+    </fixr:metadata>
+    <fixr:fields>
+        <fixr:field id="1" name="Account" type="idString" />
+        <fixr:field id="11" name="ClOrdId" type="idString" />
+        <fixr:field id="17" name="ExecID" type="idString" />
+        <fixr:field id="37" name="OrderID" type="idString" />
+        <fixr:field id="39" name="OrdStatus" type="ordStatusEnum" />
+        <fixr:field id="40" name="OrdType" type="ordTypeEnum" />
+        <fixr:field id="54" name="Side" type="sideEnum" />
+        <fixr:field id="55" name="Symbol" type="idString" />
+        <fixr:field id="60" name="TransactTime" type="timestampEncoding" />
+        <fixr:field id="75" name="TradeDate" type="date" />
+        <fixr:field id="150" name="ExecType" type="execTypeEnum" />
+        <fixr:field id="379" name="BusinesRejectRefId" type="idString" />
+        <fixr:field id="380" name="BusinessRejectReason" type="businessRejectReasonEnum" />
+        <fixr:field id="5002" name="length" type="uint16" />
+        <fixr:field id="5003" name="varData" type="uint8" />
+        <fixr:field id="5004" name="year" type="uint16" />
+        <fixr:field id="5005" name="month" type="uint8" />
+        <fixr:field id="5006" name="day" type="uint8" />
+        <fixr:field id="5007" name="week" type="uint8" />
+        <fixr:field id="5009" name="blockLength" type="uint16" />
+        <fixr:field id="5010" name="numInGroup" type="uint16" />
+        <fixr:field id="5012" name="templateId" type="uint16" />
+        <fixr:field id="5013" name="schemaId" type="uint16" />
+        <fixr:field id="5014" name="version" type="uint16" />
+        <fixr:field id="5015" name="mantissa" type="int64" />
+        <fixr:field id="5016" name="exponent" type="int8" presence="constant" value="-3" />
+    </fixr:fields>
+    <fixr:datatypes>
+        <fixr:datatype name="char">
+            <fixr:mappedDatatype standard="SBE" base="char" />
+        </fixr:datatype>
+        <fixr:datatype name="int8">
+            <fixr:mappedDatatype standard="SBE" base="int8" />
+        </fixr:datatype>
+        <fixr:datatype name="int16">
+            <fixr:mappedDatatype standard="SBE" base="int16" />
+        </fixr:datatype>
+        <fixr:datatype name="int32">
+            <fixr:mappedDatatype standard="SBE" base="int32" />
+        </fixr:datatype>
+        <fixr:datatype name="int64">
+            <fixr:mappedDatatype standard="SBE" base="int64" />
+        </fixr:datatype>
+        <fixr:datatype name="uint8">
+            <fixr:mappedDatatype standard="SBE" base="uint8" />
+        </fixr:datatype>
+        <fixr:datatype name="uint16">
+            <fixr:mappedDatatype standard="SBE" base="uint16" />
+        </fixr:datatype>
+        <fixr:datatype name="uint32">
+            <fixr:mappedDatatype standard="SBE" base="uint32" />
+        </fixr:datatype>
+        <fixr:datatype name="uint64">
+            <fixr:mappedDatatype standard="SBE" base="uint64" />
+        </fixr:datatype>
+        <fixr:datatype name="float">
+            <fixr:mappedDatatype standard="SBE" base="float" />
+        </fixr:datatype>
+        <fixr:datatype name="double">
+            <fixr:mappedDatatype standard="SBE" base="double" />
+        </fixr:datatype>
+        <fixr:datatype name="date">
+            <fixr:mappedDatatype standard="SBE" base="uint16" />
+        </fixr:datatype>
+        <fixr:datatype name="enumEncoding">
+            <fixr:mappedDatatype standard="SBE" base="char" />
+        </fixr:datatype>
+        <fixr:datatype name="idString">
+            <fixr:mappedDatatype standard="SBE" base="char" parameter="8" />
+        </fixr:datatype>
+        <fixr:datatype name="intEnumEncoding">
+            <fixr:mappedDatatype standard="SBE" base="uint8" />
+        </fixr:datatype>
+        <fixr:datatype name="timestampEncoding">
+            <fixr:mappedDatatype standard="SBE" base="uint64" />
+        </fixr:datatype>
+    </fixr:datatypes>
+    <fixr:components>
+        <fixr:component name="DATA" id="5001">
+            <fixr:fieldRef id="5002" />
+            <fixr:fieldRef id="5003" />
+        </fixr:component>
+        <fixr:component name="MONTH_YEAR" id="200">
+            <fixr:fieldRef id="5004" />
+            <fixr:fieldRef id="5005" />
+            <fixr:fieldRef id="5006" />
+            <fixr:fieldRef id="5007" />
+        </fixr:component>
+        <fixr:component name="groupSizeEncoding" id="5008">
+            <fixr:fieldRef id="5009" />
+            <fixr:fieldRef id="5010" />
+        </fixr:component>
+        <fixr:component name="messageHeader" id="5011">
+            <fixr:fieldRef id="5009" />
+            <fixr:fieldRef id="5012" />
+            <fixr:fieldRef id="5013" />
+            <fixr:fieldRef id="5014" />
+        </fixr:component>
+        <fixr:component name="optionalDecimalEncoding" id="1364">
+            <fixr:fieldRef id="5015" />
+            <fixr:fieldRef id="5016" />
+        </fixr:component>
+        <fixr:component name="qtyEncoding" id="151">
+            <fixr:fieldRef id="5015" />
+            <fixr:fieldRef id="5016" />
+        </fixr:component>
+    </fixr:components>
+    <fixr:codeSets>
+        <fixr:codeSet name="businessRejectReasonEnum" id="100" type="intEnumEncoding">
+            <fixr:code name="Other" id="101" value="0" />
+            <fixr:code name="UnknownID" id="102" value="1" />
+            <fixr:code name="UnknownSecurity" id="103" value="2" />
+            <fixr:code name="ApplicationNotAvailable" id="104" value="4" />
+            <fixr:code name="NotAuthorized" id="105" value="6" />
+        </fixr:codeSet>
+        <fixr:codeSet name="execTypeEnum" id="200" type="enumEncoding">
+            <fixr:code name="New" id="201" value="0" />
+            <fixr:code name="DoneForDay" id="202" value="3" />
+            <fixr:code name="Canceled" id="203" value="4" />
+            <fixr:code name="Replaced" id="204" value="5" />
+            <fixr:code name="PendingCancel" id="205" value="6" />
+            <fixr:code name="Rejected" id="206" value="8" />
+            <fixr:code name="PendingNew" id="207" value="A" />
+            <fixr:code name="Trade" id="208" value="F" />
+        </fixr:codeSet>
+        <fixr:codeSet name="ordStatusEnum" id="300" type="enumEncoding">
+            <fixr:code name="New" id="301" value="0" />
+            <fixr:code name="PartialFilled" id="302" value="1" />
+            <fixr:code name="Filled" id="303" value="2" />
+            <fixr:code name="DoneForDay" id="304" value="3" />
+            <fixr:code name="Canceled" id="305" value="4" />
+            <fixr:code name="PendingCancel" id="306" value="6" />
+            <fixr:code name="Rejected" id="307" value="8" />
+            <fixr:code name="PendingNew" id="308" value="A" />
+            <fixr:code name="PendingReplace" id="309" value="E" />
+        </fixr:codeSet>
+        <fixr:codeSet name="ordTypeEnum" id="400" type="enumEncoding">
+            <fixr:code name="Market" id="401" value="1" />
+            <fixr:code name="Limit" id="402" value="2" />
+            <fixr:code name="Stop" id="403" value="3" />
+            <fixr:code name="StopLimit" id="404" value="4" />
+        </fixr:codeSet>
+        <fixr:codeSet name="sideEnum" id="500" type="enumEncoding">
+            <fixr:code name="Buy" id="501" value="1" />
+            <fixr:code name="Sell" id="502" value="2" />
+        </fixr:codeSet>
+    </fixr:codeSets>
+    <fixr:messages>
+        <fixr:message name="BusinessMessageReject" id="97" msgType="j">
+            <fixr:structure>
+                <fixr:fieldRef id="379" presence="required" />
+                <fixr:fieldRef id="380" presence="required" />
+                <fixr:fieldRef id="58" presence="optional" />
+            </fixr:structure>
+        </fixr:message>
+        <fixr:message name="ExecutionReport" id="98" msgType="8">
+            <fixr:structure>
+                <fixr:fieldRef id="37" presence="required" />
+                <fixr:fieldRef id="17" presence="required" />
+                <fixr:fieldRef id="150" presence="required" />
+                <fixr:fieldRef id="39" presence="required" />
+                <fixr:fieldRef id="55" presence="required" />
+                <fixr:componentRef id="200" presence="required" />
+                <fixr:fieldRef id="54" presence="required" />
+                <fixr:componentRef id="151" presence="required" />
+                <fixr:componentRef id="14" presence="required" />
+                <fixr:fieldRef id="75" presence="required" />
+                <fixr:groupRef id="2112" />
+            </fixr:structure>
+        </fixr:message>
+        <fixr:message name="NewOrderSingle" id="99" msgType="D">
+            <fixr:structure>
+                <fixr:fieldRef id="11" presence="required" />
+                <fixr:fieldRef id="1" presence="required" />
+                <fixr:fieldRef id="55" presence="required" />
+                <fixr:fieldRef id="54" presence="required" />
+                <fixr:fieldRef id="60" presence="required" />
+                <fixr:componentRef id="38" presence="required" />
+                <fixr:fieldRef id="40" presence="required" />
+                <fixr:componentRef id="44" presence="required" />
+                <fixr:componentRef id="99" presence="required" />
+            </fixr:structure>
+            <fixr:annotation>
+                <fixr:documentation>
+                    Order message</fixr:documentation>
+            </fixr:annotation>
+        </fixr:message>
+    </fixr:messages>
+    <fixr:groups>
+        <fixr:group name="FillsGrp" id="2112">
+            <fixr:componentRef id="1364" presence="required" />
+            <fixr:componentRef id="1365" presence="required" />
+        </fixr:group>
+    </fixr:groups>
+</fixr:repository>

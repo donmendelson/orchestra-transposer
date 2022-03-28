@@ -14,6 +14,9 @@ class SBE10:
     that conform to that schema.
     """
 
+    SBE_PRIMITIVE_TYPES = ['char', 'int8', 'int16', 'int32', 'int64',
+                           'uint8', 'uint16', 'uint32', 'uint64', 'float', 'double']
+
     def __init__(self):
         self.xsd = xmlschema.XMLSchema(SBE10.get_xsd_path())
 

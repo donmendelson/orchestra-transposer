@@ -11,25 +11,30 @@ class Orchestra2SBE10_10:
     def __init__(self):
         self.logger = logging.getLogger('orchestra2sbe')
 
-    def orch2sbe_dict(self, orch: OrchestraInstance10) -> SBEInstance10:
+    def orch2sbe_dict(self, orch: OrchestraInstance10, components_to_datatypes=True) -> SBEInstance10:
         """
         Translate an Orchestra dictionary to an SBE message schema dictionary
         :param orch: an Orchestra version 1.0 data dictionary
+        :param components_to_datatypes: if True, convert Orchestra components to composite datatypes
         :return: an SBE version 1.0 data dictionary
         """
         sbe = SBEInstance10()
         self.orch2sbe_metadata(orch, sbe)
         datatypes = orch.datatypes()
         self.orch2sbe_datatypes(datatypes, sbe)
+        if components_to_datatypes:
+            components = orch.components()
+            self.orch2sbe_components2datatypes(components, orch, sbe)
         codesets = orch.codesets()
         self.orch2sbe_codesets(codesets, sbe)
         messages = orch.messages()
         self.orch2sbe_messages(messages, sbe, orch)
         return sbe
 
-    def orch2sbe_xml(self, orchestra_xml, sbe_stream) -> List[Exception]:
+    def orch2sbe_xml(self, orchestra_xml, sbe_stream, components_to_datatypes=True) -> List[Exception]:
         """
         Translate an Orchestra file to an SBE message schema file
+        :param components_to_datatypes: if True, convert Orchestra components to composite datatypes
         :param orchestra_xml: an XML file-like object in Orchestra schema
         :param sbe_stream: an output stream to write an SBE file
         :return: a list of errors, if any
@@ -42,7 +47,7 @@ class Orchestra2SBE10_10:
                 self.logger.error(error)
             return errors
         else:
-            sbe_instance = self.orch2sbe_dict(orch_instance)
+            sbe_instance = self.orch2sbe_dict(orch_instance, components_to_datatypes)
             sbe = SBE10()
             errors = sbe.write_xml(sbe_instance, sbe_stream)
             for error in errors:
@@ -75,7 +80,7 @@ class Orchestra2SBE10_10:
             name = datatype[1]['name']
             if name not in ['NumInGroup', 'Length', 'Reserved100Plus', 'Reserved1000Plus', 'Reserved4000Plus', 'XID',
                             'XIDREF']:
-                sbe_type_attr = {'name': name, 'semanticType': name}
+                sbe_type_attr = {'name': name}
                 mappings = filter(lambda l: isinstance(l, list) and l[0] == 'fixr:mappedDatatype', datatype)
                 if mappings:
                     mapping = next(
@@ -84,28 +89,21 @@ class Orchestra2SBE10_10:
                         documentation = Orchestra2SBE10_10.__documentation_str(mapping)
                         if documentation:
                             sbe_type_attr['description'] = documentation
-                        extension = next(
-                            (i for i in mapping if isinstance(i, list) and i[0] == 'fixr:extension'), None)
-                        if extension:
-                            sbe_types = next(
-                                (i for i in extension if isinstance(i, list) and i[2] == 'types'), None)
-                            if sbe_types:
-                                sbe_composite = sbe_types[0]
-                                sbe.append_composite(sbe_composite)
-                            else:
-                                self.logger.error('SBE datatype mapping not found for name=%s', name)
-                        else:
-                            base = mapping[1].get('base', None)
-                            if base:
-                                sbe_type_attr['primitiveType'] = base
-                            min_inclusive = mapping[1].get('minInclusive', None)
-                            if min_inclusive:
-                                sbe_type_attr['minValue'] = min_inclusive
-                            max_inclusive = mapping[1].get('maxInclusive', None)
-                            if max_inclusive:
-                                sbe_type_attr['maxValue'] = max_inclusive
-                            sbe_type = ['type', sbe_type_attr]
-                            sbe.append_encoding_type(sbe_type)
+                        base = mapping[1].get('base', None)
+                        if base:
+                            sbe_type_attr['primitiveType'] = base
+                        # workaround - use parameter since Orchestra 1.0 lacks a length or size attribute
+                        length = mapping[1].get('parameter', None)
+                        if length:
+                            sbe_type_attr['length'] = length
+                        min_inclusive = mapping[1].get('minInclusive', None)
+                        if min_inclusive:
+                            sbe_type_attr['minValue'] = min_inclusive
+                        max_inclusive = mapping[1].get('maxInclusive', None)
+                        if max_inclusive:
+                            sbe_type_attr['maxValue'] = max_inclusive
+                        sbe_type = ['type', sbe_type_attr]
+                        sbe.append_encoding_type(sbe_type)
 
     def orch2sbe_codesets(self, codesets: list, sbe: SBEInstance10):
         """
@@ -139,7 +137,14 @@ class Orchestra2SBE10_10:
             return None
 
     def orch2sbe_append_members(self, sbe_structure: list, field_refs, component_refs, group_refs, orch):
-        """ Appends members to an SBE message or group structure from Orchestra """
+        """
+        Appends members to an SBE message or group structure from Orchestra
+        :param sbe_structure: a message, component, or group
+        :param field_refs: a list of fieldRefs in the structure
+        :param component_refs: a list of componentRefs in the structure
+        :param group_refs: a list of groupRefs in the structure
+        :param orch: the Orchestra file containing the structure, for cross-references
+        """
         sbe_fields = []
         sbe_groups = []
         sbe_data = []
@@ -177,6 +182,14 @@ class Orchestra2SBE10_10:
             sbe.append_message(sbe_msg)
 
     def orch2sbe_fields(self, sbe_fields: list, sbe_data: list, field_refs: list, orch: OrchestraInstance10):
+        """
+        Populates lists of SBE fields from Orchestra fieldRefs
+        :param sbe_fields: a list of fixed-length SBE fields to append
+        :param sbe_data: a list of variable-length SBE fields to append
+        :param field_refs: a list of Orchestra fieldRefs
+        :param orch: Orchestra file for cross-references
+        :return:
+        """
         for field_ref in field_refs:
             field_id = field_ref[1]['id']
             field = orch.field(field_id)
@@ -288,6 +301,36 @@ class Orchestra2SBE10_10:
         else:
             return 'optional'
 
+    def orch2sbe_components2datatypes(self, components: list, orch: OrchestraInstance10, sbe: SBEInstance10):
+        """
+        Transform Orchestra components into SBE composite types
+        :param components: Orchestra components
+        :param orch: an Orchestr file for cross-references
+        :param sbe: an SBE file to populate
+        """
+        sbe_types: list = sbe.first_types()
+        for component in filter(lambda l: isinstance(l, list) and l[0] == 'fixr:component', components):
+            name = component[1]['name']
+            if name not in ['StandardHeader', 'StandardTrailer']:
+                sbe_composite_attr = {'name': name}
+                sbe_composite = ['composite', sbe_composite_attr]
+                for member in filter(lambda l: isinstance(l, list), component):
+                    if member[0] == 'fixr:fieldRef':
+                        field_id = member[1]['id']
+                        field = orch.field(field_id)
+                        field_name = field[1]['name']
+                        field_type = field[1]['type']
+                        if field_type in SBE10.SBE_PRIMITIVE_TYPES:
+                            sbe_type_attr = {'name': field_name}
+                            sbe_type = ['type', sbe_type_attr]
+                            sbe_type_attr['primitiveType'] = field_type
+                            sbe_composite.append(sbe_type)
+                        else:
+                            sbe_type_attr = {'name': field_name}
+                            sbe_type = ['ref', sbe_type_attr]
+                            sbe_composite.append(sbe_type)
+                sbe_types.append(sbe_composite)
+
 
 Orchestra2SBE = Orchestra2SBE10_10
 """Translates Orchestra version 1.0 to SBE version 1.0"""
@@ -297,9 +340,10 @@ class Orchestra2SBE10_20(Orchestra2SBE10_10):
     def __init__(self):
         super().__init__()
 
-    def orch2sbe_dict(self, orch: OrchestraInstance10) -> SBEInstance20:
+    def orch2sbe_dict(self, orch: OrchestraInstance10, components_to_datatypes=True) -> SBEInstance20:
         """
         Translate an Orchestra dictionary to an SBE message schema dictionary
+        :param components_to_datatypes: if True, convert Orchestra components to composite datatypes
         :param orch: an Orchestra version 1.0 data dictionary
         :return: an SBE version 1.0 data dictionary
         """
@@ -307,15 +351,19 @@ class Orchestra2SBE10_20(Orchestra2SBE10_10):
         self.orch2sbe_metadata(orch, sbe)
         datatypes = orch.datatypes()
         self.orch2sbe_datatypes(datatypes, sbe)
+        if components_to_datatypes:
+            components = orch.components()
+            self.orch2sbe_components2datatypes(components, orch, sbe)
         codesets = orch.codesets()
         self.orch2sbe_codesets(codesets, sbe)
         messages = orch.messages()
         self.orch2sbe_messages(messages, sbe, orch)
         return sbe
 
-    def orch2sbe_xml(self, orchestra_xml, sbe_stream) -> List[Exception]:
+    def orch2sbe_xml(self, orchestra_xml, sbe_stream, components_to_datatypes=True) -> List[Exception]:
         """
         Translate an Orchestra file to an SBE message schema file
+        :param components_to_datatypes: if True, convert Orchestra components to composite datatypes
         :param orchestra_xml: an XML file-like object in Orchestra schema
         :param sbe_stream: an output stream to write an SBE file
         :return: a list of errors, if any
@@ -328,7 +376,7 @@ class Orchestra2SBE10_20(Orchestra2SBE10_10):
                 self.logger.error(error)
             return errors
         else:
-            sbe_instance = self.orch2sbe_dict(orch_instance)
+            sbe_instance = self.orch2sbe_dict(orch_instance, components_to_datatypes)
             sbe = SBE20()
             errors = sbe.write_xml(sbe_instance, sbe_stream)
             for error in errors:

@@ -112,6 +112,18 @@ class SBEInstance10:
         types_l = self.all_types()
         return list(filter(lambda l: isinstance(l, list) and l[0] == 'enum', types_l))
 
+    def enum_by_name(self, enum_name: str) -> Optional[list]:
+        enums = self.enums()
+        return next((enum for enum in enums if
+                     isinstance(enum, list) and enum[1]['name'].casefold() == enum_name.casefold()),
+                    None)
+
+    @staticmethod
+    def enum_value_by_name(enum: list, value_name: str) -> Optional[list]:
+        return next((value for value in enum if
+                     isinstance(value, list) and value[1]['name'].casefold() == value_name.casefold()),
+                    None)
+
     def messages(self) -> list:
         """ Accesses a List of messages"""
         return list(filter(lambda l: isinstance(l, list) and l[0] == 'sbe:message', self.root()))

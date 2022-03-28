@@ -289,14 +289,29 @@ class OrchestraInstance10:
 
     @staticmethod
     def field_refs(structure: list) -> list:
+        """
+        Returns a list of fieldRefs in a structure
+        :param structure: a message, component, or group
+        :return: a list of fieldRefs, which may be empty
+        """
         return list(filter(lambda l: isinstance(l, list) and l[0] == 'fixr:fieldRef', structure))
 
     @staticmethod
     def component_refs(structure: list) -> list:
+        """
+        Returns a list of componentRefs in a structure
+        :param structure: a message, component, or group
+        :return: a list of componentRefs, which may be empty
+        """
         return list(filter(lambda l: isinstance(l, list) and l[0] == 'fixr:componentRef', structure))
 
     @staticmethod
     def group_refs(structure: list) -> list:
+        """
+        Returns a list of groupsRefs in a structure
+        :param structure: a message, component, or group
+        :return: a list of groupRefs, which may be empty
+        """
         return list(filter(lambda l: isinstance(l, list) and l[0] == 'fixr:groupRef', structure))
 
     def field(self, field_id: int) -> Optional[list]:

@@ -12,7 +12,7 @@ def output_dir():
     return path
 
 def test_orchestra2sbe_xml():
-    xml_path = os.path.join(XML_FILE_DIR, 'ExamplesOrchestra.xml')
+    xml_path = os.path.join(XML_FILE_DIR, 'Examples2Orchestra.xml')
     output_path = os.path.join(output_dir(), 'Examples-orch.xml')
     translator = Orchestra2SBE()
     with open(output_path, 'wb') as f:
