@@ -96,6 +96,12 @@ class SBEInstance10:
         types_l = self.all_types()
         return list(filter(lambda l: isinstance(l, list) and l[0] == 'type', types_l))
 
+    def type_by_name(self, type_name: str) -> Optional[list]:
+        types = self.encoding_types()
+        return next((t for t in types if
+                     isinstance(t, list) and t[1]['name'].casefold() == type_name.casefold()),
+                    None)
+
     def composites(self) -> list:
         """ Access composite types """
         types_l = self.all_types()

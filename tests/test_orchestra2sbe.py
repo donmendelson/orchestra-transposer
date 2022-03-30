@@ -13,7 +13,7 @@ def output_dir():
 
 def test_orchestra2sbe_xml():
     xml_path = os.path.join(XML_FILE_DIR, 'Examples2Orchestra.xml')
-    output_path = os.path.join(output_dir(), 'Examples-orch.xml')
+    output_path = os.path.join(output_dir(), 'Examples-roundtrip.xml')
     translator = Orchestra2SBE()
     with open(output_path, 'wb') as f:
         errors = translator.orch2sbe_xml(xml_path, f)
@@ -22,7 +22,7 @@ def test_orchestra2sbe_xml():
 
 def test_orchestra2sbe_dict():
     xml_path = os.path.join(XML_FILE_DIR, 'Examples2Orchestra.xml')
-    output_path = os.path.join(output_dir(), 'Examples-orch-dict.txt')
+    output_path = os.path.join(output_dir(), 'Examples-roundtrip-dict.txt')
     orchestra = Orchestra()
     (orch_instance, errors) = orchestra.read_xml(xml_path)
     translator = Orchestra2SBE()
@@ -48,3 +48,4 @@ def test_orchestra2sbe20_dict():
     sbe_instance = translator.orch2sbe_dict(orch_instance)
     with open(output_path, 'w') as f:
         print(str(sbe_instance), file=f)
+

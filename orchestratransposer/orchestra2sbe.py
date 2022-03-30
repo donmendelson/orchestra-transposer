@@ -28,7 +28,7 @@ class Orchestra2SBE10_10:
         codesets = orch.codesets()
         self.orch2sbe_codesets(codesets, sbe)
         messages = orch.messages()
-        self.orch2sbe_messages(messages, sbe, orch)
+        self.orch2sbe_messages(messages, sbe, orch, components_to_datatypes)
         return sbe
 
     def orch2sbe_xml(self, orchestra_xml, sbe_stream, components_to_datatypes=True) -> List[Exception]:
@@ -95,7 +95,7 @@ class Orchestra2SBE10_10:
                         # workaround - use parameter since Orchestra 1.0 lacks a length or size attribute
                         length = mapping[1].get('parameter', None)
                         if length:
-                            sbe_type_attr['length'] = length
+                            sbe_type_attr['length'] = int(length)
                         min_inclusive = mapping[1].get('minInclusive', None)
                         if min_inclusive:
                             sbe_type_attr['minValue'] = min_inclusive
@@ -118,9 +118,8 @@ class Orchestra2SBE10_10:
             sbe_enum = ['enum', sbe_enum_attr]
             cd_lst = filter(lambda l: isinstance(l, list) and l[0] == 'fixr:code', codeset)
             for code in cd_lst:
-                sbe_code = ['validValue']
                 sbe_code_attr = {'name': code[1]['name']}
-                sbe_code.append(sbe_code_attr)
+                sbe_code = ['validValue', sbe_code_attr, code[1]['value']]
                 documentation = Orchestra2SBE10_10.__documentation_str(code)
                 if documentation:
                     sbe_code_attr['description'] = documentation
@@ -136,7 +135,8 @@ class Orchestra2SBE10_10:
         except IndexError:
             return None
 
-    def orch2sbe_append_members(self, sbe_structure: list, field_refs, component_refs, group_refs, orch):
+    def orch2sbe_append_members(self, sbe_structure: list, field_refs, component_refs, group_refs, orch,
+                                components_to_datatypes: bool):
         """
         Appends members to an SBE message or group structure from Orchestra
         :param sbe_structure: a message, component, or group
@@ -149,8 +149,11 @@ class Orchestra2SBE10_10:
         sbe_groups = []
         sbe_data = []
         self.orch2sbe_fields(sbe_fields, sbe_data, field_refs, orch)
-        self.orch2sbe_components(sbe_fields, sbe_data, sbe_groups, component_refs, orch)
-        self.orch2sbe_groups(sbe_groups, group_refs, orch)
+        if components_to_datatypes:
+            self.orch2sbe_component_refs_to_composites(sbe_fields, component_refs, orch)
+        else:
+            self.orch2sbe_explode_components(sbe_fields, sbe_data, sbe_groups, component_refs, orch)
+        self.orch2sbe_groups(sbe_groups, group_refs, orch, components_to_datatypes)
         # Order must be fixed fields / groups / variable length data
         for field in sbe_fields:
             SBEInstance10.append_field(sbe_structure, field)
@@ -159,7 +162,8 @@ class Orchestra2SBE10_10:
         for data_field in sbe_data:
             SBEInstance10.append_data_field(sbe_structure, data_field)
 
-    def orch2sbe_messages(self, messages: list, sbe: SBEInstance10, orch: OrchestraInstance10):
+    def orch2sbe_messages(self, messages: list, sbe: SBEInstance10, orch: OrchestraInstance10,
+                          components_to_datatypes: bool):
         """
         Append SBE messages from Orchestra
         """
@@ -178,7 +182,7 @@ class Orchestra2SBE10_10:
             field_refs = OrchestraInstance10.field_refs(structure)
             component_refs = OrchestraInstance10.component_refs(structure)
             group_refs = OrchestraInstance10.group_refs(structure)
-            self.orch2sbe_append_members(sbe_msg, field_refs, component_refs, group_refs, orch)
+            self.orch2sbe_append_members(sbe_msg, field_refs, component_refs, group_refs, orch, components_to_datatypes)
             sbe.append_message(sbe_msg)
 
     def orch2sbe_fields(self, sbe_fields: list, sbe_data: list, field_refs: list, orch: OrchestraInstance10):
@@ -227,8 +231,25 @@ class Orchestra2SBE10_10:
                 sbe_field = ['field', sbe_field_attr]
                 sbe_fields.append(sbe_field)
 
-    def orch2sbe_components(self, sbe_fields: list, sbe_data: list, sbe_groups: list, component_refs: list,
-                            orch: OrchestraInstance10):
+    def orch2sbe_component_refs_to_composites(self, sbe_fields: list, component_refs: list, orch: OrchestraInstance10):
+        for component_ref in component_refs:
+            component_id = component_ref[1]['id']
+            instance_name = component_ref[1].get('instanceName', 'Unknown')
+            component = orch.component(component_id)
+            presence = Orchestra2SBE10_10.orch2sbe_presence(component_ref[1].get('presence', 'required'))
+            if component:
+                component_name = component[1].get('name', 'Unknown')
+            else:
+                component_name = 'Unknown'
+            sbe_field_attr = {'id': component_id,
+                              'name': instance_name,
+                              'presence': presence,
+                              'type': component_name}
+            sbe_field = ['field', sbe_field_attr]
+            sbe_fields.append(sbe_field)
+
+    def orch2sbe_explode_components(self, sbe_fields: list, sbe_data: list, sbe_groups: list, component_refs: list,
+                                    orch: OrchestraInstance10):
         """
         Recursively expand an Orchestra component into its members
 
@@ -249,13 +270,13 @@ class Orchestra2SBE10_10:
                     field_refs = OrchestraInstance10.field_refs(component)
                     self.orch2sbe_fields(sbe_fields, sbe_data, field_refs, orch)
                     nested_component_refs = OrchestraInstance10.component_refs(component)
-                    self.orch2sbe_components(sbe_fields, sbe_data, sbe_groups, nested_component_refs, orch)
+                    self.orch2sbe_explode_components(sbe_fields, sbe_data, sbe_groups, nested_component_refs, orch)
                     group_refs = OrchestraInstance10.group_refs(component)
-                    self.orch2sbe_groups(sbe_groups, group_refs, orch)
+                    self.orch2sbe_groups(sbe_groups, group_refs, orch, False)
             else:
                 self.logger.error('Component id=%d not found', component_id)
 
-    def orch2sbe_groups(self, sbe_groups, group_refs, orch):
+    def orch2sbe_groups(self, sbe_groups, group_refs, orch, components_to_datatypes: bool):
         """
         Append repeating groups to a message or outer group
         :param sbe_groups: a List of SBE groups to append
@@ -287,7 +308,8 @@ class Orchestra2SBE10_10:
                     field_refs = OrchestraInstance10.field_refs(group)
                     component_refs = OrchestraInstance10.component_refs(group)
                     group_refs = OrchestraInstance10.group_refs(group)
-                    self.orch2sbe_append_members(sbe_group, field_refs, component_refs, group_refs, orch)
+                    self.orch2sbe_append_members(sbe_group, field_refs, component_refs, group_refs, orch,
+                                                 components_to_datatypes)
             else:
                 self.logger.error('Group id=%d not found', group_id)
 
@@ -326,9 +348,16 @@ class Orchestra2SBE10_10:
                             sbe_type_attr['primitiveType'] = field_type
                             sbe_composite.append(sbe_type)
                         else:
-                            sbe_type_attr = {'name': field_name}
-                            sbe_type = ['ref', sbe_type_attr]
-                            sbe_composite.append(sbe_type)
+                            encoding_type = sbe.type_by_name(field_type)
+                            if encoding_type:
+                                sbe_type_attr = {'name': field_name, 'type': field_type}
+                                sbe_type = ['ref', sbe_type_attr]
+                                sbe_composite.append(sbe_type)
+                            else:
+                                sbe_type_attr = {'name': field_name}
+                                sbe_type = ['type', sbe_type_attr]
+                                sbe_type_attr['primitiveType'] = field_type
+                                sbe_composite.append(sbe_type)
                 sbe_types.append(sbe_composite)
 
 
@@ -357,7 +386,7 @@ class Orchestra2SBE10_20(Orchestra2SBE10_10):
         codesets = orch.codesets()
         self.orch2sbe_codesets(codesets, sbe)
         messages = orch.messages()
-        self.orch2sbe_messages(messages, sbe, orch)
+        self.orch2sbe_messages(messages, sbe, orch, components_to_datatypes)
         return sbe
 
     def orch2sbe_xml(self, orchestra_xml, sbe_stream, components_to_datatypes=True) -> List[Exception]:
@@ -382,3 +411,35 @@ class Orchestra2SBE10_20(Orchestra2SBE10_10):
             for error in errors:
                 self.logger.error(error)
             return errors
+
+    def orch2sbe_messages(self, messages: list, sbe: SBEInstance20, orch: OrchestraInstance10,
+                      components_to_datatypes: bool):
+        """
+        Append SBE messages from Orchestra
+        """
+        msg_lst = filter(lambda l: isinstance(l, list) and l[0] == 'fixr:message', messages)
+        for msg in msg_lst:
+            sbe_msg = ['message']
+            sbe_msg_attr = {'name': msg[1]['name'], 'id': msg[1]['id']}
+            sbe_msg.append(sbe_msg_attr)
+            msg_type = msg[1].get('msgType', None)
+            if msg_type:
+                sbe_msg_attr['semanticType'] = msg_type
+            documentation = Orchestra2SBE10_20.__documentation_str(msg)
+            if documentation:
+                sbe_msg_attr['description'] = documentation
+            structure = OrchestraInstance10.structure(msg)
+            field_refs = OrchestraInstance10.field_refs(structure)
+            component_refs = OrchestraInstance10.component_refs(structure)
+            group_refs = OrchestraInstance10.group_refs(structure)
+            self.orch2sbe_append_members(sbe_msg, field_refs, component_refs, group_refs, orch, components_to_datatypes)
+            sbe.append_message(sbe_msg)
+
+    @staticmethod
+    def __documentation_str(element) -> Optional[str]:
+        # Use first instance of possibly multiple documentations; consider concatenation
+        try:
+            documentation = OrchestraInstance10.documentation(element)
+            return documentation[0][1]
+        except IndexError:
+            return None

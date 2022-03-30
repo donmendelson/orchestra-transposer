@@ -61,3 +61,13 @@ def test_valid20():
     xml_path = os.path.join(XML_FILE_DIR, 'Examples20.xml')
     errors = sbe.validate(xml_path)
     assert not errors
+
+
+def test20_to_dict():
+    sbe = SBE20()
+    xml_path = os.path.join(XML_FILE_DIR, 'Examples20.xml')
+    output_path = os.path.join(output_dir(), 'Examples20-dict.txt')
+    with open(output_path, 'w') as f:
+        (instance, errors) = sbe.read_xml(xml_path)
+        print(str(instance), file=f)
+        assert not errors

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <messageSchema xmlns="http://fixprotocol.io/2017/sbe" xmlns:xs="http://www.w3.org/2001/XMLSchema" package="examples" id="91" version="0" byteOrder="littleEndian">
 	<!-- include commonly used types -->
-	<types xmlns="http://fixprotocol.io/2017/sbe" description="Commonly used types may be imported into multiple message schemas using XInclude">
+	<types description="Commonly used types may be imported into multiple message schemas using XInclude">
 		<composite name="MONTH_YEAR">
 			<type name="year" primitiveType="uint16"/>
 			<type name="month" primitiveType="uint8"/>
@@ -120,7 +120,7 @@
 		</message>
 	</messages>
 	<!-- include commonly used messages -->
-	<messages xmlns="http://fixprotocol.io/2017/sbe" description="Commonly used messsages may be imported into multiple message schemas using XInclude">
+	<messages description="Commonly used messsages may be imported into multiple message schemas using XInclude">
 		<message name="BusinessMessageReject" id="97" blockLength="9" semanticType="j">
 			<field name="BusinesRejectRefId" id="379" type="idString" offset="0" semanticType="String"/>
 			<field name="BusinessRejectReason" id="380" type="businessRejectReasonEnum" offset="8" semanticType="int"/>

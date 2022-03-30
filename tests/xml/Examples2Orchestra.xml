@@ -19,17 +19,17 @@
         <fixr:field id="380" name="BusinessRejectReason" type="businessRejectReasonEnum" />
         <fixr:field id="5002" name="length" type="uint16" />
         <fixr:field id="5003" name="varData" type="uint8" />
-        <fixr:field id="5004" name="year" type="uint16" />
-        <fixr:field id="5005" name="month" type="uint8" />
-        <fixr:field id="5006" name="day" type="uint8" />
-        <fixr:field id="5007" name="week" type="uint8" />
-        <fixr:field id="5009" name="blockLength" type="uint16" />
-        <fixr:field id="5010" name="numInGroup" type="uint16" />
-        <fixr:field id="5012" name="templateId" type="uint16" />
-        <fixr:field id="5013" name="schemaId" type="uint16" />
-        <fixr:field id="5014" name="version" type="uint16" />
-        <fixr:field id="5015" name="mantissa" type="int64" />
-        <fixr:field id="5016" name="exponent" type="int8" presence="constant" value="-3" />
+        <fixr:field id="5005" name="year" type="uint16" />
+        <fixr:field id="5006" name="month" type="uint8" />
+        <fixr:field id="5007" name="day" type="uint8" />
+        <fixr:field id="5008" name="week" type="uint8" />
+        <fixr:field id="5010" name="blockLength" type="uint16" />
+        <fixr:field id="5011" name="numInGroup" type="uint16" />
+        <fixr:field id="5013" name="templateId" type="uint16" />
+        <fixr:field id="5014" name="schemaId" type="uint16" />
+        <fixr:field id="5015" name="version" type="uint16" />
+        <fixr:field id="5017" name="mantissa" type="int64" />
+        <fixr:field id="5018" name="exponent" type="int8" presence="constant" value="-3" />
     </fixr:fields>
     <fixr:datatypes>
         <fixr:datatype name="char">
@@ -86,29 +86,29 @@
             <fixr:fieldRef id="5002" />
             <fixr:fieldRef id="5003" />
         </fixr:component>
-        <fixr:component name="MONTH_YEAR" id="200">
-            <fixr:fieldRef id="5004" />
+        <fixr:component name="MONTH_YEAR" id="5004">
             <fixr:fieldRef id="5005" />
             <fixr:fieldRef id="5006" />
             <fixr:fieldRef id="5007" />
+            <fixr:fieldRef id="5008" />
         </fixr:component>
-        <fixr:component name="groupSizeEncoding" id="5008">
-            <fixr:fieldRef id="5009" />
+        <fixr:component name="groupSizeEncoding" id="5009">
             <fixr:fieldRef id="5010" />
+            <fixr:fieldRef id="5011" />
         </fixr:component>
-        <fixr:component name="messageHeader" id="5011">
-            <fixr:fieldRef id="5009" />
-            <fixr:fieldRef id="5012" />
+        <fixr:component name="messageHeader" id="5012">
+            <fixr:fieldRef id="5010" />
             <fixr:fieldRef id="5013" />
             <fixr:fieldRef id="5014" />
-        </fixr:component>
-        <fixr:component name="optionalDecimalEncoding" id="1364">
             <fixr:fieldRef id="5015" />
-            <fixr:fieldRef id="5016" />
         </fixr:component>
-        <fixr:component name="qtyEncoding" id="151">
-            <fixr:fieldRef id="5015" />
-            <fixr:fieldRef id="5016" />
+        <fixr:component name="optionalDecimalEncoding" id="5016">
+            <fixr:fieldRef id="5017" />
+            <fixr:fieldRef id="5018" />
+        </fixr:component>
+        <fixr:component name="qtyEncoding" id="5019">
+            <fixr:fieldRef id="5017" />
+            <fixr:fieldRef id="5018" />
         </fixr:component>
     </fixr:components>
     <fixr:codeSets>
@@ -156,7 +156,7 @@
             <fixr:structure>
                 <fixr:fieldRef id="379" presence="required" />
                 <fixr:fieldRef id="380" presence="required" />
-                <fixr:fieldRef id="58" presence="optional" />
+                <fixr:componentRef id="5001" presence="required" />
             </fixr:structure>
         </fixr:message>
         <fixr:message name="ExecutionReport" id="98" msgType="8">
@@ -166,10 +166,10 @@
                 <fixr:fieldRef id="150" presence="required" />
                 <fixr:fieldRef id="39" presence="required" />
                 <fixr:fieldRef id="55" presence="required" />
-                <fixr:componentRef id="200" presence="required" />
+                <fixr:componentRef id="5004" instanceName="MaturityMonthYear" presence="required" />
                 <fixr:fieldRef id="54" presence="required" />
-                <fixr:componentRef id="151" presence="required" />
-                <fixr:componentRef id="14" presence="required" />
+                <fixr:componentRef id="5019" instanceName="LeavesQty" presence="required" />
+                <fixr:componentRef id="5019" instanceName="CumQty" presence="required" />
                 <fixr:fieldRef id="75" presence="required" />
                 <fixr:groupRef id="2112" />
             </fixr:structure>
@@ -181,10 +181,10 @@
                 <fixr:fieldRef id="55" presence="required" />
                 <fixr:fieldRef id="54" presence="required" />
                 <fixr:fieldRef id="60" presence="required" />
-                <fixr:componentRef id="38" presence="required" />
+                <fixr:componentRef id="5019" instanceName="OrderQty" presence="required" />
                 <fixr:fieldRef id="40" presence="required" />
-                <fixr:componentRef id="44" presence="required" />
-                <fixr:componentRef id="99" presence="required" />
+                <fixr:componentRef id="5016" instanceName="Price" presence="required" />
+                <fixr:componentRef id="5016" instanceName="StopPx" presence="required" />
             </fixr:structure>
             <fixr:annotation>
                 <fixr:documentation>
@@ -194,8 +194,8 @@
     </fixr:messages>
     <fixr:groups>
         <fixr:group name="FillsGrp" id="2112">
-            <fixr:componentRef id="1364" presence="required" />
-            <fixr:componentRef id="1365" presence="required" />
+            <fixr:componentRef id="5016" instanceName="FillPx" presence="required" />
+            <fixr:componentRef id="5019" instanceName="FillQty" presence="required" />
         </fixr:group>
     </fixr:groups>
 </fixr:repository>

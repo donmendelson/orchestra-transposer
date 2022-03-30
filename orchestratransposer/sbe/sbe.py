@@ -134,7 +134,7 @@ class SBE20:
         :return: a list of errors, if any
         """
         data, errors = self.xsd.encode(sbe_instance.root(), validation='lax', use_defaults=False,
-                                       # namespaces={'sbe': 'http://fixprotocol.io/2017/sbe'},
+                                       namespaces={'': 'http://fixprotocol.io/2017/sbe'},
                                        **{'converter': JsonMLConverter})
         # ET.register_namespace('sbe', "http://fixprotocol.io/2017/sbe")
         stream.write(ET.tostring(data, encoding='utf-8', method='xml'))

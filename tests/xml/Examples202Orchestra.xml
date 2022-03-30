@@ -50,89 +50,36 @@
         </fixr:codeSet>
     </fixr:codeSets>
     <fixr:fields>
+        <fixr:field id="5002" name="year" type="uint16" />
+        <fixr:field id="5003" name="month" type="uint8" />
+        <fixr:field id="5004" name="day" type="uint8" />
+        <fixr:field id="5005" name="week" type="uint8" />
+        <fixr:field id="5007" name="length" type="uint16" />
+        <fixr:field id="5008" name="varData" type="uint8" />
+        <fixr:field id="5010" name="blockLength" type="uint16" />
+        <fixr:field id="5011" name="numInGroup" type="uint16" />
+        <fixr:field id="5012" name="numGroups" type="uint16" />
+        <fixr:field id="5013" name="numVarDataFields" type="uint16" />
+        <fixr:field id="5015" name="templateId" type="uint16" />
+        <fixr:field id="5016" name="schemaId" type="uint16" />
+        <fixr:field id="5017" name="version" type="uint16" />
+        <fixr:field id="5019" name="mantissa" type="int64" />
+        <fixr:field id="5020" name="exponent" type="int8" presence="constant" value="-3" />
+        <fixr:field id="5023" name="time" type="uint64" />
+        <fixr:field id="5024" name="unit" type="uint8" presence="constant" value="9" />
         <fixr:field id="1" name="Account" type="idString" />
         <fixr:field id="11" name="ClOrdId" type="idString" />
-        <fixr:field id="14" name="CumQty" type="qtyEncoding" />
         <fixr:field id="17" name="ExecID" type="idString" />
         <fixr:field id="37" name="OrderID" type="idString" />
-        <fixr:field id="38" name="OrderQty" type="qtyEncoding" />
         <fixr:field id="39" name="OrdStatus" type="ordStatusEnum" />
         <fixr:field id="40" name="OrdType" type="ordTypeEnum" />
-        <fixr:field id="44" name="Price" type="decimalEncoding" />
         <fixr:field id="54" name="Side" type="sideEnum" />
         <fixr:field id="55" name="Symbol" type="idString" />
-        <fixr:field id="58" name="Text" type="DATA" />
-        <fixr:field id="60" name="TransactTime" type="timestampEncoding" />
         <fixr:field id="75" name="TradeDate" type="date" />
-        <fixr:field id="99" name="StopPx" type="decimalEncoding" />
         <fixr:field id="150" name="ExecType" type="execTypeEnum" />
-        <fixr:field id="151" name="LeavesQty" type="qtyEncoding" />
-        <fixr:field id="200" name="MaturityMonthYear" type="MONTH_YEAR" />
         <fixr:field id="379" name="BusinesRejectRefId" type="idString" />
         <fixr:field id="380" name="BusinessRejectReason" type="businessRejectReasonEnum" />
-        <fixr:field id="1364" name="FillPx" type="decimalEncoding" />
-        <fixr:field id="1365" name="FillQty" type="qtyEncoding" />
-        <fixr:field id="5001" name="year" type="uint16" />
-        <fixr:field id="5002" name="month" type="uint8" />
-        <fixr:field id="5003" name="day" type="uint8" />
-        <fixr:field id="5004" name="week" type="uint8" />
-        <fixr:field id="5006" name="length" type="uint16" />
-        <fixr:field id="5007" name="varData" type="uint8" />
-        <fixr:field id="5009" name="blockLength" type="uint16" />
-        <fixr:field id="5010" name="numInGroup" type="uint16" />
-        <fixr:field id="5011" name="numGroups" type="uint16" />
-        <fixr:field id="5012" name="numVarDataFields" type="uint16" />
-        <fixr:field id="5014" name="templateId" type="uint16" />
-        <fixr:field id="5015" name="schemaId" type="uint16" />
-        <fixr:field id="5016" name="version" type="uint16" />
-        <fixr:field id="5017" name="mantissa" type="int64" />
-        <fixr:field id="5018" name="exponent" type="int8" />
-        <fixr:field id="5019" name="time" type="uint64" />
-        <fixr:field id="5020" name="unit" type="uint8" />
     </fixr:fields>
-    <fixr:messages>
-        <fixr:message name="ExecutionReport" id="98" msgType="8">
-            <fixr:structure>
-                <fixr:fieldRef id="37" presence="required" />
-                <fixr:fieldRef id="17" presence="required" />
-                <fixr:fieldRef id="150" presence="required" />
-                <fixr:fieldRef id="39" presence="required" />
-                <fixr:fieldRef id="55" presence="required" />
-                <fixr:componentRef id="200" presence="required" />
-                <fixr:fieldRef id="54" presence="required" />
-                <fixr:componentRef id="151" presence="required" />
-                <fixr:componentRef id="14" presence="required" />
-                <fixr:fieldRef id="75" presence="required" />
-                <fixr:groupRef id="2112" />
-            </fixr:structure>
-        </fixr:message>
-        <fixr:message name="NewOrderSingle" id="99" msgType="D">
-            <fixr:structure>
-                <fixr:fieldRef id="11" presence="required" />
-                <fixr:fieldRef id="1" presence="required" />
-                <fixr:fieldRef id="55" presence="required" />
-                <fixr:fieldRef id="54" presence="required" />
-                <fixr:componentRef id="60" presence="required" />
-                <fixr:componentRef id="38" presence="required" />
-                <fixr:fieldRef id="40" presence="required" />
-                <fixr:componentRef id="44" presence="optional" />
-                <fixr:componentRef id="99" presence="optional" />
-            </fixr:structure>
-        </fixr:message>
-        <fixr:message name="BusinessMessageReject" id="97" msgType="j">
-            <fixr:structure>
-                <fixr:fieldRef id="379" presence="required" />
-                <fixr:fieldRef id="380" presence="required" />
-                <fixr:fieldRef id="58" presence="optional" />
-            </fixr:structure>
-        </fixr:message>
-    </fixr:messages>
-    <fixr:groups>
-        <fixr:group name="FillsGrp" id="2112">
-            <fixr:componentRef id="1364" presence="required" />
-            <fixr:componentRef id="1365" presence="required" />
-        </fixr:group>
-    </fixr:groups>
     <fixr:datatypes>
         <fixr:datatype name="char">
             <fixr:mappedDatatype standard="SBE" base="char" />
@@ -184,41 +131,84 @@
         </fixr:datatype>
     </fixr:datatypes>
     <fixr:components>
-        <fixr:component name="MONTH_YEAR" id="200">
-            <fixr:fieldRef id="5001" />
+        <fixr:component name="MONTH_YEAR" id="5001">
             <fixr:fieldRef id="5002" />
             <fixr:fieldRef id="5003" />
             <fixr:fieldRef id="5004" />
+            <fixr:fieldRef id="5005" />
         </fixr:component>
-        <fixr:component name="DATA" id="5005">
-            <fixr:fieldRef id="5006" />
+        <fixr:component name="DATA" id="5006">
             <fixr:fieldRef id="5007" />
+            <fixr:fieldRef id="5008" />
         </fixr:component>
-        <fixr:component name="groupSizeEncoding" id="5008">
-            <fixr:fieldRef id="5009" />
+        <fixr:component name="groupSizeEncoding" id="5009">
             <fixr:fieldRef id="5010" />
             <fixr:fieldRef id="5011" />
             <fixr:fieldRef id="5012" />
+            <fixr:fieldRef id="5013" />
         </fixr:component>
-        <fixr:component name="messageHeader" id="5013">
-            <fixr:fieldRef id="5009" />
-            <fixr:fieldRef id="5014" />
+        <fixr:component name="messageHeader" id="5014">
+            <fixr:fieldRef id="5010" />
             <fixr:fieldRef id="5015" />
             <fixr:fieldRef id="5016" />
-            <fixr:fieldRef id="5011" />
+            <fixr:fieldRef id="5017" />
             <fixr:fieldRef id="5012" />
+            <fixr:fieldRef id="5013" />
         </fixr:component>
-        <fixr:component name="decimalEncoding" id="1364">
-            <fixr:fieldRef id="5017" />
-            <fixr:fieldRef id="5018" />
-        </fixr:component>
-        <fixr:component name="qtyEncoding" id="151">
-            <fixr:fieldRef id="5017" />
-            <fixr:fieldRef id="5018" />
-        </fixr:component>
-        <fixr:component name="timestampEncoding" id="60">
+        <fixr:component name="decimalEncoding" id="5018">
             <fixr:fieldRef id="5019" />
             <fixr:fieldRef id="5020" />
         </fixr:component>
+        <fixr:component name="qtyEncoding" id="5021">
+            <fixr:fieldRef id="5019" />
+            <fixr:fieldRef id="5020" />
+        </fixr:component>
+        <fixr:component name="timestampEncoding" id="5022">
+            <fixr:fieldRef id="5023" />
+            <fixr:fieldRef id="5024" />
+        </fixr:component>
     </fixr:components>
+    <fixr:messages>
+        <fixr:message name="ExecutionReport" id="98" msgType="8">
+            <fixr:structure>
+                <fixr:fieldRef id="37" presence="required" />
+                <fixr:fieldRef id="17" presence="required" />
+                <fixr:fieldRef id="150" presence="required" />
+                <fixr:fieldRef id="39" presence="required" />
+                <fixr:fieldRef id="55" presence="required" />
+                <fixr:componentRef id="5001" instanceName="MaturityMonthYear" presence="required" />
+                <fixr:fieldRef id="54" presence="required" />
+                <fixr:componentRef id="5021" instanceName="LeavesQty" presence="required" />
+                <fixr:componentRef id="5021" instanceName="CumQty" presence="required" />
+                <fixr:fieldRef id="75" presence="required" />
+                <fixr:groupRef id="2112" />
+            </fixr:structure>
+        </fixr:message>
+        <fixr:message name="NewOrderSingle" id="99" msgType="D">
+            <fixr:structure>
+                <fixr:fieldRef id="11" presence="required" />
+                <fixr:fieldRef id="1" presence="required" />
+                <fixr:fieldRef id="55" presence="required" />
+                <fixr:fieldRef id="54" presence="required" />
+                <fixr:componentRef id="5022" instanceName="TransactTime" presence="required" />
+                <fixr:componentRef id="5021" instanceName="OrderQty" presence="required" />
+                <fixr:fieldRef id="40" presence="required" />
+                <fixr:componentRef id="5018" instanceName="Price" presence="optional" />
+                <fixr:componentRef id="5018" instanceName="StopPx" presence="optional" />
+            </fixr:structure>
+        </fixr:message>
+        <fixr:message name="BusinessMessageReject" id="97" msgType="j">
+            <fixr:structure>
+                <fixr:fieldRef id="379" presence="required" />
+                <fixr:fieldRef id="380" presence="required" />
+                <fixr:componentRef id="5006" presence="required" />
+            </fixr:structure>
+        </fixr:message>
+    </fixr:messages>
+    <fixr:groups>
+        <fixr:group name="FillsGrp" id="2112">
+            <fixr:componentRef id="5018" instanceName="FillPx" presence="required" />
+            <fixr:componentRef id="5021" instanceName="FillQty" presence="required" />
+        </fixr:group>
+    </fixr:groups>
 </fixr:repository>

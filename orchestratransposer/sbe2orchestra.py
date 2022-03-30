@@ -27,10 +27,10 @@ class SBE2Orchestra10_10:
         """
         orch = OrchestraInstance10()
         self.sbe2orch_metadata(sbe, orch)
-        fields = orch.fields()
+        fields: list = orch.fields()
         self.sbe2orch_fields(sbe, fields)
         self.sbe2orch_datatypes(sbe, orch)
-        codesets = orch.codesets()
+        codesets: list = orch.codesets()
         self.sbe2orch_codesets(sbe, codesets)
         self.sbe2orch_messages_and_groups(sbe, orch)
         return orch
@@ -91,13 +91,9 @@ class SBE2Orchestra10_10:
         fields = orch.fields()
         for sbe_composite in sbe_composites:
             sbe_name = sbe_composite[1]['name']
-            sbe_field = sbe.first_field_by_type(sbe_name)
-            if sbe_field:
-                sbe_field_id = sbe_field[1]['id']
-            else:
-                self.max_id += 1
-                sbe_field_id = self.max_id
-            component_attr = {'name': sbe_name, 'id': sbe_field_id}
+            self.max_id += 1
+            component_id = self.max_id
+            component_attr = {'name': sbe_name, 'id': component_id}
             component = ['fixr:component', component_attr]
             orch.append_component(component)
             # convert composite members to fields if they do not already exist from messages or groups
@@ -118,6 +114,12 @@ class SBE2Orchestra10_10:
                                   'name': sbe_type[1]['name'],
                                   'type': field_type}
                     field = ['fixr:field', field_attr]
+                    min_value = sbe_type[1].get('minValue', None)
+                    if min_value:
+                        field_attr['minInclusive'] = sbe_type[1]['minValue']
+                    max_value = sbe_type[1].get('maxValue', None)
+                    if max_value:
+                        field_attr['maxInclusive'] = sbe_type[1]['maxValue']
                     presence = self.sbe2orch_presence(sbe_type[1].get('presence', None))
                     if presence in ['required', 'constant']:
                         field_attr['presence'] = presence
@@ -227,8 +229,11 @@ class SBE2Orchestra10_10:
             member_name = sbe_field[1]['name']
             member_type = sbe_field[1]['type']
             sbe_composite = sbe.composite_by_name(member_type)
+            component = orch.component_by_name(member_type)
+            if component:
+                component_id = component[1]['id']
             if sbe_composite:
-                composite_ref_attr = {'id': member_id,
+                composite_ref_attr = {'id': component_id, 'instanceName': member_name,
                                       'presence': self.sbe2orch_presence(sbe_field[1].get('presence', 'required'))}
                 composite_ref = ['fixr:componentRef', composite_ref_attr]
                 documentation = sbe_field[1].get('description', None)
@@ -282,18 +287,19 @@ class SBE2Orchestra10_10:
         :param fields: Orchestra field list to populate
         :return:
         """
-        field_d = {}
+        # field dictionary - key is field ID
+        field_dict = {}
         sbe_messages: list = sbe.messages()
         for sbe_message in sbe_messages:
             all_sbe_fields = []
             SBEInstance10.all_fields(sbe_message, all_sbe_fields)
             for sbe_field in all_sbe_fields:
-                field_d[sbe_field[1]['id']] = sbe_field
+                field_dict[sbe_field[1]['id']] = sbe_field
             all_sbe_data_fields = []
             SBEInstance10.all_data(sbe_message, all_sbe_data_fields)
             for sbe_field in all_sbe_data_fields:
-                field_d[sbe_field[1]['id']] = sbe_field
-        field_l = sorted(field_d.values(), key=SBEInstance10.id)
+                field_dict[sbe_field[1]['id']] = sbe_field
+        field_l = sorted(field_dict.values(), key=SBEInstance10.id)
         for sbe_field in field_l:
             # do not add if sbe field has a composite type, which is translated to component
             sbe_type = sbe_field[1]['type']
@@ -338,8 +344,8 @@ class SBE2Orchestra20_10(SBE2Orchestra10_10):
         codesets = orch.codesets()
         self.sbe2orch_codesets(sbe, codesets)
         fields = orch.fields()
-        self.sbe2orch_datatypes(sbe, orch)
         self.sbe2orch_fields(sbe, fields)
+        self.sbe2orch_datatypes(sbe, orch)
         self.sbe2orch_messages_and_groups(sbe, orch)
         return orch
 
