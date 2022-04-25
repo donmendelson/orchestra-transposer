@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 
 import argparse
+import logging
+import os
 import sys
 
 from orchestratransposer import Orchestra2SBE, Orchestra2Unified, SBE2Orchestra, Unified2Orchestra
@@ -52,6 +54,8 @@ optional arguments:
   -t {orch,unif,sbe}, --to {orch,unif,sbe}
                         format of output file: Orchestra 1.0, Unified
                         Repository, or SBE 1.0
+
+  Log messages are written to a file with the same path as the output file but with '.log' extension.
     """
     parser = init_argparse()
     args = parser.parse_args()
@@ -78,6 +82,10 @@ optional arguments:
               file=sys.stderr)
         is_valid = False
     if is_valid:
+        logging.basicConfig(level=logging.INFO,
+                            format='%(asctime)s %(levelname)s %(message)s',
+                            filename=os.path.splitext(output_files[0])[0] + '.log',
+                            filemode='w')
         if input_format == 'orch':
             if output_format == 'unif':
                 translator = Orchestra2Unified()

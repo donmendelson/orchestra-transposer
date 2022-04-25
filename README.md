@@ -78,6 +78,8 @@ optional arguments:
                         format of output file: Orchestra 1.0, Unified Repository, or SBE 1.0
 ```
 
+Log messages are written to a file with the same path as the output file but with '.log' extension.
+
 First example translates an Orchestra file to SBE.
 ```
 python3 orchestratransposer.py tests/xml/OrchestraFIXLatest.xml --to sbe -o sbe_test.xml
