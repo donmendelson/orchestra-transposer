@@ -25,7 +25,7 @@ class Unified2Orchestra10:
         orch = OrchestraInstance10()
         fix = unified.fix(version)
         documentation_func: Callable[[str], List[Tuple[str, List[str]]]] = unified.text_id
-        self.unified2orch_metadata(fix, orch)
+        self.unified2orch_metadata(unified, fix, orch)
         sections = orch.sections()
         self.unified2orch_sections(fix, documentation_func, sections)
         categories = orch.categories()
@@ -61,7 +61,7 @@ class Unified2Orchestra10:
                     self.logger.error(error)
             return errors
 
-    def unified2orch_metadata(self, fix: list, orch: OrchestraInstance10):
+    def unified2orch_metadata(self, unified: UnifiedInstanceWithPhrases, fix: list, orch: OrchestraInstance10):
         """
         Set Orchestra metadata from a Unified Repository
         """
@@ -70,10 +70,16 @@ class Unified2Orchestra10:
         (first, sep, last) = version.partition('_')
         repository['version'] = version
         repository['name'] = first
+        generated = unified.root()[1]['generated']
+        right = unified.root()[1]['copyright']
         metadata = orch.metadata()
-        metadata.append(['dcterms:title', first])
+        metadata.append(['dcterms:title', version])
         my_date = datetime.now()
-        metadata.append(['dcterms:date', my_date.isoformat()])
+        metadata.append(['dcterms:created', my_date.isoformat()])
+        metadata.append(['dcterms:date', generated])
+        metadata.append(['dcterms:rights', right])
+        metadata.append(['dcterms:conformsTo', 'Orchestra v1.0'])
+        metadata.append(['dcterms:source', '2010 Edition'])
 
     def unified2orch_sections(self, fix: list, documentation_func: Callable[[str], List[Tuple[str, List[str]]]],
                               sections: list):
