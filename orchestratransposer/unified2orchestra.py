@@ -79,7 +79,7 @@ class Unified2Orchestra10:
         metadata.append(['dcterms:date', generated])
         metadata.append(['dcterms:rights', right])
         metadata.append(['dcterms:conformsTo', 'Orchestra v1.0'])
-        metadata.append(['dcterms:source', '2010 Edition'])
+        metadata.append(['dcterms:source', 'FIX Unified Repository 2010 Edition'])
 
     def unified2orch_sections(self, fix: list, documentation_func: Callable[[str], List[Tuple[str, List[str]]]],
                               sections: list):
