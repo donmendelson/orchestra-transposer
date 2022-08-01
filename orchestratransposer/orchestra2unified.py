@@ -48,7 +48,7 @@ class Orchestra10Unified:
         repository = orch.repository()
         generated = datetime.now().isoformat()
         unified.root()[1]['generated'] = generated
-        rights = orch.metadata_term('dc:rights')
+        rights = orch.metadata_term('dcterms:rights')
         if not rights:
             rights = 'Rights unknown'  # not the same as no copyright
         if rights:
