@@ -52,4 +52,4 @@ java io.fixprotocol.xml.XmlDiff $FILE2 $FILE1 $DIFF -u
 # Remove namespace declaration and diff-element(s) to have achieve an empty file if there are no differences
 sed -i "" -e '/<?xml/d' -e '/<diff/d' $DIFF
 [ -s $DIFF ] && echo ">>> Differences found for $PHRASETYPE!"
-if [ ! -f $DIFF ]; then echo "No differences found for $PHRASETYPE!"; fi
+[ ! -s $DIFF ] && echo ">>> No differences found for $PHRASETYPE!"

@@ -16,6 +16,7 @@ cp $DIFF $BASE
 # Base version contains all differences including those that are expected/intended, e.g. references to legacy spec volumes 1-7
 #cp $BASE $DIFF
 
+echo Removing known and intended deviations
 # Remove namespace declaration and timestamp differences
 sed -i "" -e '/xmlns:xsi/d' -e '/xsi:/d' -e '/<?xml/d' -e '/fixRepository\/@generated/d' $DIFF
 
@@ -29,7 +30,7 @@ sed -i "" '/<abbreviations>/, /<\/abbreviations>/d' $DIFF
 sed -i "" -e '/@legacyPosition/d' -e '/@legacyIndent/d' $DIFF
 
 # Remove entries for component types ImplicitBlock and ImplicitBlockRepeating
-sed -i "" -e '/ImplicitBlock/d' -e '/XMLDataBlock/d' $DIFF
+sed -i "" '/ImplicitBlock/d' $DIFF
 
 # Remove entries with generateImplFile, volume, inlined (to be confirmed that they are obsolete)
 # Note: script reverses input file to delete line with search pattern and previous line in original file
@@ -57,9 +58,11 @@ cp temp.xml $DIFF
 
 #-----------------------------------------------------------------------------------------------------
 # BUGS REPORTED IN GITHUB - NONE
+echo Removing known and erroneous deviations
 
-# Remaining errors:
-# - Missing enums for RiskLimitStatus and ProtectionTermEventDayType are due to an error in Basic that will be corrected with EP271
+# Remove entries for component type XMLDataBlock
+#sed -i "" -e '/XMLDataBlock/d' $DIFF
+
 #-----------------------------------------------------------------------------------------------------
 
 rm temp.xml
