@@ -9,7 +9,7 @@ OLD="Fix$SOURCE.xml"
 NEW="$SOURCE.xml"
 DIFF="diff-$SOURCE.xml"
 BASE="diffbase-$SOURCE.xml"
-java io.fixprotocol.xml.XmlDiff $NEW $OLD $DIFF -u
+java -cp "$CLASSPATH" io.fixprotocol.xml.XmlDiff $NEW $OLD $DIFF -u
 cp $DIFF $BASE
 
 # (De)Activate line below to speed up testing of the code below after first run of orchestra2unified and XmlDiff ((de)activate them above)
