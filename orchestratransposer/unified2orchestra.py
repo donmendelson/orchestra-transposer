@@ -188,7 +188,7 @@ class Unified2Orchestra10:
             codeset_attr.update(pedigree)
             enums = filter(lambda e: isinstance(e, list) and e[0] == 'enum', unified_field)
             for idx, enum in enumerate(enums):
-                code_attr = {'name': enum[1]['symbolicName'], 'id': unified_field[1]['id'] * 100 + idx + 1,
+                code_attr = {'name': enum[1]['symbolicName'], 'id': unified_field[1]['id'] * 1000 + idx + 1,
                              'value': enum[1]['value']}
                 sort = enum[1].get('sort', None)
                 if sort:
