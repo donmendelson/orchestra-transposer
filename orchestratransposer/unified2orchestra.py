@@ -79,7 +79,7 @@ class Unified2Orchestra10:
         metadata.append(['dcterms:date', generated])
         metadata.append(['dcterms:rights', right])
         metadata.append(['dcterms:conformsTo', 'Orchestra v1.0'])
-        metadata.append(['dcterms:source', '2010 Edition'])
+        metadata.append(['dcterms:source', 'FIX Unified Repository 2010 Edition'])
 
     def unified2orch_sections(self, fix: list, documentation_func: Callable[[str], List[Tuple[str, List[str]]]],
                               sections: list):
@@ -188,7 +188,7 @@ class Unified2Orchestra10:
             codeset_attr.update(pedigree)
             enums = filter(lambda e: isinstance(e, list) and e[0] == 'enum', unified_field)
             for idx, enum in enumerate(enums):
-                code_attr = {'name': enum[1]['symbolicName'], 'id': unified_field[1]['id'] * 100 + idx + 1,
+                code_attr = {'name': enum[1]['symbolicName'], 'id': unified_field[1]['id'] * 1000 + idx + 1,
                              'value': enum[1]['value']}
                 sort = enum[1].get('sort', None)
                 if sort:

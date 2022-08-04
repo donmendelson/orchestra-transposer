@@ -2,7 +2,7 @@ import logging
 from datetime import datetime
 from typing import Callable, List, Tuple
 
-from orchestratransposer.orchestra.orchestra import Orchestra10, Orchestra10WithAppinfo
+from orchestratransposer.orchestra.orchestra import Orchestra10WithAppinfo
 from orchestratransposer.orchestra.orchestrainstance import OrchestraInstance10
 from orchestratransposer.unified.unified import UnifiedWithPhrases
 from orchestratransposer.unified.unifiedinstance import UnifiedInstanceWithPhrases, UnifiedMainInstance
@@ -21,7 +21,7 @@ class Orchestra10Unified:
         self.orch2unified_categories(orchestra, documentation_func, fix)
         self.orch2unified_sections(orchestra, documentation_func, fix)
         self.orch2unified_fields(orchestra, documentation_func, fix)
-        self.orch2unified_components(orchestra, documentation_func, fix )
+        self.orch2unified_components(orchestra, documentation_func, fix)
         self.orch2unified_groups(orchestra, documentation_func, fix)
         self.orch2unified_messages(orchestra, documentation_func, fix)
         return unified
@@ -48,7 +48,7 @@ class Orchestra10Unified:
         repository = orch.repository()
         generated = datetime.now().isoformat()
         unified.root()[1]['generated'] = generated
-        rights = orch.metadata_term('dc:rights')
+        rights = orch.metadata_term('dcterms:rights')
         if not rights:
             rights = 'Rights unknown'  # not the same as no copyright
         if rights:
@@ -180,7 +180,11 @@ class Orchestra10Unified:
         lst = filter(lambda l: isinstance(l, list) and l[0] == 'fixr:component', components)
         for component in lst:
             unified_component_attr = component[1].copy()
-            unified_component_attr['type'] = 'Block'
+            if component[1]['name'] in ['SecurityXML', 'DerivativeSecurityXML', 'LegSecurityXML',
+                                        'UnderlyingSecurityXML']:
+                unified_component_attr['type'] = 'XMLDataBlock'
+            else:
+                unified_component_attr['type'] = 'Block'
             unified_component_attr['repeating'] = 0
             appinfo = OrchestraInstance10.appinfo(component, 'FIXML')
             if appinfo and appinfo[0][1].get('notReqXML', 0) == '1':
