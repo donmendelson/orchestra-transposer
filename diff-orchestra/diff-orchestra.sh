@@ -9,12 +9,12 @@ OLD="orchestra-xslt.xml"
 NEW="orchestra-python.xml"
 DIFF="diff-orchestra.xml"
 BASE="diffbase-orchestra.xml"
-#java -cp "$CLASSPATH" io.fixprotocol.xml.XmlDiff $NEW $OLD $DIFF -u
-#cp $DIFF $BASE
+java -cp "$CLASSPATH" io.fixprotocol.xml.XmlDiff $NEW $OLD $DIFF -u
+cp $DIFF $BASE
 
 # (De)Activate line below to speed up testing of the code below after first run of orchestra2unified and XmlDiff ((de)activate them above)
 # Base version contains all differences including those that are expected/intended, e.g. references to legacy spec volumes 1-7
-cp $BASE $DIFF
+# cp $BASE $DIFF
 
 echo Removing known and intended deviations
 
@@ -78,7 +78,7 @@ cp temp.xml $DIFF
 # BUG (in XSLT or Python): unified2orchestra Python creates presence="required" for numInGroup elements where Unified has required="1".
 # unified2orchestra XSLT ignores this attribute. Semantic of a required numInGroup field unclear as they are different from normal field references.
 # numInGroup are required for any instance of a repeating group, attribute is redundant.
-#sed -i "" '/<remove.*numInGroup.*\@presence/d' $DIFF
+sed -i "" '/<remove.*numInGroup.*\@presence/d' $DIFF
 
 #-----------------------------------------------------------------------------------------------------
 
