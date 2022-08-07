@@ -3,7 +3,7 @@
 # The resulting diff file should be empty
 
 echo "\nComparing Orchestra repository file created from Unified using XSLT with the one created from Unified using Python"
-CLASSPATH="diff-merge-1.5.1-SNAPSHOT-jar-with-dependencies.jar"
+CLASSPATH="../tools/diff-merge-1.5.1-SNAPSHOT-jar-with-dependencies.jar"
 
 OLD="orchestra-xslt.xml"
 NEW="orchestra-python.xml"
