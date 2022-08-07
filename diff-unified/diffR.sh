@@ -4,9 +4,9 @@
 
 CLASSPATH="diff-merge-1.5.1-SNAPSHOT-jar-with-dependencies.jar"
 
-SOURCE="Repository"
-OLD="Fix$SOURCE.xml"
-NEW="$SOURCE.xml"
+SOURCE="FixRepository"
+OLD="$SOURCE-xslt.xml"
+NEW="$SOURCE-python.xml"
 DIFF="diff-$SOURCE.xml"
 BASE="diffbase-$SOURCE.xml"
 java -cp "$CLASSPATH" io.fixprotocol.xml.XmlDiff $NEW $OLD $DIFF -u
@@ -65,4 +65,8 @@ echo Removing known and erroneous deviations
 
 #-----------------------------------------------------------------------------------------------------
 
+# Remove closing XML elements (only for legibility, assumes that everything else has been removed)
+sed -i "" -e '/<\/add/d' -e '/<\/replace/d' $DIFF
+
+echo "Completed, see $DIFF for repository deviations."
 rm temp.xml

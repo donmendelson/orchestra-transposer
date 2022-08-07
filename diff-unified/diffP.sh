@@ -2,9 +2,9 @@
 # Intended differences and those caused by bugs are then being removed
 # The resulting diff file should be empty
 
-SOURCE="Phrases"
-OLD="Fix$SOURCE.xml"
-NEW="$SOURCE.xml"
+SOURCE="FixPhrases_en"
+OLD="$SOURCE-xslt.xml"
+NEW="$SOURCE-python.xml"
 
 ./splitPhrases.sh $OLD "old" "abbreviations" "AT_" "AT_"
 ./splitPhrases.sh $NEW "new" "abbreviations" "AT_" "AT_"

@@ -6,7 +6,7 @@ PHRASEPREFIX=$4
 PATTERN=$5
 
 mkdir -p phrases/$PHRASETYPE
-echo "Extracting $SOURCE into separate files for $TARGET $PHRASETYPE..."
+echo "\nExtracting $SOURCE into separate files for $TARGET $PHRASETYPE..."
 cd phrases/$PHRASETYPE
 mkdir -p old new
 
