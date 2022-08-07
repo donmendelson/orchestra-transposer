@@ -72,12 +72,14 @@ cp temp.xml $DIFF
 echo Removing known and erroneous deviations
 
 # BUG: unified2orchestra Python does not create discriminatorId attribute, e.g. 448 and 447 (party ID and source)
+# https://github.com/FIXTradingCommunity/orchestra-transposer/issues/36
 tail -r $DIFF | sed '/type="\@discriminatorId"/{N;d;}' | tail -r > temp.xml
 cp temp.xml $DIFF
 
 # BUG (in XSLT or Python): unified2orchestra Python creates presence="required" for numInGroup elements where Unified has required="1".
 # unified2orchestra XSLT ignores this attribute. Semantic of a required numInGroup field unclear as they are different from normal field references.
 # numInGroup are required for any instance of a repeating group, attribute is redundant.
+# https://github.com/FIXTradingCommunity/orchestra-transposer/issues/37
 sed -i "" '/<remove.*numInGroup.*\@presence/d' $DIFF
 
 #-----------------------------------------------------------------------------------------------------
