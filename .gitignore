@@ -12,6 +12,7 @@ build/
 develop-eggs/
 diff-unified/phrases/
 diff-unified/*.xml
+diff-orchestra/*.xml
 dist/
 downloads/
 eggs/

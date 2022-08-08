@@ -4,7 +4,7 @@ SOURCE=$2
 TARGET=$3
 
 cd phrases/$PHRASETYPE
-echo "Comparing phrases for $PHRASETYPE..."
+echo "\nComparing phrases for $PHRASETYPE..."
 
 # Put together a list of all phrases found in source and target folder (remove path)
 ls $SOURCE/*.xml $TARGET/*.xml > temp.txt
@@ -46,10 +46,10 @@ if [ -f x.txt ]; then rm x.txt; fi
 
 # Compare the new file against the old one to see if and how the new one has to change
 DIFF="DIFF_$PHRASETYPE.xml"
-CLASSPATH="../../diff-merge-1.5.1-SNAPSHOT-jar-with-dependencies.jar"
-java io.fixprotocol.xml.XmlDiff $FILE2 $FILE1 $DIFF -u
+CLASSPATH="../../../tools/diff-merge-1.5.1-SNAPSHOT-jar-with-dependencies.jar"
+java -cp "$CLASSPATH" io.fixprotocol.xml.XmlDiff $FILE2 $FILE1 $DIFF -u
 
 # Remove namespace declaration and diff-element(s) to have achieve an empty file if there are no differences
 sed -i "" -e '/<?xml/d' -e '/<diff/d' $DIFF
 [ -s $DIFF ] && echo ">>> Differences found for $PHRASETYPE!"
-if [ ! -f $DIFF ]; then echo "No differences found for $PHRASETYPE!"; fi
+[ ! -s $DIFF ] && echo ">>> No differences found for $PHRASETYPE!"

@@ -2,20 +2,21 @@
 # Intended differences and those caused by bugs are then being removed
 # The resulting diff file should be empty
 
-CLASSPATH="diff-merge-1.5.1-SNAPSHOT-jar-with-dependencies.jar"
+CLASSPATH="../tools/diff-merge-1.5.1-SNAPSHOT-jar-with-dependencies.jar"
 
-SOURCE="Repository"
-OLD="Fix$SOURCE.xml"
-NEW="$SOURCE.xml"
+SOURCE="FixRepository"
+OLD="$SOURCE-xslt.xml"
+NEW="$SOURCE-python.xml"
 DIFF="diff-$SOURCE.xml"
 BASE="diffbase-$SOURCE.xml"
-java io.fixprotocol.xml.XmlDiff $NEW $OLD $DIFF -u
+java -cp "$CLASSPATH" io.fixprotocol.xml.XmlDiff $NEW $OLD $DIFF -u
 cp $DIFF $BASE
 
 # (De)Activate line below to speed up testing of the code below after first run of orchestra2unified and XmlDiff ((de)activate them above)
 # Base version contains all differences including those that are expected/intended, e.g. references to legacy spec volumes 1-7
 #cp $BASE $DIFF
 
+echo Removing known and intended deviations
 # Remove namespace declaration and timestamp differences
 sed -i "" -e '/xmlns:xsi/d' -e '/xsi:/d' -e '/<?xml/d' -e '/fixRepository\/@generated/d' $DIFF
 
@@ -29,7 +30,7 @@ sed -i "" '/<abbreviations>/, /<\/abbreviations>/d' $DIFF
 sed -i "" -e '/@legacyPosition/d' -e '/@legacyIndent/d' $DIFF
 
 # Remove entries for component types ImplicitBlock and ImplicitBlockRepeating
-sed -i "" -e '/ImplicitBlock/d' -e '/XMLDataBlock/d' $DIFF
+sed -i "" '/ImplicitBlock/d' $DIFF
 
 # Remove entries with generateImplFile, volume, inlined (to be confirmed that they are obsolete)
 # Note: script reverses input file to delete line with search pattern and previous line in original file
@@ -57,9 +58,15 @@ cp temp.xml $DIFF
 
 #-----------------------------------------------------------------------------------------------------
 # BUGS REPORTED IN GITHUB - NONE
+echo Removing known and erroneous deviations
 
-# Remaining errors:
-# - Missing enums for RiskLimitStatus and ProtectionTermEventDayType are due to an error in Basic that will be corrected with EP271
+# Remove entries for component type XMLDataBlock
+#sed -i "" -e '/XMLDataBlock/d' $DIFF
+
 #-----------------------------------------------------------------------------------------------------
 
+# Remove closing XML elements (only for legibility, assumes that everything else has been removed)
+sed -i "" -e '/<\/add/d' -e '/<\/replace/d' $DIFF
+
+echo "Completed, see $DIFF for repository deviations."
 rm temp.xml
