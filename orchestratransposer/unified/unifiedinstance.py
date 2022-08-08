@@ -95,6 +95,19 @@ class UnifiedMainInstance:
                      field_id), None)
 
     @staticmethod
+    def discrimintator_field(fix: list, field_name: str) -> Optional[list]:
+        """
+        Finds a discriminator field as a field with the same name suffixed by 'Source'
+        :param fix: a FIX version in a Unified Repository
+        :param field_id: tag of a field
+        :return: discriminator field if found, or None
+        """
+        expected_name = field_name + 'Source'
+        fields = UnifiedMainInstance.fields(fix)
+        return next((field for field in fields if isinstance(field, list) and field[1].get('name', None) ==
+                     expected_name), None)
+
+    @staticmethod
     def components(fix: list) -> list:
         """
         :return: a list of components and repeating groups of a fix version of UnifiedInstance

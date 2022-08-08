@@ -170,6 +170,10 @@ class Unified2Orchestra10:
                 unified_length_field = UnifiedMainInstance.field_length_field(fix, unified_field[1]['id'])
                 if unified_length_field:
                     field_attr['lengthId'] = unified_length_field[1]['id']
+            # does this field have an associated Source field? If so, set discriminatorId.
+            unified_source_field = UnifiedMainInstance.discrimintator_field(fix, unified_field[1]['name'])
+            if unified_source_field:
+                    field_attr['discriminatorId'] = unified_source_field[1]['id']
             fields.append(field)
 
     def unified2orch_codesets(self, fix: list, documentation_func: Callable[[str], List[Tuple[str, List[str]]]],
