@@ -170,6 +170,10 @@ class Unified2Orchestra10:
                 unified_length_field = UnifiedMainInstance.field_length_field(fix, unified_field[1]['id'])
                 if unified_length_field:
                     field_attr['lengthId'] = unified_length_field[1]['id']
+            # does this field have an associated Source field? If so, set discriminatorId.
+            unified_source_field = UnifiedMainInstance.discrimintator_field(fix, unified_field[1]['name'])
+            if unified_source_field:
+                    field_attr['discriminatorId'] = unified_source_field[1]['id']
             fields.append(field)
 
     def unified2orch_codesets(self, fix: list, documentation_func: Callable[[str], List[Tuple[str, List[str]]]],
@@ -243,9 +247,6 @@ class Unified2Orchestra10:
             d = {k: unified_repeating_group[1].get(k, None) for k in
                  ['id', 'added', 'addedEP', 'updated', 'updatedEP', 'deprecated', 'deprecatedEP', 'issue']}
             num_in_group_attr = dict(filter(lambda item: not item[1] is None, d.items()))
-            presence = Unified2Orchestra10.unified2orch_presence(unified_repeating_group[1].get('required', 0))
-            if not presence == 'optional':
-                num_in_group_attr['presence'] = presence
             num_in_group = ['fixr:numInGroup', num_in_group_attr]
             unified_numingroup_documentation: List[Tuple[str, List[str]]] = documentation_func(
                 unified_repeating_group[1].get('textId',
