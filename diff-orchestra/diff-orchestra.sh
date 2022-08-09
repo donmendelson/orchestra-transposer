@@ -37,10 +37,6 @@ sed -i "" '/^.[ ]*<replace.*\@builtin/d' $DIFF
 # Remove difference due to XSLT error (will not be fixed) regarding missing issue attribute for BeginStringCodeSet
 sed -i "" '/^.[ ]*<remove.*\@issue/d' $DIFF
 
-# Remove replacements of annotations and related removals (Python version of Orchestra creates separate elements per line of multi-line documentation)
-# NOTE: This removes too much when the content of the documentation is different!
-sed -i "" -e '/^.[ ]*<replace.*annotation/d' -e '/^.[ ]*<remove.*annotation/d' $DIFF
-
 # Remove differences due to examples (no longer provided as part of the metadata)
 # Note: script reverses input file to delete line with search pattern and previous two lines in original file
 tail -r $DIFF | sed '/^.[ ]*purpose="EXAMPLE"/{N;N;d;}' | tail -r > temp.xml
@@ -58,6 +54,13 @@ sed -i "" -e '/^.[ ]*<remove.*numInGroup.*\@added/d' -e '/^.[ ]*<remove.*numInGr
 # Note: script reverses input file to delete line with search pattern and previous line in original file
 tail -r $DIFF | sed '/^.[ ]*type="\@updated/{N;d;}' | tail -r > temp.xml
 cp temp.xml $DIFF
+
+# Remove appinfo elements (not provided by XSLT version)
+sed -i "" '/^.[ ]*<remove.*appinfo/d' $DIFF
+
+# Remove replacements of annotations and related removals (Python version of Orchestra creates separate elements per line of multi-line documentation)
+# NOTE: This removes too much when the content of the documentation is different or nested elements other than <documentation> exist in annotation!
+sed -i "" -e '/^.[ ]*<replace.*annotation/d' -e '/^.[ ]*<remove.*annotation/d' $DIFF
 
 # Remove lines starting with text and not a command ("<..."), e.g. multi-line text following a replace command
 # NOTE: This may remove too much, not all cases known yet!
