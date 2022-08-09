@@ -1,20 +1,33 @@
+# Create Orchestra repository from the Unified repository files created by basic2orchestra (runs several minutes without any output)
+# Not required if Orchestra repository file is copied from GitHub (https://github.com/FIXTradingCommunity/unified2orchestra/actions)
+echo "\nConverting Unified created from Basic with XSLT to Orchestra repository files..."
+#python3 ../orchestratransposer.py ../diff-unified/FixRepository-xslt.xml ../diff-unified/FixPhrases_en-xslt.xml --from unif --to orch -o orchestra-python.xml
+
 # Compare Orchestra XML file created from Unified with XSLT against the one created with Python
 # Intended differences and those caused by bugs are then being removed
 # The resulting diff file should be empty
 
 echo "\nComparing Orchestra repository file created from Unified using XSLT with the one created from Unified using Python"
-CLASSPATH="../tools/diff-merge-1.5.1-SNAPSHOT-jar-with-dependencies.jar"
 
 OLD="orchestra-xslt.xml"
 NEW="orchestra-python.xml"
 DIFF="diff-orchestra.xml"
 BASE="diffbase-orchestra.xml"
+
+# Remove addedEP="-1" from Python version (XSLT version suppresses it) before creating the base difference file
+grep ' addedEP="-1"' orchestra-python.xml > temp.xml
+if [[ -s temp.xml ]]; then
+  echo 'Removing attributes addedEP="-1" from Python source...'
+  sed -i ".bak" 's/ addedEP="-1"//g' $NEW
+fi
+
+CLASSPATH="../tools/diff-merge-1.5.1-SNAPSHOT-jar-with-dependencies.jar"
 java -cp "$CLASSPATH" io.fixprotocol.xml.XmlDiff $NEW $OLD $DIFF -u
 cp $DIFF $BASE
 
 # (De)Activate line below to speed up testing of the code below after first run of orchestra2unified and XmlDiff ((de)activate them above)
 # Base version contains all differences including those that are expected/intended, e.g. references to legacy spec volumes 1-7
-# cp $BASE $DIFF
+#cp $BASE $DIFF
 
 echo Removing known and intended deviations
 
@@ -71,19 +84,8 @@ grep '^<\|^type=' $DIFF > temp.xml
 cp temp.xml $DIFF
 
 #-----------------------------------------------------------------------------------------------------
-# BUGS REPORTED IN GITHUB (not done yet)
-echo Removing known and erroneous deviations
-
-# BUG: unified2orchestra Python does not create discriminatorId attribute, e.g. 448 and 447 (party ID and source)
-# https://github.com/FIXTradingCommunity/orchestra-transposer/issues/36
-tail -r $DIFF | sed '/type="\@discriminatorId"/{N;d;}' | tail -r > temp.xml
-cp temp.xml $DIFF
-
-# BUG (in XSLT or Python): unified2orchestra Python creates presence="required" for numInGroup elements where Unified has required="1".
-# unified2orchestra XSLT ignores this attribute. Semantic of a required numInGroup field unclear as they are different from normal field references.
-# numInGroup are required for any instance of a repeating group, attribute is redundant.
-# https://github.com/FIXTradingCommunity/orchestra-transposer/issues/37
-sed -i "" '/<remove.*numInGroup.*\@presence/d' $DIFF
+# BUGS REPORTED IN GITHUB (none)
+# echo Removing known and erroneous deviations
 
 #-----------------------------------------------------------------------------------------------------
 
