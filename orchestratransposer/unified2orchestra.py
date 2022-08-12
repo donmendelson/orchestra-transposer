@@ -121,7 +121,7 @@ class Unified2Orchestra10:
         unified_datatypes = UnifiedMainInstance.datatypes(fix)
         lst = filter(lambda l: isinstance(l, list) and l[0] == 'datatype', unified_datatypes)
         for unified_datatype in lst:
-            exclude_keys = ['textId', 'builtin']
+            exclude_keys = ['textId', 'builtin', 'issue']
             datatype_attr = {k: unified_datatype[1][k] for k in
                              set(list(unified_datatype[1].keys())) - set(exclude_keys)}
             datatype = ['fixr:datatype', datatype_attr]
@@ -146,7 +146,7 @@ class Unified2Orchestra10:
         unified_fields = UnifiedMainInstance.fields(fix)
         lst = filter(lambda l: isinstance(l, list) and l[0] == 'field', unified_fields)
         for unified_field in lst:
-            exclude_keys = ['textId', 'notReqXML', 'enum', 'associatedDataTag', 'enumDatatype']
+            exclude_keys = ['textId', 'notReqXML', 'enum', 'associatedDataTag', 'enumDatatype', 'issue']
             field_attr = {k: unified_field[1][k] for k in set(list(unified_field[1].keys())) - set(exclude_keys)}
             field = ['fixr:field', field_attr]
             unified_documentation: List[Tuple[str, List[str]]] = documentation_func(
@@ -187,7 +187,7 @@ class Unified2Orchestra10:
             codeset = ['fixr:codeSet', codeset_attr]
             d = {k: unified_field[1].get(k, None) for k in
                  ['added', 'addedEP', 'updated', 'updatedEP', 'deprecated',
-                  'deprecatedEP', 'issue']}
+                  'deprecatedEP']}
             pedigree = dict(filter(lambda item: not item[1] is None, d.items()))
             codeset_attr.update(pedigree)
             enums = filter(lambda e: isinstance(e, list) and e[0] == 'enum', unified_field)
@@ -202,7 +202,7 @@ class Unified2Orchestra10:
                     code_attr['group'] = group
                 d = {k: enum[1].get(k, None) for k in
                      ['added', 'addedEP', 'updated', 'updatedEP', 'deprecated',
-                      'deprecatedEP', 'issue']}
+                      'deprecatedEP']}
                 pedigree = dict(filter(lambda item: not item[1] is None, d.items()))
                 code_attr.update(pedigree)
                 code = ['fixr:code', code_attr]
@@ -245,7 +245,7 @@ class Unified2Orchestra10:
             group = ['fixr:group', group_attr]
             unified_repeating_group = unified_component[2]
             d = {k: unified_repeating_group[1].get(k, None) for k in
-                 ['id', 'added', 'addedEP', 'updated', 'updatedEP', 'deprecated', 'deprecatedEP', 'issue']}
+                 ['id', 'added', 'addedEP', 'updated', 'updatedEP', 'deprecated', 'deprecatedEP']}
             num_in_group_attr = dict(filter(lambda item: not item[1] is None, d.items()))
             num_in_group = ['fixr:numInGroup', num_in_group_attr]
             unified_numingroup_documentation: List[Tuple[str, List[str]]] = documentation_func(
@@ -289,7 +289,7 @@ class Unified2Orchestra10:
                 unified_member[1].get('textId', None))
             presence = Unified2Orchestra10.unified2orch_presence(unified_member[1].get('required', 0))
             if unified_member[0] == 'fieldRef':
-                exclude_keys = ['textId', 'inlined', 'legacyIndent', 'legacyPosition', 'name', 'required']
+                exclude_keys = ['textId', 'inlined', 'legacyIndent', 'legacyPosition', 'name', 'required', 'issue']
                 field_attr = {k: unified_member[1][k] for k in
                               set(list(unified_member[1].keys())) - set(exclude_keys)}
                 if not presence == 'optional':
@@ -301,7 +301,7 @@ class Unified2Orchestra10:
                 component_id = unified_member[1]['id']
                 component = UnifiedMainInstance.component(fix, component_id)
                 if component[1].get('repeating', 0) == 1:
-                    exclude_keys = ['textId', 'inlined', 'legacyIndent', 'legacyPosition', 'name', 'required']
+                    exclude_keys = ['textId', 'inlined', 'legacyIndent', 'legacyPosition', 'name', 'required', 'issue']
                     group_attr = {k: unified_member[1][k] for k in
                                   set(list(unified_member[1].keys())) - set(exclude_keys)}
                     if not presence == 'optional':
@@ -310,7 +310,7 @@ class Unified2Orchestra10:
                     OrchestraInstance10.append_documentations(group_ref, unified_documentation)
                     structure.append(group_ref)
                 else:
-                    exclude_keys = ['textId', 'inlined', 'legacyIndent', 'legacyPosition', 'name', 'required']
+                    exclude_keys = ['textId', 'inlined', 'legacyIndent', 'legacyPosition', 'name', 'required', 'issue']
                     component_attr = {k: unified_member[1][k] for k in
                                       set(list(unified_member[1].keys())) - set(exclude_keys)}
                     if not presence == 'optional':
