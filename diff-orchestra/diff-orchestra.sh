@@ -44,11 +44,11 @@ sed -i "" '/fixr:category\[\@name=\&#34;Session\&\#34;\]/d' $DIFF
 sed -i "" '/^.[ ]*<add.*type="@latestEP"/d' $DIFF
 
 # Remove differences due to builtin attribute values (0/1 versus false/true)
-# NOTE: to be confirmed that we want to change this
 sed -i "" '/^.[ ]*<replace.*\@builtin/d' $DIFF
 
-# Remove difference due to XSLT error (will not be fixed) regarding missing issue attribute for BeginStringCodeSet
-sed -i "" '/^.[ ]*<remove.*\@issue/d' $DIFF
+# Remove difference due to XSLT still showing issue attribute (removed in Orchestra)
+tail -r $DIFF | sed '/^.[ ]*type="\@issue/{N;d;}' | tail -r > temp.xml
+cp temp.xml $DIFF
 
 # Remove differences due to examples (no longer provided as part of the metadata)
 # Note: script reverses input file to delete line with search pattern and previous two lines in original file
@@ -84,9 +84,9 @@ grep '^<\|^type=' $DIFF > temp.xml
 cp temp.xml $DIFF
 
 #-----------------------------------------------------------------------------------------------------
-# BUGS REPORTED IN GITHUB (none)
+# BUGS REPORTED IN GITHUB
 # echo Removing known and erroneous deviations
-
+echo NO MORE KNOWN BUGS FOR EP272
 #-----------------------------------------------------------------------------------------------------
 
 # Remove closing XML elements but only if they are at the beginning if the lines
