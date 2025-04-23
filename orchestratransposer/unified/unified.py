@@ -42,7 +42,7 @@ class UnifiedMain:
         instance or an ElementTree instance or a string containing the XML data.
         """
         data, errors = [], []
-        for result in self.xsd.iter_decode(xml, validation='skip', use_defaults=False, converter=JsonMLConverter):
+        for result in self.xsd.iter_decode(xml, validation='lax', use_defaults=False, converter=JsonMLConverter):
             if not isinstance(result, Exception):
                 data.append(result)
             else:
@@ -98,7 +98,7 @@ class UnifiedPhrases:
         instance or an ElementTree instance or a string containing the XML data.
         """
         data, errors = [], []
-        for result in self.xsd.iter_decode(xml, validation='skip', use_defaults=False, converter=JsonMLConverter):
+        for result in self.xsd.iter_decode(xml, validation='lax', use_defaults=False, converter=JsonMLConverter):
             if not isinstance(result, Exception):
                 data.append(result)
             else:

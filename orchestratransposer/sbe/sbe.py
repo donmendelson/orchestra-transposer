@@ -50,7 +50,7 @@ class SBE10:
         """
         data, errors = [], []
         # JsonMLConverter preserves order
-        for result in self.xsd.iter_decode(xml, validation='skip', use_defaults=False, converter=JsonMLConverter):
+        for result in self.xsd.iter_decode(xml, validation='lax', use_defaults=False, converter=JsonMLConverter):
             if not isinstance(result, Exception):
                 data.append(result)
             else:
@@ -117,7 +117,7 @@ class SBE20:
         """
         data, errors = [], []
         # JsonMLConverter preserves order
-        for result in self.xsd.iter_decode(xml, validation='skip', use_defaults=False, converter=JsonMLConverter):
+        for result in self.xsd.iter_decode(xml, validation='lax', use_defaults=False, converter=JsonMLConverter):
             if not isinstance(result, Exception):
                 data.append(result)
             else:

@@ -45,7 +45,7 @@ class Orchestra10:
         """
         data, errors = [], []
         # counterintuitively, validation='skip' allows attributes from 'any' type to pass through
-        for result in self.xsd.iter_decode(xml, use_defaults=False, validation='skip', converter=JsonMLConverter):
+        for result in self.xsd.iter_decode(xml, use_defaults=False, validation='lax', converter=JsonMLConverter):
             if not isinstance(result, Exception):
                 data.append(result)
             else:
