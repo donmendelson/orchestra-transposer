@@ -384,5 +384,64 @@ class OrchestraInstance10:
             structure.append(group_ref)
 
 
+class OrchestraInstance11(OrchestraInstance10):
+    """
+    An instance of Orchestra version 1.1.
+    Extends Orchestra 1.0 with additional features and improvements.
+    """
+    
+    def __init__(self, obj=None):
+        super().__init__(obj)
+        # Add any version 1.1 specific initialization here
+
+    def __str__(self):
+        return f"Orchestra 1.1 Instance:\n{super().__str__()}"
+
+    def scenarios(self) -> list:
+        """
+        :return: a list of scenarios of an Orchestra instance
+        """
+        return self.__types('fixr:scenarios')
+
+    def scenario(self, scenario_id: int) -> Optional[list]:
+        """
+        Finds a scenario by its numeric ID
+        :param scenario_id: numeric ID of the scenario
+        :return: a scenario if found, or None
+        """
+        scenarios: list = self.scenarios()
+        return next((scenario for scenario in scenarios if 
+                    isinstance(scenario, list) and scenario[1]['id'] == scenario_id), None)
+
+    def scenario_by_name(self, scenario_name: str) -> Optional[list]:
+        """
+        Finds a scenario by its name
+        :param scenario_name: name of the scenario
+        :return: a scenario if found, or None
+        """
+        scenarios: list = self.scenarios()
+        return next((scenario for scenario in scenarios if 
+                    isinstance(scenario, list) and scenario[1]['name'].casefold() == scenario_name.casefold()), None)
+
+    def append_scenario(self, scenario: list):
+        """
+        Add a scenario to this Orchestra instance
+
+        :param scenario: a scenario is represented as a list in the following format.
+
+        .. code-block:: python
+          ['fixr:scenario',
+           {'id': 1, 'name': 'ExampleScenario'},
+           ['fixr:annotation',
+            ['fixr:documentation',
+             {'purpose': 'SYNOPSIS'},
+             'Description of the scenario']]]
+        """
+        scenarios = self.scenarios()
+        scenarios.append(scenario)
+
+    # Add any version 1.1 specific methods here
+    # For example, if there are new features in 1.1 that aren't in 1.0
+
 OrchestraInstance = OrchestraInstance10
 """Default Orchestra instance"""

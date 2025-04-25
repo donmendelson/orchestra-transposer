@@ -1,6 +1,6 @@
 import os
 import xml.etree.ElementTree as ET
-from typing import Iterator, List, Tuple
+from typing import List, Tuple
 
 import xmlschema
 from xmlschema import JsonMLConverter
