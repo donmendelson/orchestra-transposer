@@ -71,11 +71,12 @@ class Orchestra10:
                                                    'dcterms': 'http://purl.org/dc/terms/',
                                                    'dc': 'http://purl.org/dc/elements/1.1/'},
                                        **{'converter': JsonMLConverter})
-        ElementTree.register_namespace(
-            'fixr', self.FIXR_NAMESPACE)
-        ElementTree.register_namespace('dcterms', 'http://purl.org/dc/terms/')
-        ElementTree.register_namespace('dc', 'http://purl.org/dc/elements/1.1/')
-        stream.write(ElementTree.tostring(data, encoding='utf-8', method='xml'))
+        if not errors:
+            ElementTree.register_namespace(
+                'fixr', self.FIXR_NAMESPACE)
+            ElementTree.register_namespace('dcterms', 'http://purl.org/dc/terms/')
+            ElementTree.register_namespace('dc', 'http://purl.org/dc/elements/1.1/')
+            stream.write(ElementTree.tostring(data, encoding='utf-8', method='xml'))
         return errors
 
 
@@ -113,20 +114,20 @@ class Orchestra10WithAppinfo(Orchestra10):
         :param instance: an OrchestraInstance dictionary
         :param stream: a file like object
         """
-        # validation='skip' required to write appinfo attributes, so no errors returned
-        data = self.xsd.encode(instance.root(), validation='skip', use_defaults=False,
+        data, errors = self.xsd.encode(instance.root(), validation='lax', use_defaults=False,
                                        namespaces={'fixr': 'http://fixprotocol.io/2020/orchestra/repository',
                                                    'dcterms': 'http://purl.org/dc/terms/',
                                                    'dc': 'http://purl.org/dc/elements/1.1/',
                                                    'fixml': 'http://fixprotocol.io/2022/orchestra/appinfo/fixml'},
                                        **{'converter': JsonMLConverter})
-        ElementTree.register_namespace(
-            'fixr', 'http://fixprotocol.io/2020/orchestra/repository')
-        ElementTree.register_namespace('dcterms', 'http://purl.org/dc/terms/')
-        ElementTree.register_namespace('dc', 'http://purl.org/dc/elements/1.1/')
-        ElementTree.register_namespace('fixml', 'http://fixprotocol.io/2022/orchestra/appinfo/fixml')
-        stream.write(ElementTree.tostring(data, encoding='utf-8', method='xml'))
-        return []
+        if not errors:
+            ElementTree.register_namespace(
+                'fixr', 'http://fixprotocol.io/2020/orchestra/repository')
+            ElementTree.register_namespace('dcterms', 'http://purl.org/dc/terms/')
+            ElementTree.register_namespace('dc', 'http://purl.org/dc/elements/1.1/')
+            ElementTree.register_namespace('fixml', 'http://fixprotocol.io/2022/orchestra/appinfo/fixml')
+            stream.write(ElementTree.tostring(data, encoding='utf-8', method='xml'))
+        return errors
 
 
 Orchestra = Orchestra10WithAppinfo
@@ -137,12 +138,14 @@ class Orchestra11(Orchestra10):
     """
     Represents the XML schema for FIX Orchestra version 1.1 and processing of XML instances \
     that conform to that schema.
+
+    Currently, the schema is in v1.1 Release Candidate 2 format.
     """
     V1_1_DIR = 'v1-1'
     """Directory name for version 1.1 schema files"""
 
-    FIXR_NAMESPACE = 'http://fixprotocol.io/2023/orchestra/repository'
-    """Namespace for FIX Orchestra elements"""
+    FIXR_NAMESPACE = 'http://fixprotocol.io/2024/orchestra/repository'
+    """Namespace for FIX Orchestra v1.1 RC2 elements"""
 
     def __init__(self):
         self.xsd = XMLSchema(Orchestra11.get_xsd_path())
@@ -181,9 +184,10 @@ class Orchestra11(Orchestra10):
                                                'dcterms': 'http://purl.org/dc/terms/',
                                                'dc': 'http://purl.org/dc/elements/1.1/'},
                                      **{'converter': JsonMLConverter})
-        ElementTree.register_namespace('fixr', self.FIXR_NAMESPACE)
-        ElementTree.register_namespace('dcterms', 'http://purl.org/dc/terms/')
-        ElementTree.register_namespace('dc', 'http://purl.org/dc/elements/1.1/')
-        stream.write(ElementTree.tostring(data, encoding='utf-8', method='xml'))
+        if not errors:
+            ElementTree.register_namespace('fixr', self.FIXR_NAMESPACE)
+            ElementTree.register_namespace('dcterms', 'http://purl.org/dc/terms/')
+            ElementTree.register_namespace('dc', 'http://purl.org/dc/elements/1.1/')
+            stream.write(ElementTree.tostring(data, encoding='utf-8', method='xml'))
         return errors
 

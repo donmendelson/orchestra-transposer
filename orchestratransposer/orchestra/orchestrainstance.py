@@ -47,7 +47,7 @@ class OrchestraInstance10:
         metadata = self.metadata()
         return next((l[1] for l in metadata if isinstance(l, list) and l[0] == term), None)
 
-    def __types(self, category: str) -> list:
+    def _types(self, category: str) -> list:
         try:
             types = next(i for i in self.root() if isinstance(i, list) and i[0] == category)
         except StopIteration:
@@ -59,13 +59,13 @@ class OrchestraInstance10:
         """
         :return: a list of sections of an Orchestra instance
         """
-        return self.__types('fixr:sections')
+        return self._types('fixr:sections')
 
     def categories(self) -> list:
         """
         :return: a list of categories of an Orchestra instance
         """
-        return self.__types('fixr:categories')
+        return self._types('fixr:categories')
 
     def category(self, name: str) -> Optional[list]:
         """
@@ -79,37 +79,37 @@ class OrchestraInstance10:
         """
         :return: a list of  datatypes of an Orchestra instance
         """
-        return self.__types('fixr:datatypes')
+        return self._types('fixr:datatypes')
 
     def codesets(self) -> list:
         """
         :return: a list of  codesets of an Orchestra instance
         """
-        return self.__types('fixr:codeSets')
+        return self._types('fixr:codeSets')
 
     def fields(self) -> list:
         """
         :return: a list of  fields of an Orchestra instance
         """
-        return self.__types('fixr:fields')
+        return self._types('fixr:fields')
 
     def components(self) -> list:
         """
         :return: a list of  components of an Orchestra instance
         """
-        return self.__types('fixr:components')
+        return self._types('fixr:components')
 
     def groups(self) -> list:
         """
         :return: a list of  components of an Orchestra instance
         """
-        return self.__types('fixr:groups')
+        return self._types('fixr:groups')
 
     def messages(self) -> list:
         """
         :return: a list of messages of an Orchestra instance
         """
-        return self.__types('fixr:messages')
+        return self._types('fixr:messages')
 
     def append_message(self, message: list):
         """
@@ -401,7 +401,7 @@ class OrchestraInstance11(OrchestraInstance10):
         """
         :return: a list of scenarios of an Orchestra instance
         """
-        return self.__types('fixr:scenarios')
+        return self._types('fixr:scenarios')
 
     def scenario(self, scenario_id: int) -> Optional[list]:
         """
