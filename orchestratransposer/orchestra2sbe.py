@@ -1,10 +1,10 @@
 import logging
 from typing import List, Optional
 
-from orchestratransposer.orchestra.orchestra import Orchestra10
-from orchestratransposer.orchestra.orchestrainstance import OrchestraInstance10
-from orchestratransposer.sbe.sbe import SBE10, SBE20
-from orchestratransposer.sbe.sbeinstance import SBEInstance10, SBEInstance20
+from orchestra.orchestra import Orchestra10
+from orchestra.orchestrainstance import OrchestraInstance10
+from sbe.sbe import SBE10, SBE20
+from sbe.sbeinstance import SBEInstance10, SBEInstance20
 
 
 class Orchestra2SBE10_10:

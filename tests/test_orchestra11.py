@@ -1,8 +1,6 @@
 import os
-from typing import List, Tuple
 
 from orchestratransposer.orchestra.orchestra import Orchestra11
-from orchestratransposer.orchestra.orchestrainstance import OrchestraInstance11
 
 XML_FILE_DIR = os.path.join(os.path.dirname(__file__), 'xml/')
 

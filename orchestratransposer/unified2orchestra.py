@@ -2,10 +2,10 @@ import logging
 from datetime import datetime
 from typing import Callable, List, Optional, Tuple
 
-from orchestratransposer.orchestra.orchestra import Orchestra10WithAppinfo
-from orchestratransposer.orchestra.orchestrainstance import OrchestraInstance10
-from orchestratransposer.unified.unified import UnifiedWithPhrases
-from orchestratransposer.unified.unifiedinstance import UnifiedInstanceWithPhrases, UnifiedMainInstance
+from orchestra.orchestra import Orchestra10WithAppinfo
+from orchestra.orchestrainstance import OrchestraInstance10
+from unified.unified import UnifiedWithPhrases
+from unified.unifiedinstance import UnifiedInstanceWithPhrases, UnifiedMainInstance
 
 
 class Unified2Orchestra10:

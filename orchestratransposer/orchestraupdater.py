@@ -1,8 +1,8 @@
 import logging
 from typing import List, Set, Tuple
 
-from orchestratransposer.orchestra.orchestra import Orchestra10, Orchestra11
-from orchestratransposer.orchestra.orchestrainstance import OrchestraInstance10, OrchestraInstance11
+from orchestra.orchestra import Orchestra10, Orchestra11
+from orchestra.orchestrainstance import OrchestraInstance10, OrchestraInstance11
 
 
 class Orchestra10_11Updater:

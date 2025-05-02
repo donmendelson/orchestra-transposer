@@ -5,16 +5,19 @@ import logging
 import os
 import sys
 
-from orchestratransposer import Orchestra2SBE, Orchestra2Unified, SBE2Orchestra, Unified2Orchestra
-from orchestratransposer.sbe2orchestra import SBE2Orchestra20_10
+from orchestra2sbe import Orchestra2SBE
+from orchestra2unified import Orchestra2Unified
+from orchestraupdater import Orchestra10_11Updater
+from sbe2orchestra import SBE2Orchestra, SBE2Orchestra20_10
+from unified2orchestra import Unified2Orchestra
 
-FORMATS = ['orch', 'unif', 'sbe', 'sbe2']
+FORMATS = ['orch', 'orch11', 'unif', 'sbe', 'sbe2']
 
 
 def init_argparse() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         usage='%(prog)s [OPTION]...',
-        description='Convert an Orchestra XML file to or from another schema'
+        description='Convert an Orchestra version 1.0 XML file to or from another schema'
     )
     parser.add_argument(
         '-v', '--version', action='version',
@@ -26,34 +29,31 @@ def init_argparse() -> argparse.ArgumentParser:
     parser.add_argument('-f', '--from', choices=FORMATS, default='orch', dest='input_format',
                         help='format of source file: Orchestra 1.0, Unified Repository, or SBE 1.0')
     parser.add_argument('-t', '--to', choices=FORMATS, default='orch', dest='output_format',
-                        help='format of output file: Orchestra 1.0, Unified Repository, or SBE 1.0')
+                        help='format of output file: Orchestra 1.0, Orchestra 1.1, Unified Repository, or SBE 1.0')
 
     return parser
 
 
 def main() -> None:
     """
-usage: orchestratransposer.py [OPTION]...
+usage: python -m orchestratransposer [OPTION]...
 
-Convert an Orchestra XML file to or from another schema
+Convert an Orchestra version 1.0 XML file to or from another schema
 
 positional arguments:
-  input                 Name of a input file(s)
+  input                 Name of input file(s)
 
-optional arguments:
+options:
   -h, --help            show this help message and exit
   -v, --version         show program's version number and exit
-  -o OUTPUT, --output OUTPUT
-                        name of output file
-  -p OUTPUT2, --outPut2 OUTPUT2
-                        name of second output file (phrases file for Unified
-                        Repository)
-  -f {orch,unif,sbe}, --from {orch,unif,sbe}
+  -o OUTPUT [OUTPUT ...], --output OUTPUT [OUTPUT ...]
+                        name of output file(s)
+  -f {orch,orch11,unif,sbe,sbe2}, --from {orch,orch11,unif,sbe,sbe2}
                         format of source file: Orchestra 1.0, Unified
                         Repository, or SBE 1.0
-  -t {orch,unif,sbe}, --to {orch,unif,sbe}
-                        format of output file: Orchestra 1.0, Unified
-                        Repository, or SBE 1.0
+  -t {orch,orch11,unif,sbe,sbe2}, --to {orch,orch11,unif,sbe,sbe2}
+                        format of output file: Orchestra 1.0, Orchestra 1.1,
+                        Unified Repository, or SBE 1.0
 
   Log messages are written to a file with the same path as the output file but with '.log' extension.
     """
@@ -65,6 +65,16 @@ optional arguments:
     input_files = d['input']
     output_files = d['output']
     is_valid = True
+    
+    # Validate orch11 format requirements
+    if output_format == 'orch11' and input_format != 'orch':
+        print(f'ERROR: "orch11" output format can only be used with "orch" input format',
+              file=sys.stderr)
+        is_valid = False
+    if input_format == 'orch11':
+        print(f'ERROR: "orch11" only supported as upgrade from "orch" format',
+              file=sys.stderr)
+        is_valid = False
     if input_format == output_format:
         print(f'ERROR: Input format "{input_format}" same as output format; nothing to do.',
               file=sys.stderr)
@@ -95,6 +105,10 @@ optional arguments:
                 translator = Orchestra2SBE()
                 with open(output_files[0], 'wb') as f:
                     errors = translator.orch2sbe_xml(input_files[0], f)
+            elif output_format == 'orch11':
+                translator = Orchestra10_11Updater()
+                with open(output_files[0], 'wb') as f:
+                    errors = translator.update_xml(input_files[0], f)
         elif output_format == 'orch':
             if input_format == 'unif':
                 translator = Unified2Orchestra()

@@ -225,13 +225,12 @@ class OrchestraInstance10:
                 annotation = ['fixr:annotation']
                 element.append(annotation)
             for documentation in documentations:
+                attr = {}
                 if documentation[0]:
                     if isinstance(documentation[0], dict):
                         attr = documentation[0]
                     elif isinstance(documentation[0], str):
                         attr = {'purpose': documentation[0]}
-                else:
-                    attr = {}
                 if len(documentation[1]) == 0:
                     # add at least one documentation because annotation cannot be empty
                     annotation.append(['fixr:documentation', attr, ""])
