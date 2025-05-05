@@ -5,6 +5,7 @@ Converts between a FIX Orchestra file and other artifacts.
 The initial implementation converts between Orchestra version 1.0 and these other XML schemas:
 * Simple Binary Encoding (SBE) version 1.0
 * FIX Unified Repository 2010 Edition
+* Updates to Orchestra version 1.1 (currently a release candidate)
 
 ### FIX standards and schemas
 References for these standards and their XML schemas are available in GitHub.
@@ -60,22 +61,24 @@ A command line interface is provided by script `orchestratransposer.py`.
 The arguments are patterned after Pandoc.
 
 ```
-usage: orchestratransposer.py [OPTION]...
+usage: python -m orchestratransposer [OPTION]...
 
-Convert an Orchestra XML file to or from another schema
+Convert an Orchestra version 1.0 XML file to or from another schema
 
 positional arguments:
   input                 Name of input file(s)
 
-optional arguments:
+options:
   -h, --help            show this help message and exit
   -v, --version         show program's version number and exit
   -o OUTPUT [OUTPUT ...], --output OUTPUT [OUTPUT ...]
                         name of output file(s)
-  -f {orch,unif,sbe}, --from {orch,unif,sbe}
-                        format of source file: Orchestra 1.0, Unified Repository, or SBE 1.0
-  -t {orch,unif,sbe}, --to {orch,unif,sbe}
-                        format of output file: Orchestra 1.0, Unified Repository, or SBE 1.0
+  -f {orch,orch11,unif,sbe,sbe2}, --from {orch,orch11,unif,sbe,sbe2}
+                        format of source file: Orchestra 1.0, Unified
+                        Repository, or SBE 1.0
+  -t {orch,orch11,unif,sbe,sbe2}, --to {orch,orch11,unif,sbe,sbe2}
+                        format of output file: Orchestra 1.0, Orchestra 1.1,
+                        Unified Repository, or SBE 1.0
 ```
 
 Log messages are written to a file with the same path as the output file but with '.log' extension.
@@ -93,7 +96,7 @@ python3 orchestratransposer.py tests/xml/OrchestraFIXLatest.xml --to unif -o Rep
 
 ## License
 
-© Copyright 2022 FIX Protocol Limited
+© Copyright 2022-2025 FIX Protocol Limited
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
